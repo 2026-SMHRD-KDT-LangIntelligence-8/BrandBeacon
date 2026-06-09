@@ -22,7 +22,12 @@ public class MemberService {
         }
 
         // 중복이 아니라면 회원 가입 가능, DB에 저장
-        Member newMember = new Member(email, password, nickname, "LOCAL");
+        Member newMember = Member.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
         return memberRepository.save(newMember);
     }
 
@@ -34,7 +39,11 @@ public class MemberService {
         return memberRepository.findByEmail(email)
                 .orElseGet(() -> {
                     // 만약 찾지 못했다면, 아래 코드 실행해서 새로 가입할 수 있도록!
-                    Member newGoogleMember = new Member(email, null, nickname, "GOOGLE");
+                    Member newGoogleMember = Member.builder()
+                            .email(email)
+                            .nickname(nickname)
+                            .build();
+
                     return memberRepository.save(newGoogleMember);
                 });
     }
