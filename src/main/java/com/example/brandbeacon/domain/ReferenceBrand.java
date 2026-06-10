@@ -1,26 +1,30 @@
 package com.example.brandbeacon.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "REFERENCE_BRAND")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "REFERENCE_BRAND")
 public class ReferenceBrand {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BRAND_ID")
-    private Long brandId;
+    private Long brandId; // 기성 브랜드 고유 번호 (PK)
 
-    @Column(name = "BRAND_NAME", nullable = false, unique = true, length = 100)
-    private String brandName;
+    @Column(name = "BRAND_NAME", nullable = false, length = 100, unique = true)
+    private String brandName; // 기성 브랜드 이름
 
     @Column(name = "BRAND_X", nullable = false)
-    private Float brandX;
+    private Float brandX; // 기성 브랜드의 X 좌표 고정값
 
     @Column(name = "BRAND_Y", nullable = false)
-    private Float brandY;
+    private Float brandY; // 기성 브랜드의 Y 좌표 고정값
 }
