@@ -1,0 +1,46 @@
+<div xmlns:th="http://www.thymeleaf.org">
+
+    <div th:fragment="content" class="content-wrapper" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+
+        <div class="step-title" style="display: flex; align-items: center; font-size: 20px; font-weight: 800; color: var(--primary-orange); margin-bottom: 25px;">
+            <span class="step-badge" style="font-size: 13px; color: var(--text-gray); background: var(--bg-card-inner); padding: 4px 10px; border-radius: 4px; margin-right: 12px;">스텝 01</span>
+            브랜드기획 동기화
+        </div>
+
+        <div class="q-box">
+            <p class="q-title">Q1. 브랜드의 핵심 지향점이나 아이덴티티를 나타내는 한 줄 소개를 입력하십시오.</p>
+            <textarea id="brand-line-summary" class="textarea-input" placeholder="ex) 도시적 실루엣과 테크니컬 유틸리티를 수렴한 하이엔드 고프코어 브랜드"></textarea>
+        </div>
+
+        <div class="q-box">
+            <p class="q-title">Q2. 지향하는 브랜드 무드의 힌트가 될 수 있는 구체적인 탐색 대상(사물, 특정 건축물, 공간 이미지 등)을 입력하십시오.</p>
+            <textarea id="brand-object-search" class="textarea-input" placeholder="ex) 콘크리트 노출형 미니멀리즘 건축물, 안개 낀 새벽녘의 아스팔트 도로 텍스처"></textarea>
+        </div>
+
+        <div class="q-box">
+            <p class="q-title">Q3. 브랜드 포지셔닝의 대전제가 될 핵심 무드태그를 선택하십시오. (상반 선택 시 상대 태그 즉시 비활성화)</p>
+            <div class="keyword-pool">
+                <div class="keyword-tag" id="main-tag-ACTIVE" onclick="handleMoodTagClick('ACTIVE', 'CALM')">ACTIVE (동적 에너지)</div>
+                <div class="keyword-tag" id="main-tag-CALM" onclick="handleMoodTagClick('CALM', 'ACTIVE')">CALM (정적 안정감)</div>
+                <div class="keyword-tag" id="main-tag-PERFORMANCE" onclick="handleMoodTagClick('PERFORMANCE', 'LIFESTYLE')">PERFORMANCE (기능성 중심)</div>
+                <div class="keyword-tag" id="main-tag-LIFESTYLE" onclick="handleMoodTagClick('LIFESTYLE', 'PERFORMANCE')">LIFESTYLE (일상 중심)</div>
+            </div>
+        </div>
+
+        <div class="q-box">
+            <p class="q-title">Q4. 선택 상위 무드와 매칭된 세부 스타일 키워드 및 이미지셋입니다. (최대 4개 선택)</p>
+            <div class="dynamic-hierarchy-grid" id="q4-dynamic-style-pool">
+                <div style="grid-column: span 4; text-align: center; color: var(--text-gray); padding: 30px; font-size: 13px;">Q3 무드태그를 선택하시면 상응하는 하위 계층 핵심 이미지셋이 실시간으로 여기에 전개됩니다.</div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+            <button class="btn-action btn-blue" onclick="checkInputsAndNavigate()">레퍼런스 이미지 선택 단계로 이동</button>
+        </div>
+
+    </div>
+
+    <th:block th:fragment="page-scripts">
+        <script th:src="@{/js/brandLogic.js}"></script>
+    </th:block>
+</div>

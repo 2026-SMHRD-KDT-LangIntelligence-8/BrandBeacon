@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <title>BRAND-BEACON</title>
     <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/features.css}">
 </head>
 <body>
 
-        <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: header}"></div>
 
-        <main th:replace="~{:: content}">
-            </main>
+<main th:insert="${content}"></main>
 
-        <script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/common.js}"></script>
+
+<th:block th:if="${#vars.containsKey('page-scripts')}" th:replace="~{:: page-scripts}"></th:block>
+
 </body>
 </html>
