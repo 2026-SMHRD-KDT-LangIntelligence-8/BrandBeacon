@@ -1,6 +1,6 @@
 package com.example.brandbeacon.controller;
 
-import com.example.brandbeacon.service.MemberService;
+import com.example.brandbeacon.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     // Service 클래스 불러오기
-    private final MemberService memberService;
+    private final UserService userService;
 
     // 1. 일반 회원가입 요청 받기
     @PostMapping("/join")
     public ResponseEntity<String> joinLocal(@RequestBody JoinRequest request) {
         try {
             // 받은 데이터를 Service 객체로 넘겨 가입 처리
-            memberService.joinLocal(request.getEmail(), request.getPassword(), request.getNickname());
+            userService.joinLocal(request.getEmail(), request.getPassword(), request.getNickname());
 
             // 성공하면 환영 인사 반환
             return ResponseEntity.ok("회원가입이 완료되었습니다. 환영합니다!");
