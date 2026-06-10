@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <div class="split-layout" style="align-items: flex-start;">
+            <div class="split-left" style="border-right: 1px solid var(--border-color); padding-right: 40px;">
+                <h4 style="margin-bottom: 20px; font-size: 18px;">[Login]</h4>
+                <div class="input-group">
+                    <label>이메일 주소 입력</label>
+                    <input type="text" id="login-email" placeholder="name@domain.com">
+                </div>
+                <div class="input-group">
+                    <label>비밀번호 입력</label>
+                    <input type="password" id="login-pw" placeholder="••••••••">
+                </div>
+                <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="executeLogin()">로그인</button>
+                <button class="btn-action" style="width:100%; justify-content:center;" onclick="navigateTo(4)">회원가입</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

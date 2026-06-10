@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <div class="split-layout" style="align-items: flex-start;">
+            <div class="split-left" style="border-right: 1px solid var(--border-color); padding-right: 40px;">
+                <h4 style="margin-bottom: 20px; font-size: 18px;">[Sign up]</h4>
+
+                <div class="input-group">
+                    <label>사용자 닉네임</label>
+                    <input type="text" id="join-name" placeholder="홍길동">
+                </div>
+
+                <div class="input-group">
+                    <label>이메일 주소 입력</label>
+                    <div class="input-inline-row">
+                        <input type="text" id="join-email" placeholder="name@domain.com" style="flex:1;">
+                        <button class="btn-action" style="padding:0 15px; font-size:12px;" onclick="checkEmailDuplicate()">중복확인</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>신규 비밀번호(최소 8자 이상)</label>
+                    <input type="password" id="join-pw" placeholder="최소 8자 믹싱">
+                </div>
+
+                <div class="input-group">
+                    <label>비밀번호 확인</label>
+                    <input type="password" id="join-pw-confirm" placeholder="동일 비밀번호 재입력">
+                </div>
+
+                <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="executeRegister()">회원가입</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
