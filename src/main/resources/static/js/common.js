@@ -1,5 +1,5 @@
 // 1. 상태 관리 변수
-        let isLoggedIn = false; // 로그인 여부
+        let isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true"; // 브라우저 저장소(sessionStorage)를 활용해 새로고침 시에도 상태 유지
         let currentIdx = 1; // 현재 활성화된 페이지
         const maxPages = 10; // 전체 페이지 수
         let organizedDataGlobal = []; // 무드보드 구조화 데이터를 담을 전역 변수
@@ -7,7 +7,7 @@
         function checkAuthAndNavigate(pageIdx) {
         if (!isLoggedIn) {
             alert("로그인이 필요한 서비스입니다.");
-            navigateTo(3); // 로그인 페이지(page3)로 이동
+            window.location.href = '/login'; // 🚀 백엔드 URL로 직접 이동
             return;
         }
         navigateTo(pageIdx);
@@ -64,25 +64,43 @@
             }
         ];
 
-        // 페이지 로드 시 초기 화면 렌더링
+        // 페이지 로드 시 초기 화면 렌더링 (✨ 현재 주소창의 위치에 따라 내부 인덱스 동기화 설정)
         window.onload = function() {
-            renderFolderTree();
-            renderProjectGallery();
+            if (typeof renderFolderTree === "function") renderFolderTree();
+            if (typeof renderProjectGallery === "function") renderProjectGallery();
+            syncAuthUI();
+
+            // 멀티 페이지 환경 대응: 현재 URL 경로에 맞게 내부 currentIdx 세팅
+            const path = window.location.pathname;
+            if (path === '/') currentIdx = 1;
+            else if (path === '/login') currentIdx = 3;
+            else if (path === '/signup') currentIdx = 4;
+            else if (path === '/brandsync') {
+                currentIdx = 6;
+                // brandsync 페이지 내부의 탭(page6)을 자동으로 활성화
+                const activePage = document.getElementById('page6');
+                if (activePage) activePage.classList.add('active-view');
+                const stepBar = document.getElementById('global-step-bar');
+                if (stepBar) stepBar.style.display = 'flex';
+                const activeStep = document.getElementById('st-6');
+                if (activeStep) activeStep.classList.add('active');
+            }
         };
 
 
         // 3. 페이지 네비게이션 및 제어
 
         // 로고 클릭 시 메인 페이지로 이동
-        function handleLogoClick() { navigateTo(1); }
+        function handleLogoClick() { window.location.href = '/'; }
 
-        // 워크스페이스 진입 시 로그인 여부 체크
+        // 워크스페이스 진입 시 로그인 여부 체크 (✨ 6번 탭이 아니라 /brandsync 주소로 진짜 이동!)
         function handleEntrance() {
-            if (isLoggedIn) {
-                navigateTo(6); // 로그인 상태면 기획 시작 페이지(6번)로
+            const 찐로그인상태 = sessionStorage.getItem("isLoggedIn") === "true";
+            if (찐로그인상태) {
+                window.location.href = '/brandsync'; // 🚀 이제 컨트롤러 주소로 실제 이동합니다!
             } else {
                 alert("로그인이 필요한 워크스페이스입니다.");
-                navigateTo(3); // 비로그인이면 로그인 페이지(3번)로
+                window.location.href = '/login'; // 🚀 로그인 페이지 주소로 이동합니다!
             }
         }
 
@@ -93,38 +111,45 @@
         }
 
 
-        // 페이지 전환 및 공통 제어
+        // 페이지 전환 및 공통 제어 (✨ 멀티 페이지간 가교 역할 및 내부 탭 전환용)
         function navigateTo(idx) {
-            currentIdx = idx;
+            // 다른 파일로 페이지 점프가 필요한 핵심 인덱스 분기 처리
+            if (idx === 1) { window.location.href = '/'; return; }
+            if (idx === 3) { window.location.href = '/login'; return; }
+            if (idx === 6) { window.location.href = '/brandsync'; return; }
 
-            // 모든 페이지 숨김 후 해당 페이지 활성화
-            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-view'));
+            // 현재 HTML 내부에 해당 page id 뷰가 존재할 때만 작동 (brandsync 내부 스텝 전환용)
             const activePage = document.getElementById(`page${idx}`);
-            if (activePage) activePage.classList.add('active-view');
+            if (!activePage) return;
+
+            currentIdx = idx;
+            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-view'));
+            activePage.classList.add('active-view');
 
             // 스텝 바 제어 (6~9번 페이지만 노출)
             const stepBar = document.getElementById('global-step-bar');
-            if (idx >= 6 && idx <= 9) {
-                stepBar.style.display = 'flex';
-                document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            if (stepBar) {
+                if (idx >= 6 && idx <= 9) {
+                    stepBar.style.display = 'flex';
+                    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
 
-                // 해당 ID가 존재할 때만 클래스를 추가하여 에러 방지
-                const activeStep = document.getElementById(`st-${idx}`);
-                if (activeStep) {
-                    activeStep.classList.add('active');
+                    const activeStep = document.getElementById(`st-${idx}`);
+                    if (activeStep) {
+                        activeStep.classList.add('active');
+                    }
+                } else {
+                    stepBar.style.display = 'none';
                 }
-            } else {
-                stepBar.style.display = 'none';
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // 이전 페이지 이동 함수
         function goBack() {
-            if (currentIdx > 1) {
+            if (currentIdx > 6) { // brandsync 내부 스텝 제어용
                 navigateTo(currentIdx - 1);
             } else {
-                alert("첫 번째 페이지입니다.");
+                window.location.href = '/'; // 그 외엔 메인으로
             }
         }
 
@@ -134,95 +159,101 @@
         // 회원가입(사용가능한 이메일인지 확인하는 로직 추가)
         function checkEmailDuplicate() { alert("사용가능한 이메일 포맷입니다."); }
 
-      const API_BASE_URL = window.location.port === "3000"
-          ? "http://localhost:8089"
-          : "";
+        // 로그인 (✨ 성공 시 메인으로 주소 이동)
+        function executeLogin() {
+            const emailInput = document.getElementById('login-email');
+            const pwInput = document.getElementById('login-pw');
 
-      async function requestApi(path, options = {}) {
-          const response = await fetch(`${API_BASE_URL}${path}`, {
-              ...options,
-              credentials: "include",
-              headers: {
-                  "Content-Type": "application/json",
-                  ...(options.headers || {})
-              }
-          });
+            const email = emailInput ? emailInput.value.trim() : "";
+            const pw = pwInput ? pwInput.value.trim() : "";
 
-          const message = await response.text();
+            if (!email || !pw) {
+                alert("⚠️ 이메일과 비밀번호를 모두 입력해주세요.");
+                return;
+            }
 
-          if (!response.ok) {
-              throw new Error(message || "요청 처리 중 오류가 발생했습니다.");
-          }
+            fetch('/api/members/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: pw
+                })
+            })
+            .then(async response => {
+                if (response.ok) {
+                    const msg = await response.text();
+                    alert("🎉 " + msg);
 
-          return message;
-      }
+                    sessionStorage.setItem("isLoggedIn", "true");
+                    isLoggedIn = true;
 
-      async function executeLogin() {
-          const email = document.getElementById("login-email")?.value.trim();
-          const password = document.getElementById("login-pw")?.value;
+                    syncAuthUI();
+                    window.location.href = '/'; // 🚀 로그인 완료 후 실제 메인 화면 주소로 이동!
+                } else {
+                    const errorMsg = await response.text();
+                    alert("❌ 로그인 실패: " + errorMsg);
+                }
+            })
+            .catch(error => {
+                console.error("통신 에러:", error);
+                alert("🚨 서버 통신 중 오류가 발생했습니다.");
+            });
+        }
 
-          if (!email || !password) {
-              alert("이메일과 비밀번호를 입력해주세요.");
-              return;
-          }
+        // 회원가입 (✨ 가입 성공 시 로그인 주소로 이동)
+        function executeRegister() {
+            const name = document.getElementById('join-name').value.trim();
+            const email = document.getElementById('join-email').value.trim();
+            const pw = document.getElementById('join-pw').value.trim();
+            const pwConfirm = document.getElementById('join-pw-confirm').value.trim();
 
-          try {
-              const message = await requestApi("/api/members/login", {
-                  method: "POST",
-                  body: JSON.stringify({
-                      email: email,
-                      password: password
-                  })
-              });
+            if (!name || !email || !pw || !pwConfirm) {
+                alert("⚠️ 모든 항목을 입력해주세요.");
+                return;
+            }
 
-              isLoggedIn = true;
-              syncAuthUI();
-              alert(message || "로그인 성공!");
-              window.location.href = "/";
-          } catch (error) {
-              alert(error.message);
-          }
-      }
+            if (pw !== pwConfirm) {
+                alert("⚠️ 비밀번호가 일치하지 않습니다.");
+                return;
+            }
 
-      async function executeRegister() {
-          const nickname = document.getElementById("join-name")?.value.trim();
-          const email = document.getElementById("join-email")?.value.trim();
-          const password = document.getElementById("join-pw")?.value;
-          const passwordConfirm = document.getElementById("join-pw-confirm")?.value;
+            fetch('/api/members/join', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nickname: name,
+                    email: email,
+                    password: pw
+                })
+            })
+            .then(async response => {
+                if (response.ok) {
+                    const msg = await response.text();
+                    alert("🎉 " + msg);
+                    window.location.href = '/login'; // 🚀 가입 완료 후 로그인 주소로 실제 이동!
+                } else {
+                    const errorMsg = await response.text();
+                    alert("❌ 가입 실패: " + errorMsg);
+                }
+            })
+            .catch(error => {
+                console.error("통신 에러:", error);
+                alert("🚨 서버 통신 중 오류가 발생했습니다.");
+            });
+        }
 
-          if (!nickname || !email || !password || !passwordConfirm) {
-              alert("회원가입 정보를 모두 입력해주세요.");
-              return;
-          }
-
-          if (password !== passwordConfirm) {
-              alert("비밀번호가 일치하지 않습니다.");
-              return;
-          }
-
-          try {
-              const message = await requestApi("/api/members/join", {
-                  method: "POST",
-                  body: JSON.stringify({
-                      email: email,
-                      password: password,
-                      nickname: nickname
-                  })
-              });
-
-              alert(message || "회원가입이 완료되었습니다.");
-              window.location.href = "/login";
-          } catch (error) {
-              alert(error.message);
-          }
-      }
-
-        // 로그아웃
+        // 로그아웃 (✨ 저장소 데이터 삭제 후 메인 주소 이동)
         function triggerLogout() {
         if (confirm("로그아웃 하시겠습니까?")) {
+            sessionStorage.removeItem("isLoggedIn");
             isLoggedIn = false;
             syncAuthUI();
-            navigateTo(1); // 로그아웃 후 랜딩/메인(1번)으로 이동
+            window.location.href = '/'; // 🚀 메인 페이지 주소로 아예 이동
         }
     }
 
@@ -242,7 +273,7 @@
         }
 
 
-        function executeModify() { alert("저장되었습니다."); navigateTo(1); }
+        function executeModify() { alert("저장되었습니다."); window.location.href = '/'; }
 
         // 5. 브랜드기획 동기화 - 무드태그 선택 상반 비활성화 & 이미지 6개/12개 동적 연동
         function handleMoodTagClick(clickedTag, opposingTag) {
@@ -269,6 +300,7 @@
         // 세부 키워드 그리드 생성
         function syncRenderQ4SubClusterGrid() {
             const poolContainer = document.getElementById('q4-dynamic-style-pool');
+            if (!poolContainer) return; // 해당 엘리먼트가 없는 페이지라면 스킵
             poolContainer.innerHTML = "";
 
             if (selectedMainMoods.length === 0) {
@@ -298,7 +330,6 @@
 
         // 브랜드 기획 동기화 - Q1~Q4 모두 입력 후 다음 단계 이동 가능
         function checkInputsAndNavigate() {
-              // 1. Q1, Q2 텍스트 입력값 체크
               const q1 = document.getElementById('brand-line-summary').value.trim();
               const q2 = document.getElementById('brand-object-search').value.trim();
 
@@ -307,19 +338,17 @@
                   return;
               }
 
-              // 2. Q3 무드태그 선택 체크 (selectedMainMoods 배열에 값이 있는지 확인)
               if (selectedMainMoods.length === 0) {
                   alert("⚠️ Q3에서 최소 1개의 브랜드 무드태그를 선택해주세요.");
                   return;
               }
 
-              // 3. Q4 세부 키워드 선택 체크 (selectedSubKeywordsList 배열에 값이 있는지 확인)
               if (selectedSubKeywordsList.length === 0) {
                   alert("⚠️ Q4에서 최소 1개의 세부 스타일 키워드를 선택해주세요.");
                   return;
               }
 
-              // 모두 통과하면 다음 페이지로 이동
+              // 같은 brandsync 파일 안에서 7번 스텝으로 전환하므로 기존 navigateTo 연동 작동
               navigateTo(7);
           }
 
@@ -357,6 +386,7 @@
         // 레퍼런스 이미지 선택 - 중복선택, 최대 4개 제한
         function selectSingleReference(card, rowId) {
             const rowContainer = document.getElementById(rowId);
+            if (!rowContainer) return;
 
             if (card.classList.contains('chosen')) {
                 card.classList.remove('chosen');

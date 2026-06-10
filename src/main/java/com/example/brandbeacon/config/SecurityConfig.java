@@ -39,7 +39,8 @@ public class SecurityConfig {
 
                 // 4. 구글 소셜 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("http://localhost:3000/main")
+                        .loginPage("/login")
+                        .defaultSuccessUrl("http://localhost:3000/main", true)
                 );
 
         return http.build();

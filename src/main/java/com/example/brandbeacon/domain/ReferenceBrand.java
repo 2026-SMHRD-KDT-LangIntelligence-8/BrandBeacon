@@ -19,6 +19,9 @@ public class ReferenceBrand {
     @Column(name = "BRAND_ID")
     private Long brandId; // 기성 브랜드 고유 번호 (PK)
 
+    @Column(name = "CATEGORY", nullable = false, length = 100)
+    private String category; // 브랜드 카테고리
+
     @Column(name = "BRAND_NAME", nullable = false, length = 100, unique = true)
     private String brandName; // 기성 브랜드 이름
 

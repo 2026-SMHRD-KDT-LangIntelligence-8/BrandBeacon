@@ -2,7 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <header th:fragment="header">
-    <div class="logo" onclick="handleLogoClick()">
+    <!-- [추가] 메인 페이지 URL 이동 -->
+    <div class="logo" onclick="window.location.href='/'">
         <div class="logo-icon">
             <div class="square-large"></div>
             <div class="square-small"></div>
@@ -11,14 +12,24 @@
     </div>
 
     <ul class="top-menu">
-        <li onclick="handleNavInterruption(2)">[서비스 소개]</li>
-        <li onclick="handleNavInterruption(3)" id="login-nav-menu">[로그인]</li>
+        <!-- [추가] 서비스 소개 페이지 이동 -->
+        <li onclick="window.location.href='/service'">[서비스 소개]</li>
+
+        <!-- [추가] 로그인 페이지 이동 -->
+        <li onclick="window.location.href='/login'" id="login-nav-menu">[로그인]</li>
+
         <li>
             <div class="profile-dropdown-container">
                 <span style="cursor:pointer;">[마이페이지]</span>
                 <div class="dropdown-menu">
-                    <p onclick="checkAuthAndNavigate(10)">프로젝트 저장소</p>
-                    <p onclick="checkAuthAndNavigate(5)">회원정보 수정</p>
+
+                    <!-- [추가] 프로젝트 저장소 페이지 이동 -->
+                    <p onclick="window.location.href='/archive'">프로젝트 저장소</p>
+
+                    <!-- [추가] 회원정보 수정 페이지 이동 -->
+                    <p onclick="window.location.href='/profileEdit'">회원정보 수정</p>
+
+                    <!-- [추가] 로그아웃 후 메인 이동 -->
                     <p onclick="triggerLogout()">로그아웃</p>
                 </div>
             </div>
