@@ -1,5 +1,4 @@
-
-        // 1. 상태 관리 변수
+// 1. 상태 관리 변수
         let isLoggedIn = false; // 로그인 여부
         let currentIdx = 1; // 현재 활성화된 페이지
         const maxPages = 10; // 전체 페이지 수
@@ -13,6 +12,66 @@
         }
         navigateTo(pageIdx);
     }
+
+
+        // 2. 데이터 소스 구조 (핵심 데이터 저장소)
+
+        // 브랜드기획 동기화 - 무드태그 선택지에 따라 하위 스타일을 분류하는 매핑 데이터
+        const HIERARCHY_DATA_SOURCE = {
+            ACTIVE: ["dynamic", "speed", "intense", "power", "race", "energy"],
+            CALM: ["wellness", "soft", "mindful", "minimal", "balance", "relaxed"],
+            PERFORMANCE: ["running", "training", "trail", "outdoor", "athlete", "sport"],
+            LIFESTYLE: ["street", "fashion", "casual", "urban", "daily", "stylish"]
+        };
+
+        // 사용자의 선택 실시간으로 저장
+        let selectedMainMoods = [];  // 사용자가 선택한 메인 무드
+        let selectedSubKeywordsList = [];  // 사용자가 선택한 세부 키워드
+        let currentLiveSessionAssets = ["도전 (Challenge)", "러닝 (Running)", "새벽기상 루틴", "도시 중심 (Urban)", "미니멀 (Minimal)", "퍼포먼스 러닝웨어", "Black + White", "통기성 메쉬 (Mesh)"]; // 현재 기획 중인 프로젝트 자산 리스트(지금은 화면 보여주기용이라 나중에 삭제)
+
+
+        // 프로젝트 저장소 - 가상 데이터(지금은 화면 보여주기용이라 나중에 삭제)
+        let virtualFolders = [
+            { id: "all", name: "전체 프로젝트", isSystem: true },
+            { id: "f1", name: "고프코어 라인업", isSystem: false },
+            { id: "f2", name: "시티 트레일 아웃핏", isSystem: false }
+        ];
+        let currentSelectedFolderId = "all";
+
+
+        // 실제 저장된 프로젝트 데이터 배열 (지금은 화면 보여주기용이라 나중에 삭제)
+        let virtualProjects = [
+            {
+                id: "p1", folder: "f1", title: "도시형 새벽 러닝 가이드라인 보드셋", date: "2026-05-12",
+                assets: ["도전 (Challenge)", "러닝 (Running)", "새벽기상 루틴", "도시 중심 (Urban)", "미니멀 (Minimal)", "퍼포먼스 러닝웨어", "Black + White", "통기성 메쉬 (Mesh)"],
+                moodboardData: [],
+                analysis: { benchmarks: [{ name: "On Running", score: 94 }] },
+                selectedKeywords: ["Premium", "Urban Tech", "Running Sleek"]
+            },
+            {
+                id: "p2", folder: "f1", title: "헤비 나일론 아우터 포지셔닝 구조도", date: "2026-05-20",
+                assets: ["자유 (Freedom)", "트레일러닝 (Trail)", "도심 러닝 루틴", "트레일 (Trail) 코스", "하이 콘트라스트", "익스페디션 아웃도어", "Navy + Lime", "내마모 나일론 (Nylon)"],
+                moodboardData: [],
+                analysis: { benchmarks: [{ name: "Salomon", score: 91 }] },
+                selectedKeywords: ["Heavy", "Nylon", "Outdoor"]
+            },
+            {
+                id: "p3", folder: "f2", title: "시티 트레일 고성능 테크 팩 모델", date: "2026-06-02",
+                assets: ["승리 (Victory)", "하이킹 (Hiking)", "리커버리 샤워", "산악 지대 (Mountain)", "에디토리얼 매거진", "테크니컬 트레이닝", "Earth Tone", "방수 투습 고어텍스"],
+                moodboardData: [],
+                analysis: { benchmarks: [{ name: "Patagonia", score: 95 }] },
+                selectedKeywords: ["City Trail", "Tech-Pack", "Performance"]
+            }
+        ];
+
+        // 페이지 로드 시 초기 화면 렌더링
+        window.onload = function() {
+            renderFolderTree();
+            renderProjectGallery();
+        };
+
+
+        // 3. 페이지 네비게이션 및 제어
 
         // 로고 클릭 시 메인 페이지로 이동
         function handleLogoClick() { navigateTo(1); }
@@ -32,6 +91,7 @@
             if (currentIdx === 6 && !confirm("진행 중인 프로젝트가 저장되지 않습니다. 이동하시겠습니까?")) return;
             navigateTo(targetPageIdx);
         }
+
 
         // 페이지 전환 및 공통 제어
         function navigateTo(idx) {
@@ -68,25 +128,94 @@
             }
         }
 
+
         // 4. 로그인/ 인증로직
+
         // 회원가입(사용가능한 이메일인지 확인하는 로직 추가)
         function checkEmailDuplicate() { alert("사용가능한 이메일 포맷입니다."); }
 
-        // 로그인
-        function executeLogin() {
-          isLoggedIn = true;
-          syncAuthUI(); // 헤더 업데이트
-          alert("반갑습니다. 워크스페이스 콘솔을 가동합니다.");
-          navigateTo(1); // 로그인 후 메인 페이지(1번) 이동
+      const API_BASE_URL = window.location.port === "3000"
+          ? "http://localhost:8089"
+          : "";
+
+      async function requestApi(path, options = {}) {
+          const response = await fetch(`${API_BASE_URL}${path}`, {
+              ...options,
+              credentials: "include",
+              headers: {
+                  "Content-Type": "application/json",
+                  ...(options.headers || {})
+              }
+          });
+
+          const message = await response.text();
+
+          if (!response.ok) {
+              throw new Error(message || "요청 처리 중 오류가 발생했습니다.");
+          }
+
+          return message;
       }
 
-        // 회원가입
-        function executeRegister() {
-            alert("성공적으로 등록되었습니다.");
-            isLoggedIn = true;
-            syncAuthUI();
-            navigateTo(1); // 가입 후 메인 페이지(1번)로 이동
-        }
+      async function executeLogin() {
+          const email = document.getElementById("login-email")?.value.trim();
+          const password = document.getElementById("login-pw")?.value;
+
+          if (!email || !password) {
+              alert("이메일과 비밀번호를 입력해주세요.");
+              return;
+          }
+
+          try {
+              const message = await requestApi("/api/members/login", {
+                  method: "POST",
+                  body: JSON.stringify({
+                      email: email,
+                      password: password
+                  })
+              });
+
+              isLoggedIn = true;
+              syncAuthUI();
+              alert(message || "로그인 성공!");
+              window.location.href = "/";
+          } catch (error) {
+              alert(error.message);
+          }
+      }
+
+      async function executeRegister() {
+          const nickname = document.getElementById("join-name")?.value.trim();
+          const email = document.getElementById("join-email")?.value.trim();
+          const password = document.getElementById("join-pw")?.value;
+          const passwordConfirm = document.getElementById("join-pw-confirm")?.value;
+
+          if (!nickname || !email || !password || !passwordConfirm) {
+              alert("회원가입 정보를 모두 입력해주세요.");
+              return;
+          }
+
+          if (password !== passwordConfirm) {
+              alert("비밀번호가 일치하지 않습니다.");
+              return;
+          }
+
+          try {
+              const message = await requestApi("/api/members/join", {
+                  method: "POST",
+                  body: JSON.stringify({
+                      email: email,
+                      password: password,
+                      nickname: nickname
+                  })
+              });
+
+              alert(message || "회원가입이 완료되었습니다.");
+              window.location.href = "/login";
+          } catch (error) {
+              alert(error.message);
+          }
+      }
 
         // 로그아웃
         function triggerLogout() {
@@ -111,4 +240,135 @@
                 }
             }
         }
+
+
         function executeModify() { alert("저장되었습니다."); navigateTo(1); }
+
+        // 5. 브랜드기획 동기화 - 무드태그 선택 상반 비활성화 & 이미지 6개/12개 동적 연동
+        function handleMoodTagClick(clickedTag, opposingTag) {
+            const currentBtn = document.getElementById('main-tag-' + clickedTag);
+            const oppoBtn = document.getElementById('main-tag-' + opposingTag);
+
+            if(currentBtn.classList.contains('disabled-tag')) return;
+
+            if(currentBtn.classList.contains('selected-tag')) {
+                currentBtn.classList.remove('selected-tag');
+                oppoBtn.classList.remove('disabled-tag');
+                selectedMainMoods = selectedMainMoods.filter(t => t !== clickedTag);
+            } else {
+                currentBtn.classList.add('selected-tag');
+                oppoBtn.classList.add('disabled-tag');
+                oppoBtn.classList.remove('selected-tag');
+                selectedMainMoods.push(clickedTag);
+                const keywordsToClear = HIERARCHY_DATA_SOURCE[opposingTag];
+                selectedSubKeywordsList = selectedSubKeywordsList.filter(item => !keywordsToClear.includes(item));
+            }
+            syncRenderQ4SubClusterGrid();
+        }
+
+        // 세부 키워드 그리드 생성
+        function syncRenderQ4SubClusterGrid() {
+            const poolContainer = document.getElementById('q4-dynamic-style-pool');
+            poolContainer.innerHTML = "";
+
+            if (selectedMainMoods.length === 0) {
+                poolContainer.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-gray); padding: 30px; font-size: 13px;">Q3 무드태그를 선택하시면 상응하는 하위 계층 핵심 이미지셋이 실시간으로 여기에 전개됩니다.</div>`;
+                return;
+            }
+
+            selectedMainMoods.forEach(clusterKey => {
+                const subItems = HIERARCHY_DATA_SOURCE[clusterKey];
+                subItems.forEach(keywordValue => {
+                    const isChosen = selectedSubKeywordsList.includes(keywordValue);
+                    const card = document.createElement('div');
+                    card.className = `dynamic-style-card ${isChosen ? 'chosen-style' : ''}`;
+                    card.setAttribute('data-keyword', keywordValue);
+
+                    card.innerHTML = `
+                        <div class="card-img-placeholder">[PREVIEW: ${clusterKey}_${keywordValue}]</div>
+                        <div style="text-align:center; font-weight:700; font-size:13px;">${keywordValue}</div>
+                        <div style="text-align:center; font-size:10px; color:var(--text-gray); margin-top:2px;">${clusterKey} 계층 소속</div>
+                    `;
+                    card.onclick = function() { handleSubCardSelection(this, keywordValue); };
+                    poolContainer.appendChild(card);
+                });
+            });
+            enforceQ4LockingLimit();
+        }
+
+        // 브랜드 기획 동기화 - Q1~Q4 모두 입력 후 다음 단계 이동 가능
+        function checkInputsAndNavigate() {
+              // 1. Q1, Q2 텍스트 입력값 체크
+              const q1 = document.getElementById('brand-line-summary').value.trim();
+              const q2 = document.getElementById('brand-object-search').value.trim();
+
+              if (q1 === "" || q2 === "") {
+                  alert("⚠️ Q1과 Q2의 내용을 모두 입력해주세요.");
+                  return;
+              }
+
+              // 2. Q3 무드태그 선택 체크 (selectedMainMoods 배열에 값이 있는지 확인)
+              if (selectedMainMoods.length === 0) {
+                  alert("⚠️ Q3에서 최소 1개의 브랜드 무드태그를 선택해주세요.");
+                  return;
+              }
+
+              // 3. Q4 세부 키워드 선택 체크 (selectedSubKeywordsList 배열에 값이 있는지 확인)
+              if (selectedSubKeywordsList.length === 0) {
+                  alert("⚠️ Q4에서 최소 1개의 세부 스타일 키워드를 선택해주세요.");
+                  return;
+              }
+
+              // 모두 통과하면 다음 페이지로 이동
+              navigateTo(7);
+          }
+
+        // 스타일 선택 및 4개 제한 로직
+        function handleSubCardSelection(cardElement, keywordValue) {
+            if (cardElement.classList.contains('disabled-style')) return;
+
+            if (cardElement.classList.contains('chosen-style')) {
+                cardElement.classList.remove('chosen-style');
+                selectedSubKeywordsList = selectedSubKeywordsList.filter(k => k !== keywordValue);
+            } else {
+                if (selectedSubKeywordsList.length > 4) {
+                    alert("⚠️ 세부 스타일 지표 키워드는 최대 4개까지만 복합 바인딩이 허용됩니다.");
+                    return;
+                }
+                cardElement.classList.add('chosen-style');
+                selectedSubKeywordsList.push(keywordValue);
+            }
+            enforceQ4LockingLimit();
+        }
+
+        function enforceQ4LockingLimit() {
+            const cards = document.querySelectorAll('.dynamic-style-card');
+            if (selectedSubKeywordsList.length >= 4) {
+                cards.forEach(card => {
+                    const kw = card.getAttribute('data-keyword');
+                    if (!selectedSubKeywordsList.includes(kw)) card.classList.add('disabled-style');
+                });
+            } else {
+                cards.forEach(card => card.classList.remove('disabled-style'));
+            }
+        }
+
+
+        // 레퍼런스 이미지 선택 - 중복선택, 최대 4개 제한
+        function selectSingleReference(card, rowId) {
+            const rowContainer = document.getElementById(rowId);
+
+            if (card.classList.contains('chosen')) {
+                card.classList.remove('chosen');
+                return;
+            }
+
+            const selectedCountInThisRow = rowContainer.querySelectorAll('.scroll-card.chosen').length;
+
+            if (selectedCountInThisRow >= 4) {
+                alert("⚠️ 한 카테고리당 최대 4개까지만 선택할 수 있습니다.");
+                return;
+            }
+
+            card.classList.add('chosen');
+        }
