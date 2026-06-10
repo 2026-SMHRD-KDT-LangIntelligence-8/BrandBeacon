@@ -145,3 +145,40 @@
 
             card.classList.add('chosen');
         }
+
+
+        // 유효성 검사 후 무드보드 빌드
+        // 1. 선택된 모든 데이터를 수집하는 함수
+        function validateAndBuildMoodboard() {
+            let incompleteCategories = [];
+            organizedDataGlobal = [];
+
+            for (let i = 1; i <= 8; i++) {
+                const row = document.getElementById(`scroll-row-${i}`);
+                if (!row) continue;
+
+                const selectedCards = row.querySelectorAll('.scroll-card.chosen');
+                const categoryBlock = row.closest('.category-scroll-block');
+                const categoryName = categoryBlock ? categoryBlock.getAttribute('data-cat-name') : `카테고리 ${i}`;
+
+                if (selectedCards.length === 0) {
+                    incompleteCategories.push(`${i}번 [${categoryName}]`);
+                } else {
+                    let assets = [];
+                    selectedCards.forEach(card => {
+                        assets.push(card.innerText.trim());
+                    });
+
+                    organizedDataGlobal.push({ category: categoryName, assets: assets });
+                }
+            }
+
+            if (incompleteCategories.length > 0) {
+                alert(`⚠️ 다음 카테고리에서 최소 1개 이상 선택해주세요:\n- ${incompleteCategories.join('\n- ')}`);
+                return;
+            }
+
+            // 3. 묶인 데이터를 전달하여 무드보드 생성
+            compileMoodboardCanvasHTML(organizedDataGlobal);
+            navigateTo(8);
+        }

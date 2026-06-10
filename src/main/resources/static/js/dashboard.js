@@ -153,18 +153,25 @@
         }
 
           // 기획 단계에서 선택한 키워드를 대시보드로 넘겨주고 화면을 전환하는 함수
-          function showLiveDashboard() {
-              console.log("대시보드 확인 버튼 클릭됨! 키워드 전송 시작.");
+                function showLiveDashboard() {
+                    console.log("대시보드 확인 버튼 클릭됨! 키워드 전송 시작.");
 
-              // 1. 현재 기획 페이지에서 선택된 키워드들을 담은 데이터 객체 생성
-              const liveData = {
-                  title: "기획 중인 브랜드",
-                  selectedKeywords: selectedSubKeywordsList,
-                  analysis: {
-                      benchmarks: [{ name: "Brand-Sync Default", score: 87 }] // 기본 데이터
-                  }
+                    // 1. 현재 기획 페이지에서 선택된 키워드들을 담은 데이터 객체 생성
+                    const liveData = {
+                        title: "기획 중인 브랜드",
+                        selectedKeywords: selectedSubKeywordsList,
+                        analysis: {
+                            benchmarks: [{ name: "Brand-Sync Default", score: 87 }] // 기본 데이터
+                        }
+                    };
+
+                    // 2. 대시보드 UI를 현재 기획 데이터로 업데이트
+                    updateDashboardUI(liveData);
+
+                    // 3. 페이지 이동
+                    navigateTo(9);
+                    console.log("대시보드로 이동 완료.");
                 }
-              };
 
 
       // 현재 화면(대시보드)을 PDF로 변환 및 다운로드
@@ -246,11 +253,24 @@
         }
 
         // 브랜드 대시보드 - 처음부터 다시 기획하기
-        function rebootProjectWorkflow() {
-        // 1. 확인창 문구
-        if (!confirm("프로젝트가 저장되지 않습니다. 처음부터 다시 기획하시겠습니까?")) {
-            return;
+        function resetAllPlanningData() {
+            document.getElementById('brand-line-summary').value = "";
+            document.getElementById('brand-object-search').value = "";
+            selectedMainMoods = [];
+            selectedSubKeywordsList = [];
+            document.querySelectorAll('.keyword-tag').forEach(el => el.classList.remove('selected-tag', 'disabled-tag'));
+
+            const poolContainer = document.getElementById('q4-dynamic-style-pool');
+            if (poolContainer) {
+                poolContainer.innerHTML = '<div style="grid-column: span 4; text-align: center; color: var(--text-gray); padding: 30px; font-size: 13px;">Q3 무드태그를 선택하시면 상응하는 하위 계층 핵심 이미지셋이 실시간으로 여기에 전개됩니다.</div>';
             }
+            document.querySelectorAll('.scroll-card').forEach(el => el.classList.remove('chosen'));
+
+            // 대시보드 데이터까지 초기화가 필요하다면 여기서 dashboard.js의 함수를 호출하거나 변수를 초기화
+            organizedDataGlobal = [];
+            currentLiveSessionAssets = [];
+
+            navigateTo(6);
         }
 
         // 프로젝트 삭제
@@ -298,3 +318,29 @@
                 renderFolderTree();
                 renderProjectGallery();
             });
+
+
+          // 새 폴더 추가
+          function createNewFolderInSystem() {
+              const fName = prompt("새로운 보관 폴더 이름을 지정하십시오:");
+              if(!fName || fName.trim() === "") return;
+              virtualFolders.push({ id: "custom_" + Date.now(), name: fName.trim(), isSystem: false });
+              renderFolderTree();
+          }
+
+          // 선택된 폴더 삭제
+          function deleteSelectedFolderInSystem() {
+              const currentFolder = virtualFolders.find(f => f.id === currentSelectedFolderId);
+              if(!currentFolder || currentFolder.isSystem) {
+                  alert("🔒 기본 루트 아카이브 폴더는 시스템 수렴 보존을 위해 삭제할 수 없습니다.");
+                  return;
+              }
+              if(confirm(`⚠️ [${currentFolder.name}] 폴더를 삭제하시겠습니까? 내부 가이드북 데이터가 동시 파기됩니다.`)) {
+                  virtualProjects = virtualProjects.filter(p => p.folder !== currentSelectedFolderId);
+                  virtualFolders = virtualFolders.filter(f => f.id !== currentSelectedFolderId);
+                  currentSelectedFolderId = "all";
+                  document.getElementById('current-folder-title-display').innerText = "전체 프로젝트";
+                  renderFolderTree();
+                  renderProjectGallery();
+              }
+          }
