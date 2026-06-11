@@ -54,15 +54,15 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px; /* 아이콘과 텍스트 사이 거리 */
+            gap: 12px; /* 아이콘과 텍스트 사이 거리 */
             cursor: pointer;
         }
 
         /* 로고 아이콘 박스 */
         .logo-icon {
             position: relative;
-            width: 20px; /* 전체 아이콘 영역 크기 */
-            height: 20px;
+            width: 32px; /* 전체 아이콘 영역 크기 */
+            height: 35px;
         }
 
         /* 큰 회색 사각형 */
@@ -70,9 +70,9 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 14px;
-            height: 16px;
-            background-color: #37373f;
+            width: 21px;
+            height: 29px;
+            background-color: #141518;
         }
 
         /* 작은 주황색 사각형 */
@@ -80,17 +80,19 @@
             position: absolute;
             top: 0;
             right: 0;
-            width: 8px;
-            height: 8px;
+            width: 11px;
+            height: 11px;
             background-color: #FF5C00;
         }
 
         /* 로고 텍스트 */
         .logo-text {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: var(--text-dark);
+            font-family: 'Roboto', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 35px;
+            color: #141518;
+            letter-spacing: -2px;
         }
 
         .top-menu {
@@ -220,7 +222,7 @@
             background-color: var(--bg-card-inner);
             color: var(--text-light);
             border: 1px solid var(--border-color);
-            padding: 12px 24px;
+            padding: 15px 60px !important;
             font-size: 15px;
             font-weight: 600;
             border-radius: 6px;

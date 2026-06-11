@@ -106,7 +106,7 @@
                     <div style="font-weight:700; font-size:13px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;">${p.title}</div>
                     <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
                         <span style="font-size:11px; color:var(--text-gray);">${p.date}</span>
-                        <button class="btn-action" style="background-color: #718096; color: white; border: none; padding:4px 10px; font-size:11px; border-radius:4px; cursor:pointer;" onclick="deleteProjectNode('${p.id}')">삭제</button>
+                        <button class="btn-action" style="background-color: #B4B4B4; color: black; border: none; padding:5px 15px !important; font-size:13px; border-radius:4px; cursor:pointer;" onclick="deleteProjectNode('${p.id}')">삭제</button>
                     </div>
                 `;
                 target.appendChild(item);
