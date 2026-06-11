@@ -128,6 +128,8 @@
             if (idx === 1) { window.location.href = '/'; return; }
             if (idx === 3) { window.location.href = '/login'; return; }
             if (idx === 6) { window.location.href = '/brandsync'; return; }
+            if (idx === 7) { window.location.href = '/reference'; return; } // 🚀 7번 스텝 주소 추가 완료!
+            if (idx === 8) { window.location.href = '/moodboard'; return; } // 🚀 8번(무드보드) 스텝 주소 추가 완료!
 
             // 현재 HTML 내부에 해당 page id 뷰가 존재할 때만 작동 (brandsync 내부 스텝 전환용)
             const activePage = document.getElementById(`page${idx}`);
@@ -359,8 +361,14 @@
                   return;
               }
 
-              // 같은 brandsync 파일 안에서 7번 스텝으로 전환하므로 기존 navigateTo 연동 작동
-              navigateTo(7);
+              // 🚀 DB 저장을 위해 현재 화면에서 입력한 데이터를 브라우저에 임시 백업
+              sessionStorage.setItem("brandQ1", q1);
+              sessionStorage.setItem("brandQ2", q2);
+              sessionStorage.setItem("brandMoods", JSON.stringify(selectedMainMoods));
+              sessionStorage.setItem("brandKeywords", JSON.stringify(selectedSubKeywordsList));
+
+              // 🚀 무조건 레퍼런스 페이지로 강제 이동! (수정된 부분)
+              window.location.href = '/reference';
           }
 
         // 스타일 선택 및 4개 제한 로직
