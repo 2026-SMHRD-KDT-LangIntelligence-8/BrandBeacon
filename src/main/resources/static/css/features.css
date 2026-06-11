@@ -35,7 +35,7 @@
         /* 캐러셀 컨테이너 */
         .carousel-wrapper { position: relative; width: 100%; padding: 0 40px; box-sizing: border-box; }
         .carousel-pages { display: flex; transition: transform 0.3s ease; position: relative; }
-        .carousel-page { min-width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; box-sizing: border-box; }
+        .carousel-page { min-width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; box-sizing: border-box; }
         .carousel-page { display: none; } /* 기본 숨김 */
         .carousel-page.active { display: grid; } /* 활성 페이지만 보임 */
 
@@ -51,18 +51,14 @@
 
 
         .scroll-card {
-            width: 200px !important;
-            min-width: 200px !important;
-            max-width: 200px !important;
-            flex: 0 0 200px !important; /* 압축 완전 차단 */
-            display: inline-block;
+            width: 100% !important;
+            display: block;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px;
             background: #FFFFFF;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            margin-right: 14px;
         }
 
         .category-scroll-block {

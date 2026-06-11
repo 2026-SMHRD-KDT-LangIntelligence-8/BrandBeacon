@@ -194,7 +194,7 @@
             organizedDataGlobal = [];
 
             for (let i = 1; i <= 8; i++) {
-                const row = document.getElementById(`scroll-row-${i}`);
+                const row = document.getElementById(`carousel-row-${i}`);
                 if (!row) continue;
 
                 const selectedCards = row.querySelectorAll('.scroll-card.chosen');
