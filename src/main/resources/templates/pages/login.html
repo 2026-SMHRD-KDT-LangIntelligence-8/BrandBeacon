@@ -6,6 +6,17 @@
         <div class="split-layout" style="align-items: flex-start;">
             <div class="split-left" style="border-right: 1px solid var(--border-color); padding-right: 40px;">
                 <h4 style="margin-bottom: 20px; font-size: 18px;">[Login]</h4>
+
+                <button class="btn-action" style="width:100%; justify-content:center; background:#FFFFFF; color:#4A5568; border: 1px solid var(--border-color); margin-bottom: 20px;"
+                        onclick="location.href='/oauth2/authorization/google'">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="16" style="margin-right:10px;">
+                    Google로 시작하기
+                </button>
+
+                <div style="text-align: center; color: var(--text-gray); font-size: 12px; margin: 20px 0; border-bottom: 1px solid var(--border-color); line-height: 0.1em;">
+                    <span style="background:#fff; padding:0 10px;">또는 이메일로 로그인</span>
+                </div>
+
                 <div class="input-group">
                     <label>이메일 주소 입력</label>
                     <input type="text" id="login-email" placeholder="name@domain.com">
@@ -14,6 +25,7 @@
                     <label>비밀번호 입력</label>
                     <input type="password" id="login-pw" placeholder="••••••••">
                 </div>
+
                 <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="executeLogin()">로그인</button>
                 <button class="btn-action" style="width:100%; justify-content:center;" onclick="navigateTo(4)">회원가입</button>
             </div>
