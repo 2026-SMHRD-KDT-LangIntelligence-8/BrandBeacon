@@ -95,4 +95,20 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // 🚀 프론트엔드 fetch('/api/projects/save') 요청을 수신하기 위한 POST 엔드포인트 추가
+    @PostMapping("/save")
+    public ResponseEntity<String> saveProjectFromDashboard(@RequestBody ProjectCreateRequest request, HttpServletRequest httpRequest) {
+        try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session == null || session.getAttribute("loginUserId") == null) {
+                return ResponseEntity.status(401).body("로그인이 필요한 서비스입니다.");
+            }
+            Long userId = (Long) session.getAttribute("loginUserId");
+            Long projectId = projectService.createProject(userId, request);
+            return ResponseEntity.ok("프로젝트가 성공적으로 생성되었습니다! 프로젝트 ID: " + projectId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
