@@ -485,7 +485,7 @@ function navigateTo(idx) {
             if (modal) modal.style.display = 'none';
         }
 
-        // 🔥 DB NOT NULL 제약조건(BRAND_INTRO)을 완벽히 준수하는 DTO 매핑 저장 함수
+        // 🔥 DB NOT NULL 제약조건(BRAND_INTRO) 및 키워드 매핑을 완벽히 준수하는 DTO 매핑 저장 함수
         function executeAdvancedProjectSave() {
             const titleInput = document.getElementById('modal-project-title-input');
             const newFolderInput = document.getElementById('modal-new-folder-input');
@@ -504,10 +504,10 @@ function navigateTo(idx) {
             const q1 = sessionStorage.getItem("brandQ1") || "브랜드 라인 요약 기본값";
             const q2 = sessionStorage.getItem("brandQ2") || "타겟 오브젝트 검색 기본값";
 
-            // 키워드 ID 배열 가공 (예시: ['minimal', 'running'] 등 문자열 배열 또는 ID)
+            // 키워드 ID 배열 가공
             const keywordIdsList = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
 
-            // 이미지 url 배열 추출 (예시: referenceData 구조에 맞춰 배열 생성)
+            // 이미지 url 배열 추출
             const references = JSON.parse(sessionStorage.getItem("referenceData") || "[]");
             let imgUrlsList = [];
             references.forEach(cat => {
@@ -521,7 +521,7 @@ function navigateTo(idx) {
                 projectName: title,
                 brandIntro: q1,            // 🔥 NOT NULL 제약조건 방어
                 referenceType: q2,         // 참조 타입으로 Q2 값 바인딩
-                keywordIds: [],            // DB 키워드 엔티티 조회용 배열 (빈 배열 또는 ID 목록)
+                keywordIds: keywordIdsList,// 🔥 정상 반영: 세션에서 가져온 키워드 ID 배열 바인딩
                 imgUrls: imgUrlsList       // 이미지 주소 배열
             };
 
