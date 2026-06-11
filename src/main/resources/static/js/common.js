@@ -1,3 +1,40 @@
+// 페이지 전환 및 공통 제어 (✨ 멀티 페이지간 가교 역할 및 내부 탭 전환용)
+function navigateTo(idx) {
+    // 🚀 [최상단 배치] 다른 파일로 페이지 점프가 필요한 핵심 인덱스는 DOM 검사 전에 즉시 이동 처리!
+    if (idx === 1) { window.location.href = '/'; return; }
+    if (idx === 3) { window.location.href = '/login'; return; }
+    if (idx === 6) { window.location.href = '/brandsync'; return; }
+    if (idx === 7) { window.location.href = '/reference'; return; }
+    if (idx === 8) { window.location.href = '/moodboard'; return; }
+    if (idx === 9) { window.location.href = '/dashboard'; return; } // 🚀 무드보드 -> 대시보드 주소 안내 추가!
+
+    // 현재 HTML 내부에 해당 page id 뷰가 존재할 때만 작동 (동일 페이지 내 내부 스텝 전환용)
+    const activePage = document.getElementById(`page${idx}`);
+    if (!activePage) return; // 💡 다른 페이지 주소일 때는 이 장벽에 걸리기 전에 위에서 리턴됩니다.
+
+    currentIdx = idx;
+    document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-view'));
+    activePage.classList.add('active-view');
+
+    // 스텝 바 제어 (6~9번 페이지만 노출)
+    const stepBar = document.getElementById('global-step-bar');
+    if (stepBar) {
+        if (idx >= 6 && idx <= 9) {
+            stepBar.style.display = 'flex';
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+            const activeStep = document.getElementById(`st-${idx}`);
+            if (activeStep) {
+                activeStep.classList.add('active');
+            }
+        } else {
+            stepBar.style.display = 'none';
+        }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
 // 1. 상태 관리 변수
         let isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true"; // 브라우저 저장소(sessionStorage)를 활용해 새로고침 시에도 상태 유지
         let currentIdx = 1; // 현재 활성화된 페이지
@@ -310,7 +347,7 @@
             syncRenderQ4SubClusterGrid();
         }
 
-        // 세부 키워드 그리드 생성
+        // 세부 키워드 그리드 생성 (✨ 이벤트 델리게이션 적용으로 하위 엘리먼트 클릭 씹힘 방지)
         function syncRenderQ4SubClusterGrid() {
             const poolContainer = document.getElementById('q4-dynamic-style-pool');
             if (!poolContainer) return; // 해당 엘리먼트가 없는 페이지라면 스킵
@@ -329,15 +366,26 @@
                     card.className = `dynamic-style-card ${isChosen ? 'chosen-style' : ''}`;
                     card.setAttribute('data-keyword', keywordValue);
 
+                    // 포인터 이벤트 논(none)을 주어 내부 프리뷰, 텍스트가 클릭을 흡수하지 못하게 처리
                     card.innerHTML = `
-                        <div class="card-img-placeholder">[PREVIEW: ${clusterKey}_${keywordValue}]</div>
-                        <div style="text-align:center; font-weight:700; font-size:13px;">${keywordValue}</div>
-                        <div style="text-align:center; font-size:10px; color:var(--text-gray); margin-top:2px;">${clusterKey} 계층 소속</div>
+                        <div class="card-img-placeholder" style="pointer-events: none;">[PREVIEW: ${clusterKey}_${keywordValue}]</div>
+                        <div style="text-align:center; font-weight:700; font-size:13px; pointer-events: none;">${keywordValue}</div>
+                        <div style="text-align:center; font-size:10px; color:var(--text-gray); margin-top:2px; pointer-events: none;">${clusterKey} 계층 소속</div>
                     `;
-                    card.onclick = function() { handleSubCardSelection(this, keywordValue); };
                     poolContainer.appendChild(card);
                 });
             });
+
+            // 부모 컨테이너에 클릭 이벤트 델리게이션 바인딩
+            poolContainer.onclick = function(e) {
+                const targetCard = e.target.closest('.dynamic-style-card');
+                if (!targetCard) return;
+                const kwVal = targetCard.getAttribute('data-keyword');
+                if (kwVal) {
+                    handleSubCardSelection(targetCard, kwVal);
+                }
+            };
+
             enforceQ4LockingLimit();
         }
 
@@ -371,7 +419,7 @@
               window.location.href = '/reference';
           }
 
-        // 스타일 선택 및 4개 제한 로직
+        // 스타일 선택 및 4개 제한 로직 (✨ 선택 4개 초과 방지 조건 >= 4 로 엄격하게 수정)
         function handleSubCardSelection(cardElement, keywordValue) {
             if (cardElement.classList.contains('disabled-style')) return;
 
@@ -379,7 +427,7 @@
                 cardElement.classList.remove('chosen-style');
                 selectedSubKeywordsList = selectedSubKeywordsList.filter(k => k !== keywordValue);
             } else {
-                if (selectedSubKeywordsList.length > 4) {
+                if (selectedSubKeywordsList.length >= 4) {
                     alert("⚠️ 세부 스타일 지표 키워드는 최대 4개까지만 복합 바인딩이 허용됩니다.");
                     return;
                 }
@@ -401,7 +449,6 @@
             }
         }
 
-
         // 레퍼런스 이미지 선택 - 중복선택, 최대 4개 제한
         function selectSingleReference(card, rowId) {
             const rowContainer = document.getElementById(rowId);
@@ -420,4 +467,84 @@
             }
 
             card.classList.add('chosen');
+        }
+
+        // 🚀 [추가 완료] 무드보드 페이지에서 대시보드(9번)로 곧바로 이동하는 함수 정의
+        function showLiveDashboard() {
+            window.location.href = '/dashboard';
+        }
+
+        // 🚀 6. 프로젝트 저장 모달 제어 및 대시보드 백엔드 통신 저장 로직
+        function openSaveProjectModal() {
+            const modal = document.getElementById('custom-save-modal-overlay');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeSaveProjectModal() {
+            const modal = document.getElementById('custom-save-modal-overlay');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // 🔥 DB NOT NULL 제약조건(BRAND_INTRO)을 완벽히 준수하는 DTO 매핑 저장 함수
+        function executeAdvancedProjectSave() {
+            const titleInput = document.getElementById('modal-project-title-input');
+            const newFolderInput = document.getElementById('modal-new-folder-input');
+            const folderSelect = document.getElementById('modal-existing-folder-select');
+
+            const title = titleInput ? titleInput.value.trim() : "신규 생성 매칭 가이드 모델 셋";
+            const newFolder = newFolderInput ? newFolderInput.value.trim() : "";
+            const existingFolder = folderSelect ? folderSelect.value : "";
+
+            if (!title) {
+                alert("⚠️ 저장할 프로젝트명을 입력해주세요.");
+                return;
+            }
+
+            // 세션 스토리지에 있는 기획 Q1 데이터(BRAND_INTRO 매핑용) 및 기타 데이터 수집
+            const q1 = sessionStorage.getItem("brandQ1") || "브랜드 라인 요약 기본값";
+            const q2 = sessionStorage.getItem("brandQ2") || "타겟 오브젝트 검색 기본값";
+
+            // 키워드 ID 배열 가공 (예시: ['minimal', 'running'] 등 문자열 배열 또는 ID)
+            const keywordIdsList = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
+
+            // 이미지 url 배열 추출 (예시: referenceData 구조에 맞춰 배열 생성)
+            const references = JSON.parse(sessionStorage.getItem("referenceData") || "[]");
+            let imgUrlsList = [];
+            references.forEach(cat => {
+                if (cat.assets && Array.isArray(cat.assets)) {
+                    imgUrlsList = imgUrlsList.concat(cat.assets);
+                }
+            });
+
+            // 백엔드 DTO(ProjectCreateRequest) 규격에 정확히 맞춘 객체 조립
+            const payload = {
+                projectName: title,
+                brandIntro: q1,            // 🔥 NOT NULL 제약조건 방어
+                referenceType: q2,         // 참조 타입으로 Q2 값 바인딩
+                keywordIds: [],            // DB 키워드 엔티티 조회용 배열 (빈 배열 또는 ID 목록)
+                imgUrls: imgUrlsList       // 이미지 주소 배열
+            };
+
+            fetch('/api/projects/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(async response => {
+                if (response.ok) {
+                    const msg = await response.text();
+                    alert("🎉 " + (msg || "프로젝트가 성공적으로 저장되었습니다."));
+                    closeSaveProjectModal();
+                    window.location.href = '/dashboard';
+                } else {
+                    const err = await response.text();
+                    alert("❌ 저장 실패: " + err);
+                }
+            })
+            .catch(error => {
+                console.error("통신 에러:", error);
+                alert("🚨 서버 통신 중 오류가 발생했습니다.");
+            });
         }
