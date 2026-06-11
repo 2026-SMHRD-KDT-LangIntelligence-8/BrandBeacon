@@ -4,22 +4,22 @@ import com.example.brandbeacon.domain.Keyword;
 import com.example.brandbeacon.domain.Member;
 import com.example.brandbeacon.domain.MoodboardImg;
 import com.example.brandbeacon.domain.Project;
-import com.example.brandbeacon.domain.PositioningMap; // ✨ NEW: 맵 엔티티 임포트
+import com.example.brandbeacon.domain.PositioningMap;
 import com.example.brandbeacon.dto.ProjectCreateRequest;
 import com.example.brandbeacon.dto.ProjectDetailResponse;
-import com.example.brandbeacon.dto.AiRequestDto; // ✨ NEW: 파이썬 요청 가방 임포트
-import com.example.brandbeacon.dto.AiResponseDto; // ✨ NEW: 파이썬 응답 가방 임포트
+import com.example.brandbeacon.dto.AiRequestDto;
+import com.example.brandbeacon.dto.AiResponseDto;
 import com.example.brandbeacon.repository.KeywordRepository;
 import com.example.brandbeacon.repository.MemberRepository;
 import com.example.brandbeacon.repository.MoodboardImgRepository;
 import com.example.brandbeacon.repository.ProjectRepository;
-import com.example.brandbeacon.repository.PositioningMapRepository; // ✨ NEW: 맵 창고 임포트
+import com.example.brandbeacon.repository.PositioningMapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate; // ✨ NEW: 심부름꾼 임포트
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList; // ✨ NEW: 빈 리스트 처리를 위한 임포트
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,10 +49,14 @@ public class ProjectService {
                 .orElseThrow(() -> new IllegalArgumentException("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요."));
 
 
-        // 2. DB에서 실제 키워드 엔티티 목록을 한 번에 조회 (✨ 빈 값 전달 시 500 에러 방어 로직 적용)
-        List<Keyword> keywords = (request.getKeywordIds() != null && !request.getKeywordIds().isEmpty())
-                ? keywordRepository.findAllById(request.getKeywordIds())
-                : new ArrayList<>();
+        // 2. DB에서 실제 키워드 엔티티 목록을 한 번에 조회
+        List<Keyword> keywords = new ArrayList<>();
+        if (request.getKeywordIds() != null && !request.getKeywordIds().isEmpty()) {
+            List<String> keywordNames = request.getKeywordIds();
+            keywords = keywordRepository.findAll().stream()
+                    .filter(k -> keywordNames.contains(k.getKeywordName()))
+                    .collect(Collectors.toList());
+        }
 
 
         // 3. 빌더 패턴을 사용 -> 새로운 프로젝트(Project) 객체를 조립
