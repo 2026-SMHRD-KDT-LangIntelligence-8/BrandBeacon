@@ -1,31 +1,34 @@
-<div xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<body>
 
-    <div th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+        <div th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="font-size:22px; color:var(--text-white);">My Project</h3>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-action btn-blue" onclick="createNewFolderInSystem()">📁 새 폴더 생성</button>
-                <button class="btn-action btn-orange" onclick="deleteSelectedFolderInSystem()">🗑️ 현재 선택 폴더 삭제</button>
-            </div>
-        </div>
-
-        <div class="storage-layout">
-            <div class="sidebar-folders">
-                <ul class="folder-tree" id="system-folder-tree-element"></ul>
-            </div>
-            <div class="main-contents">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h4 style="font-size:14px; color:var(--text-white);" id="current-folder-title-display">전체 프로젝트</h4>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:22px; color:var(--text-white);">My Project</h3>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-action btn-blue" onclick="createNewFolderInSystem()">📁 새 폴더 생성</button>
+                    <button class="btn-action btn-orange" onclick="deleteSelectedFolderInSystem()">🗑️ 현재 선택 폴더 삭제</button>
                 </div>
-                <div class="grid-gallery" id="project-archive-gallery-element"></div>
             </div>
+
+            <div class="storage-layout">
+                <div class="sidebar-folders">
+                    <ul class="folder-tree" id="system-folder-tree-element"></ul>
+                </div>
+                <div class="main-contents">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="font-size:14px; color:var(--text-white);" id="current-folder-title-display">전체 프로젝트</h4>
+                    </div>
+                    <div class="grid-gallery" id="project-archive-gallery-element"></div>
+                </div>
+            </div>
+
         </div>
 
-    </div>
-
-    <th:block th:fragment="page-scripts">
-        <script th:src="@{/js/dashboard.js}"></script>
-    </th:block>
-
-</div>
+        <th:block th:fragment="page-scripts">
+            <script th:src="@{/js/dashboard.js}"></script>
+        </th:block>
+</body>
+</html>

@@ -1,131 +1,207 @@
-<div xmlns:th="http://www.thymeleaf.org">
-
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<body>
     <div th:fragment="content" class="content-wrapper" style="max-width: 900px; margin: 0 auto; padding: 20px;">
 
         <div class="step-title" style="display: flex; align-items: center; font-size: 20px; font-weight: 800; color: var(--primary-orange); margin-bottom: 25px;">
-            <span class="step-badge" style="font-size: 13px; color: var(--text-gray); background: var(--bg-card-inner); padding: 4px 10px; border-radius: 4px; margin-right: 12px;">스텝 02</span>
-            레퍼런스 이미지 선택
-        </div>
-        <p class="page-desc">각 카테고리당 1개 이상의 레퍼런스 이미지를 선택해주세요.</p>
+                <span class="step-badge" style="font-size: 13px; color: var(--text-gray); background: var(--bg-card-inner); padding: 4px 10px; border-radius: 4px; margin-right: 12px;">스텝 02</span>
+                레퍼런스 이미지 선택
+            </div>
+            <p class="page-desc">각 카테고리당 1개 이상의 레퍼런스 이미지를 선택해주세요.</p>
 
-        <div class="category-scroll-block" data-cat-id="essence" data-cat-name="브랜드 에센스">
-            <p class="category-title">1. 브랜드 에센스 (Brand Essence)</p>
-            <div class="scroll-container" id="scroll-row-1">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도전 (Challenge)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>자유 (Freedom)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>승리 (Victory)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>자기초월 (Self)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>커뮤니티 가치</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>Run Beyond Limits</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>Progress Over</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>브랜드 시너지 링</div>
+            <div class="category-scroll-block" data-cat-id="essence" data-cat-name="브랜드 에센스">
+                <p class="category-title">1. 브랜드 에센스 (Brand Essence)</p>
+                <div class="carousel-wrapper" id="carousel-row-1">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-1', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도전 (Challenge)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>자유 (Freedom)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>승리 (Victory)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>자기초월 (Self)</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>커뮤니티 가치</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>Run Beyond Limits</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>Progress Over</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-1')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>브랜드 시너지 링</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-1', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-1', 0)"></span><span class="dot" onclick="goToPage('row-1', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="sports" data-cat-name="스포츠 종류">
+                <p class="category-title">2. 스포츠 종류 (Sports)</p>
+                <div class="carousel-wrapper" id="carousel-row-2">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-2', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>러닝 (Running)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>트레일러닝 (Trail)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>하이킹 (Hiking)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>크로스핏 (CrossFit)</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스트리트 트랙</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>알파인 클라이밍</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>인도어 서킷 트레이닝</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>애슬레틱 피트니스</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-2', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-2', 0)"></span><span class="dot" onclick="goToPage('row-2', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="lifestyle" data-cat-name="라이프 스타일">
+                <p class="category-title">3. 라이프 스타일 (Lifestyle)</p>
+                <div class="carousel-wrapper" id="carousel-row-3">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-3', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>새벽기상 루틴</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도심 러닝 루틴</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>리커버리 샤워</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>야근 후 헬스</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>커피 & 오피스 크루</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>주말 마라톤 레이스</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>식단 관리 프로필</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>얼반 헬시 라이프스킨</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-3', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-3', 0)"></span><span class="dot" onclick="goToPage('row-3', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="environment" data-cat-name="환경">
+                <p class="category-title">4. 환경 (Environment)</p>
+                <div class="carousel-wrapper" id="carousel-row-4">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-4', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도시 중심 (Urban)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도심 공원 (Park)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>트레일 (Trail) 코스</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>산악 지대 (Mountain)</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스포츠 스타디움 내부</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>해안 패스트 로드</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>가혹 기후 야외 필드</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>오프로드 거친 자연</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-4', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-4', 0)"></span><span class="dot" onclick="goToPage('row-4', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="visual" data-cat-name="비주얼 톤">
+                <p class="category-title">5. 비주얼 톤 (Visual Tone)</p>
+                <div class="carousel-wrapper" id="carousel-row-5">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-5', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>미니멀 (Minimal)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>하이 콘트라스트</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>에디토리얼 매거진</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>다큐멘터리 스타일</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>프리미엄 스포츠셋</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>시네마틱 모노 무드</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>빈티지 필터 무드</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>자연광 내추럴 라이트</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-5', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-5', 0)"></span><span class="dot" onclick="goToPage('row-5', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="product" data-cat-name="제품 방향성">
+                <p class="category-title">6. 제품 방향성 (Product Direction)</p>
+                <div class="carousel-wrapper" id="carousel-row-6">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-6', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>퍼포먼스 러닝웨어</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>애슬레저 (Athleisure)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>테크니컬 트레이닝</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>아웃도어 기어 세트</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스포츠 러닝화/슈즈</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>유틸리티 테크 가방</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>방수 스마트 고글팩</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>어반 가이드 아우터웨어</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-6', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-6', 0)"></span><span class="dot" onclick="goToPage('row-6', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="palette" data-cat-name="컬러 팔레트">
+                <p class="category-title">7. 컬러 팔레트 (Color Palette)</p>
+                <div class="carousel-wrapper" id="carousel-row-7">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-7', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background: linear-gradient(135deg, #0A0A0A 50%, #F5F5F5 50%); border-radius:4px; margin-bottom:6px;"></div>Black + White</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background: linear-gradient(135deg, #1E3A8A 50%, #CCFF00 50%); border-radius:4px; margin-bottom:6px;"></div>Navy + Lime</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background: linear-gradient(135deg, #5C4033 50%, #D2B48C 50%); border-radius:4px; margin-bottom:6px;"></div>Earth Tone</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background: linear-gradient(135deg, #FF007F 50%, #39FF14 50%); border-radius:4px; margin-bottom:6px;"></div>Neon Cluster</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background:#1A202C; border-radius:4px; margin-bottom:6px;"></div>Monochrome Grey</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background:#E2E8F0; border-radius:4px; margin-bottom:6px;"></div>Concrete White</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background: linear-gradient(135deg, #7F1D1D 50%, #FCA5A5 50%); border-radius:4px; margin-bottom:6px;"></div>Deep Cyber Crimson</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-7')"><div style="height:100px; background: linear-gradient(135deg, #064E3B 50%, #A7F3D0 50%); border-radius:4px; margin-bottom:6px;"></div>Safety Bio Teal</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-7', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-7', 0)"></span><span class="dot" onclick="goToPage('row-7', 1)"></span></div>
+            </div>
+
+            <div class="category-scroll-block" data-cat-id="material" data-cat-name="소재">
+                <p class="category-title">8. 소재 (Material & Texture)</p>
+                <div class="carousel-wrapper" id="carousel-row-8">
+                    <button class="nav-arrow prev" onclick="moveCarousel('row-8', -1)">❮</button>
+                    <div class="carousel-pages">
+                        <div class="carousel-page active">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>통기성 메쉬 (Mesh)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>내마모 나일론 (Nylon)</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>방수 투습 고어텍스</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>리플렉티브 반사 원단</div>
+                        </div>
+                        <div class="carousel-page">
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>경량 립스탑 패브릭</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>레이저컷 통풍 가공재</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>친환경 리사이클 원사</div>
+                            <div class="scroll-card" onclick="selectSingleReference(this, 'carousel-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스마트 서모 패브릭</div>
+                        </div>
+                    </div>
+                    <button class="nav-arrow next" onclick="moveCarousel('row-8', 1)">❯</button>
+                </div>
+                <div class="carousel-dots"><span class="dot active" onclick="goToPage('row-8', 0)"></span><span class="dot" onclick="goToPage('row-8', 1)"></span></div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:25px;">
+                <button class="btn-action btn-blue" onclick="validateAndBuildMoodboard()">가치 매트릭스 기반 무드보드 생성 →</button>
             </div>
         </div>
 
-        <div class="category-scroll-block" data-cat-id="sports" data-cat-name="스포츠 종류">
-            <p class="category-title">2. 스포츠 종류 (Sports)</p>
-            <div class="scroll-container" id="scroll-row-2">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>러닝 (Running)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>트레일러닝 (Trail)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>하이킹 (Hiking)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>크로스핏 (CrossFit)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스트리트 트랙</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>알파인 클라이밍</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>인도어 서킷 트레이닝</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-2')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>애슬레틱 피트니스</div>
-            </div>
-        </div>
-
-        <div class="category-scroll-block" data-cat-id="lifestyle" data-cat-name="라이프 스타일">
-            <p class="category-title">3. 라이프 스타일 (Lifestyle)</p>
-            <div class="scroll-container" id="scroll-row-3">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>새벽기상 루틴</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도심 러닝 루틴</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>리커버리 샤워</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>야근 후 헬스</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>커피 & 오피스 크루</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>주말 마라톤 레이스</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>식단 관리 프로필</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-3')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>얼반 헬시 라이프스킨</div>
-            </div>
-        </div>
-
-        <div class="category-scroll-block" data-cat-id="environment" data-cat-name="환경">
-            <p class="category-title">4. 환경 (Environment)</p>
-            <div class="scroll-container" id="scroll-row-4">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도시 중심 (Urban)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>도심 공원 (Park)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>트레일 (Trail) 코스</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>산악 지대 (Mountain)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스포츠 스타디움 내부</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>해안 패스트 로드</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>가혹 기후 야외 필드</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-4')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>오프로드 거친 자연</div>
-            </div>
-        </div>
-
-        <div class="category-scroll-block" data-cat-id="visual" data-cat-name="비주얼 톤">
-            <p class="category-title">5. 비주얼 톤 (Visual Tone)</p>
-            <div class="scroll-container" id="scroll-row-5">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>미니멀 (Minimal)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>하이 콘트라스트</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>에디토리얼 매거진</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>다큐멘터리 스타일</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>프리미엄 스포츠셋</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>시네마틱 모노 무드</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>빈티지 필터 무드</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-5')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>자연광 내추럴 라이트</div>
-            </div>
-        </div>
-
-        <div class="category-scroll-block" data-cat-id="product" data-cat-name="제품 방향성">
-            <p class="category-title">6. 제품 방향성 (Product Direction)</p>
-            <div class="scroll-container" id="scroll-row-6">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>퍼포먼스 러닝웨어</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>애슬레저 (Athleisure)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>테크니컬 트레이닝</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>아웃도어 기어 세트</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스포츠 러닝화/슈즈</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>유틸리티 테크 가방</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>방수 스마트 고글팩</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-6')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>어반 가이드 아우터웨어</div>
-            </div>
-        </div>
-
-        <div class="category-scroll-block" data-cat-id="palette" data-cat-name="컬러 팔레트">
-            <p class="category-title">7. 컬러 팔레트 (Color Palette)</p>
-            <div class="scroll-container" id="scroll-row-7">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background: linear-gradient(135deg, #0A0A0A 50%, #F5F5F5 50%); border-radius:4px; margin-bottom:6px;"></div>Black + White</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background: linear-gradient(135deg, #1E3A8A 50%, #CCFF00 50%); border-radius:4px; margin-bottom:6px;"></div>Navy + Lime</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background: linear-gradient(135deg, #5C4033 50%, #D2B48C 50%); border-radius:4px; margin-bottom:6px;"></div>Earth Tone</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background: linear-gradient(135deg, #FF007F 50%, #39FF14 50%); border-radius:4px; margin-bottom:6px;"></div>Neon Cluster</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background:#1A202C; border-radius:4px; margin-bottom:6px;"></div>Monochrome Grey</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background:#E2E8F0; border-radius:4px; margin-bottom:6px;"></div>Concrete White</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background: linear-gradient(135deg, #7F1D1D 50%, #FCA5A5 50%); border-radius:4px; margin-bottom:6px;"></div>Deep Cyber Crimson</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-7')"><div style="height:100px; background: linear-gradient(135deg, #064E3B 50%, #A7F3D0 50%); border-radius:4px; margin-bottom:6px;"></div>Safety Bio Teal</div>
-            </div>
-        </div>
-
-        <div class="category-scroll-block" data-cat-id="material" data-cat-name="소재">
-            <p class="category-title">8. 소재 (Material & Texture)</p>
-            <div class="scroll-container" id="scroll-row-8">
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>통기성 메쉬 (Mesh)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>내마모 나일론 (Nylon)</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>방수 투습 고어텍스</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>리플렉티브 반사 원단</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>경량 립스탑 패브릭</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>레이저컷 통풍 가공재</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>친환경 리사이클 원사</div>
-                <div class="scroll-card" onclick="selectSingleReference(this, 'scroll-row-8')"><div style="height:100px; background:#262F40; border-radius:4px; margin-bottom:6px;"></div>스마트 서모 패브릭</div>
-            </div>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; margin-top:25px;">
-            <button class="btn-action btn-blue" onclick="validateAndBuildMoodboard()">가치 매트릭스 기반 무드보드 생성 →</button>
-        </div>
+        <th:block th:fragment="page-scripts">
+            <script th:src="@{/js/brandLogic.js}"></script>
+        </th:block>
     </div>
-
-    <th:block th:fragment="page-scripts">
-        <script th:src="@{/js/brandLogic.js}"></script>
-    </th:block>
-</div>
+</body>
+</html>
