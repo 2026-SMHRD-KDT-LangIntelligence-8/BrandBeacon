@@ -1,5 +1,7 @@
 package com.example.brandbeacon.config;
 
+import com.example.brandbeacon.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,7 +17,12 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor // 추가: CustomOAuth2UserService 및 OAuth2SuccessHandler 의존성 주입을 위한 어노테이션
 public class SecurityConfig {
+
+    // 추가: OAuth2 인증 후 유저 정보를 처리할 서비스 및 성공 핸들러 의존성 주입
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     // 비밀번호 암호화에 사용할 인코더 빈 등록
     @Bean
@@ -40,7 +47,10 @@ public class SecurityConfig {
                 // 4. 구글 소셜 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("http://localhost:3000/main", true)
+                        // 추가: OAuth2 제공자(구글)로부터 획득한 유저 정보를 DB에 저장하고 처리하는 엔드포인트 설정
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        // 수정: 기존의 defaultSuccessUrl 대신, 세션 생성 및 커스텀 리다이렉트를 수행하는 핸들러로 교체
+                        .successHandler(oAuth2SuccessHandler)
                 );
 
         return http.build();
@@ -53,7 +63,7 @@ public class SecurityConfig {
         // 1. 허용할 프론트엔드 주소
         // 실제 배포용 주소 여기에 추가하기!
         // React나 Vue의 기본 로컬 주소 -> 3000번 포트 허용
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8089"));
 
         // 2. 허용할 HTTP 메서드 (조회, 생성, 수정, 삭제 다 허용!)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

@@ -68,6 +68,17 @@
         window.onload = function() {
             if (typeof renderFolderTree === "function") renderFolderTree();
             if (typeof renderProjectGallery === "function") renderProjectGallery();
+
+            // 🚀 [소셜 로그인 자동 감지 센서]
+            // 주소창에 ?socialLogin=true 가 붙어 들어왔다면 프론트엔드 로그인 상태도 동기화 시켜줍니다.
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('socialLogin') === 'true') {
+                sessionStorage.setItem("isLoggedIn", "true");
+                isLoggedIn = true;
+                // 주소창의 지저분한 파라미터(?socialLogin=true)를 사용자 모르게 지워주는 깔끔한 처리
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             syncAuthUI();
 
             // 멀티 페이지 환경 대응: 현재 URL 경로에 맞게 내부 currentIdx 세팅
