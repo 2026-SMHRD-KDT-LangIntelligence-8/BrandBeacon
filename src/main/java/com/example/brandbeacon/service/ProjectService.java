@@ -110,6 +110,11 @@ public class ProjectService {
 
                 savedProject.updateAiAnalysis(aiResponse.getConsistencyScore(), insightText);
 
+                // 🚀 파이썬에서 보내준 브랜드 프로필 데이터 업데이트 (추가됨)
+                if (aiResponse.getBrandProfile() != null) {
+                    savedProject.updateBrandProfile(aiResponse.getBrandProfile());
+                }
+
                 // 포지셔닝 맵 좌표 생성 후 DB에 저장
                 PositioningMap map = PositioningMap.builder()
                         .project(savedProject)
@@ -168,6 +173,7 @@ public class ProjectService {
                 .projectName(project.getProjectName())
                 .brandIntro(project.getBrandIntro())
                 .referenceType(project.getReferenceType()) // 👈 request 대신 이미 조회한 project 객체 사용
+                .brandProfile(project.getBrandProfile())   // 🚀 상세 조회 시 브랜드 프로필 매핑 추가
                 .keywords(keywordNames)
                 .imgUrls(imgUrls)
                 .createdAt(project.getCreatedAt())
@@ -213,6 +219,7 @@ public class ProjectService {
                     .projectName(project.getProjectName())
                     .brandIntro(project.getBrandIntro())
                     .referenceType(project.getReferenceType())
+                    .brandProfile(project.getBrandProfile()) // 🚀 목록 조회 시 브랜드 프로필 매핑 추가
                     .keywords(keywordNames)
                     .imgUrls(imgUrls)
                     .createdAt(project.getCreatedAt())

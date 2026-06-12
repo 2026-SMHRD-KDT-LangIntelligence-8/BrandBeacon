@@ -13,6 +13,7 @@ public class ProjectDetailResponse {
     private String projectName;       // 프로젝트 이름
     private String brandIntro;        // 브랜드 소개
     private String referenceType;     // 레퍼런스 희망 항목
+    private String brandProfile;      // AI가 생성한 브랜드 프로필 데이터
     private List<String> keywords;    // 선택했던 키워드 이름들
     private List<String> imgUrls;     // 등록했던 이미지 주소들
     private LocalDateTime createdAt;  // 생성 일자

@@ -43,6 +43,10 @@ public class Project {
     @Column(name = "ANALYSIS_INSIGHT", length = 1000)
     private String analysisInsight; // AI 분석 인사이트 내용
 
+    // 스프링 부트가 소문자로 강제 변환하지 못하도록 이스케이프 따옴표(\")로 대문자 고정!
+    @Column(name = "\"BRAND_PROFILE\"", length = 1000)
+    private String brandProfile; // 모델이 종합해서 전달하는 브랜드 프로필 데이터
+
     @CreationTimestamp
     @Column(name = "CREATED_AT", updatable = false)
     private LocalDateTime createdAt; // 프로젝트 생성 일자
@@ -62,6 +66,11 @@ public class Project {
     public void updateAiAnalysis(java.math.BigDecimal similarityScore, String analysisInsight) {
         this.similarityScore = similarityScore;
         this.analysisInsight = analysisInsight;
+    }
+
+    // 파이썬 AI 서버 등에서 도출된 BRAND_PROFILE 데이터를 업데이트하기 위한 메서드 추가
+    public void updateBrandProfile(String brandProfile) {
+        this.brandProfile = brandProfile;
     }
 
 }
