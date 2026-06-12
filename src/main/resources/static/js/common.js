@@ -390,34 +390,7 @@ function navigateTo(idx) {
         }
 
         // 브랜드 기획 동기화 - Q1~Q4 모두 입력 후 다음 단계 이동 가능
-        function checkInputsAndNavigate() {
-              const q1 = document.getElementById('brand-line-summary').value.trim();
-              const q2 = document.getElementById('brand-object-search').value.trim();
 
-              if (q1 === "" || q2 === "") {
-                  alert("⚠️ Q1과 Q2의 내용을 모두 입력해주세요.");
-                  return;
-              }
-
-              if (selectedMainMoods.length === 0) {
-                  alert("⚠️ Q3에서 최소 1개의 브랜드 무드태그를 선택해주세요.");
-                  return;
-              }
-
-              if (selectedSubKeywordsList.length === 0) {
-                  alert("⚠️ Q4에서 최소 1개의 세부 스타일 키워드를 선택해주세요.");
-                  return;
-              }
-
-              // 🚀 DB 저장을 위해 현재 화면에서 입력한 데이터를 브라우저에 임시 백업
-              sessionStorage.setItem("brandQ1", q1);
-              sessionStorage.setItem("brandQ2", q2);
-              sessionStorage.setItem("brandMoods", JSON.stringify(selectedMainMoods));
-              sessionStorage.setItem("brandKeywords", JSON.stringify(selectedSubKeywordsList));
-
-              // 🚀 무조건 레퍼런스 페이지로 강제 이동! (수정된 부분)
-              window.location.href = '/reference';
-          }
 
         // 스타일 선택 및 4개 제한 로직 (✨ 선택 4개 초과 방지 조건 >= 4 로 엄격하게 수정)
         function handleSubCardSelection(cardElement, keywordValue) {

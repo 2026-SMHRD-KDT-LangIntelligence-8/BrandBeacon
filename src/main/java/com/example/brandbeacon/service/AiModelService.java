@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 public class AiModelService {
 
     private final RestTemplate restTemplate;
-    private final String PYTHON_SERVER_URL = "http://localhost:8000/api/generate-moodboard";
+    private final String PYTHON_SERVER_URL = "http://localhost:8000/api/ai/moodboard/generate";
 
     // ⭐️ 생성자에 @Qualifier를 붙여서 우리가 만든 AI 전용 빈을 콕 집어 가져옵니다.
     public AiModelService(@Qualifier("aiRestTemplate") RestTemplate restTemplate) {
