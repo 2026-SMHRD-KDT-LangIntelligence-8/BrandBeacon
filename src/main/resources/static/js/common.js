@@ -546,7 +546,7 @@ function navigateTo(idx) {
             const keywordIdsList = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
 
             // 이미지 url 배열 추출
-            const references = JSON.parse(sessionStorage.getItem("referenceData") || "[]");
+            const references = JSON.parse(sessionStorage.getItem("finalMoodboardData") || "[]");
             let imgUrlsList = [];
             references.forEach(cat => {
                 if (cat.assets && Array.isArray(cat.assets)) {
