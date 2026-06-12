@@ -195,33 +195,12 @@
     </div>
 
     <div style="display:flex; justify-content:flex-end; margin-top:25px;">
-        <button type="button" class="btn-action btn-blue" onclick="forceMoodboard()">가치 매트릭스 기반 무드보드 생성 →</button>
+        <button class="btn-action btn-blue" onclick="validateAndBuildMoodboard()">가치 매트릭스 기반 무드보드 생성 →</button>
     </div>
 
-    <script>
-        function forceMoodboard() {
-            let tempOrganizedData = [];
-            for (let i = 1; i <= 8; i++) {
-                let row = document.getElementById('carousel-row-' + i);
-                if (row) {
-                    let catBlock = row.closest('.category-scroll-block');
-                    let catName = catBlock ? catBlock.getAttribute('data-cat-name') : '카테고리 ' + i;
-                    let assets = [];
-                    row.querySelectorAll('.scroll-card.chosen').forEach(function(card) {
-                        assets.push(card.innerText.trim());
-                    });
-                    tempOrganizedData.push({ category: catName, assets: assets });
-                }
-            }
-            sessionStorage.setItem('referenceData', JSON.stringify(tempOrganizedData));
-            window.location.href = '/moodboard';
-        }
-    </script>
-</div>
-
-<th:block th:fragment="page-scripts">
+    <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/brandLogic.js}"></script>
-</th:block>
+
 </div>
 </body>
 </html>

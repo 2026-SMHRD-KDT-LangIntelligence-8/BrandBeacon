@@ -12,20 +12,22 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiProxyController {
 
-    private final RestTemplate restTemplate;
+    // 💡 수정: Config에서 지정한 Bean 이름("aiRestTemplate")과 변수명을 똑같이 맞춰줍니다.
+    private final RestTemplate aiRestTemplate;
 
-    // FastAPI가 8000 포트에서 실행 중이라고 가정
     private final String FAST_API_URL = "http://localhost:8000/api";
 
     @PostMapping("/generate-moodboard")
     public ResponseEntity<?> generateMoodboard(@RequestBody Map<String, Object> request) {
         String targetUrl = FAST_API_URL + "/generate-moodboard";
-        return restTemplate.postForEntity(targetUrl, request, Object.class);
+        // 💡 수정: aiRestTemplate 사용
+        return aiRestTemplate.postForEntity(targetUrl, request, Object.class);
     }
 
     @PostMapping("/analyze-dashboard")
     public ResponseEntity<?> analyzeDashboard(@RequestBody Map<String, Object> request) {
         String targetUrl = FAST_API_URL + "/analyze-dashboard";
-        return restTemplate.postForEntity(targetUrl, request, Object.class);
+        // 💡 수정: aiRestTemplate 사용
+        return aiRestTemplate.postForEntity(targetUrl, request, Object.class);
     }
 }
