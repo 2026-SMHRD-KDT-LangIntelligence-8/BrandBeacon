@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController // JSON 형태의 객체 데이터를 반환하는 컨트롤러
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor // 의존성 주입을 위한 어노테이션
@@ -108,6 +110,24 @@ public class ProjectController {
             Long projectId = projectService.createProject(userId, request);
             return ResponseEntity.ok("프로젝트가 성공적으로 생성되었습니다! 프로젝트 ID: " + projectId);
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 마이페이지 프로젝트 저장소 목록 조회 API
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyProjectsList(HttpServletRequest httpRequest) {
+        try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session == null || session.getAttribute("loginUserId") == null) {
+                return ResponseEntity.status(401).body("로그인이 필요한 서비스입니다.");
+            }
+            Long userId = (Long) session.getAttribute("loginUserId");
+
+            List<ProjectDetailResponse> myProjects = projectService.getMyProjects(userId);
+            return ResponseEntity.ok(myProjects);
+
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

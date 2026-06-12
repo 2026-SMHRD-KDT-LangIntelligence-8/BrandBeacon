@@ -101,6 +101,71 @@ function navigateTo(idx) {
             }
         ];
 
+
+        // 🚀 [추가 완료] 백엔드에서 실제 프로젝트 데이터를 가져와 마이페이지(저장소)에 그려주는 함수
+        function renderProjectGallery() {
+            // HTML상의 프로젝트 카드 컨테이너 수집
+            const gallery = document.getElementById('project-gallery-grid') ||
+                            document.getElementById('project-list') ||
+                            document.querySelector('.project-gallery') ||
+                            document.querySelector('[class*="gallery"]');
+
+            if (!gallery) return;
+
+            gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; font-size: 14px; color: var(--text-gray);">프로젝트를 불러오는 중입니다...</div>';
+
+            // 백엔드 API에서 실제 내 프로젝트 데이터를 요청
+            fetch('/api/projects/my')
+                .then(response => {
+                    if (!response.ok) throw new Error('데이터 불러오기 실패');
+                    return response.json();
+                })
+                .then(data => {
+                    gallery.innerHTML = '';
+
+                    if (data.length === 0) {
+                        gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; color: var(--text-gray);">저장된 프로젝트가 없습니다.</div>';
+                        return;
+                    }
+
+                    // 데이터를 순회하며 실제 카드를 생성
+                    data.forEach(project => {
+                        const card = document.createElement('div');
+                        card.className = 'project-card';
+                        card.style.cursor = 'pointer';
+
+                        const displayDate = project.createdAt ? project.createdAt.substring(0, 10) : '날짜 없음';
+                        const keywordText = project.keywords && project.keywords.length > 0 ? project.keywords.join(', ') : '선택된 키워드 없음';
+
+                        card.innerHTML = `
+                            <div class="project-thumb" style="background-color: #f8f9fa; height: 140px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #adb5bd; font-size: 13px;">
+                                [프로젝트 미리보기]
+                            </div>
+                            <div class="project-info">
+                                <div class="project-title" style="font-weight: bold; font-size: 16px; margin-bottom: 6px; color: #212529;">${project.projectName}</div>
+                                <div class="project-date" style="font-size: 12px; color: #868e96; margin-bottom: 8px;">생성일: ${displayDate}</div>
+                                <div class="project-assets-preview">
+                                    <span style="font-size: 12px; color: #495057;">📍 키워드: ${keywordText}</span>
+                                </div>
+                            </div>
+                        `;
+
+                        // 🚀 클릭 시 대시보드 화면으로 이동하는 로직 적용
+                        card.onclick = () => {
+                            sessionStorage.setItem("currentProjectId", project.projectId);
+                            window.location.href = '/dashboard?projectId=' + project.projectId;
+                        };
+
+                        gallery.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error("통신 에러:", error);
+                    gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; color: #fa5252;">서버에서 프로젝트를 불러오는 데 실패했습니다.</div>';
+                });
+        }
+
+
         // 페이지 로드 시 초기 화면 렌더링 (✨ 현재 주소창의 위치에 따라 내부 인덱스 동기화 설정)
         window.onload = function() {
             if (typeof renderFolderTree === "function") renderFolderTree();

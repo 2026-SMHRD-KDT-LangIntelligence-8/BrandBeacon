@@ -193,4 +193,30 @@ public class ProjectService {
         // 연결된 이미지 데이터들도 같이 삭제
         projectRepository.delete(project);
     }
+
+    // 마이페이지 프로젝트 저장소 목록 조회를 위한 로직 추가
+    @Transactional(readOnly = true)
+    public List<ProjectDetailResponse> getMyProjects(Long userId) {
+        List<Project> projects = projectRepository.findByMember_Id(userId);
+
+        return projects.stream().map(project -> {
+            List<String> keywordNames = project.getKeywords().stream()
+                    .map(Keyword::getKeywordName)
+                    .collect(Collectors.toList());
+
+            List<String> imgUrls = moodboardImgRepository.findByProject_ProjectId(project.getProjectId()).stream()
+                    .map(MoodboardImg::getImgUrl)
+                    .collect(Collectors.toList());
+
+            return ProjectDetailResponse.builder()
+                    .projectId(project.getProjectId())
+                    .projectName(project.getProjectName())
+                    .brandIntro(project.getBrandIntro())
+                    .referenceType(project.getReferenceType())
+                    .keywords(keywordNames)
+                    .imgUrls(imgUrls)
+                    .createdAt(project.getCreatedAt())
+                    .build();
+        }).collect(Collectors.toList());
+    }
 }
