@@ -170,6 +170,47 @@ function selectSingleReference(card, rowId) {
     card.classList.add('chosen');
 }
 
+
+        // 캐러셀 페이지 이동 (이전/다음 화살표)
+        function moveCarousel(rowId, direction) {
+            const wrapper = document.getElementById(`carousel-${rowId}`);
+            const pages = wrapper.querySelectorAll('.carousel-page');
+            const dots = wrapper.parentElement.querySelectorAll('.dot');
+
+            // 현재 활성화된 페이지 인덱스 찾기
+            let currentIndex = Array.from(pages).findIndex(p => p.classList.contains('active'));
+
+            // 이동할 인덱스 계산
+            let nextIndex = currentIndex + direction;
+
+            // 범위 체크 (첫 페이지보다 작거나 마지막 페이지보다 크면 무시)
+            if (nextIndex < 0 || nextIndex >= pages.length) return;
+
+            // 페이지 전환
+            pages[currentIndex].classList.remove('active');
+            pages[nextIndex].classList.add('active');
+
+            // 하단 도트 상태 전환
+            dots[currentIndex].classList.remove('active');
+            dots[nextIndex].classList.add('active');
+        }
+
+        // 도트 클릭 시 특정 페이지로 이동
+        function goToPage(rowId, pageIndex) {
+            const wrapper = document.getElementById(`carousel-${rowId}`);
+            const pages = wrapper.querySelectorAll('.carousel-page');
+            const dots = wrapper.parentElement.querySelectorAll('.dot');
+
+            // 현재 활성 상태 해제
+            wrapper.querySelector('.carousel-page.active').classList.remove('active');
+            wrapper.parentElement.querySelector('.dot.active').classList.remove('active');
+
+            // 선택한 페이지 활성
+            pages[pageIndex].classList.add('active');
+            dots[pageIndex].classList.add('active');
+        }
+
+
 // [brandLogic.js] 내부에 있는 기존 함수를 지우고 이걸로 덮어씌우세요!
 function validateAndBuildMoodboard() {
     let organizedDataGlobal = [];
