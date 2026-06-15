@@ -31,20 +31,20 @@ public class Project {
     @Column(name = "PROJECT_NAME", nullable = false, length = 255)
     private String projectName; // 프로젝트 이름
 
-    @Column(name = "BRAND_INTRO", nullable = false, length = 500)
+    @Column(name = "BRAND_INTRO", nullable = false, columnDefinition = "TEXT")
     private String brandIntro; // 브랜드 소개글
 
-    @Column(name = "REFERENCE_TYPE", nullable = false, length = 1000)
+    @Column(name = "REFERENCE_TYPE", nullable = false, columnDefinition = "TEXT")
     private String referenceType; // 레퍼런스 희망 항목
 
     @Column(name = "SIMILARITY_SCORE", precision = 5, scale = 2)
     private BigDecimal similarityScore; // AI가 계산한 유사도 점수
 
-    @Column(name = "ANALYSIS_INSIGHT", length = 1000)
+    @Column(name = "ANALYSIS_INSIGHT", columnDefinition = "TEXT")
     private String analysisInsight; // AI 분석 인사이트 내용
 
-    // 스프링 부트가 소문자로 강제 변환하지 못하도록 이스케이프 따옴표(\")로 대문자 고정!
-    @Column(name = "\"BRAND_PROFILE\"", length = 1000)
+    // 스프링 부트가 소문자로 강제 변환하지 못하도록 이스케이프 따옴표(\") 씌우기 완료!
+    @Column(name = "\"BRAND_PROFILE\"", columnDefinition = "TEXT")
     private String brandProfile; // 모델이 종합해서 전달하는 브랜드 프로필 데이터
 
     @CreationTimestamp
