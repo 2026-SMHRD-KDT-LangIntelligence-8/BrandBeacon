@@ -17,11 +17,33 @@
             </button>
         </div>
 
-        <div class="split-right">
-            <div class="preview-moodboard-grid"></div>
+        <div class="split-right" style="display: flex; gap: 20px; flex: 1; overflow: hidden; height: 500px;">
+
+            <!-- 왼쪽: 무드보드 (위로 이동) -->
+            <div class="showcase-container">
+                <div class="showcase-track-up">
+                    <div class="showcase-card moodboard-card"><img th:src="@{/images/moodboard_sample1.jpg}"></div>
+                    <div class="showcase-card moodboard-card"><img th:src="@{/images/moodboard_sample2.png}"></div>
+                    <div class="showcase-card moodboard-card"><img th:src="@{/images/moodboard_sample1.jpg}"></div> <!-- 루프용 -->
+                    <div class="showcase-card moodboard-card"><img th:src="@{/images/moodboard_sample2.png}"></div>
+                    <div class="showcase-card moodboard-card"><img th:src="@{/images/moodboard_sample1.jpg}"></div>
+                    <div class="showcase-card moodboard-card"><img th:src="@{/images/moodboard_sample2.png}"></div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 대시보드 (아래로 이동) -->
+            <div class="showcase-container">
+                <div class="showcase-track-down">
+                    <div class="showcase-card dashboard-card"><img th:src="@{/images/dashboard_sample1.png}"></div>
+                    <div class="showcase-card dashboard-card"><img th:src="@{/images/dashboard_sample2.png}"></div>
+                    <div class="showcase-card dashboard-card"><img th:src="@{/images/dashboard_sample1.png}"></div> <!-- 루프용 -->
+                    <div class="showcase-card dashboard-card"><img th:src="@{/images/dashboard_sample2.png}"></div>
+                    <div class="showcase-card dashboard-card"><img th:src="@{/images/dashboard_sample1.png}"></div>
+                    <div class="showcase-card dashboard-card"><img th:src="@{/images/dashboard_sample2.png}"></div>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
 </body>
 </html>
