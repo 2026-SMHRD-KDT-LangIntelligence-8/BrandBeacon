@@ -12,9 +12,47 @@
         <!-- 💡 빈 캔버스: 자바스크립트가 여기에 8장의 이미지를 꽂아 넣습니다 -->
     </div>
 
-    <div style="display:flex; justify-content:flex-end;">
-        <a th:href="@{/dashboard}" class="btn-action btn-blue" style="text-decoration: none; display: inline-flex; align-items: center;">브랜드 대시보드 확인하기</a>
-    </div>
+        <!-- 💡 사용자가 브랜드 대시보드 확인하기 클릭시 입력데이터 전송-->
+    <button id="dashboard-btn" onclick="goToDashboard()" class="btn-action btn-blue">브랜드 대시보드 확인하기</button>
+
+    <script>
+        async function goToDashboard() {
+            const btn = document.getElementById('dashboard-btn');
+            btn.textContent = 'AI 분석 중... (약 30초 소요)';
+            btn.disabled = true;
+
+            const finalMoodboardData = JSON.parse(sessionStorage.getItem("finalMoodboardData") || "[]");
+            const userText = sessionStorage.getItem("brandQ1") || "";
+            const selectedTags = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
+
+            const imageUrls = [];
+            finalMoodboardData.forEach(cat => {
+                cat.assets.forEach(url => {
+                    if (url && url.startsWith('http')) imageUrls.push(url);
+                });
+            });
+
+            try {
+                const response = await fetch('/api/brand/analyze-full', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_text: userText,
+                        selected_tags: selectedTags,
+                        image_urls: imageUrls
+                    })
+                });
+                if (!response.ok) throw new Error("분석 실패");
+                const data = await response.json();
+                sessionStorage.setItem("dashboardData", JSON.stringify(data));
+                window.location.href = '/dashboard';
+            } catch (error) {
+                alert("분석 중 오류가 발생했습니다. 다시 시도해주세요.");
+                btn.textContent = '브랜드 대시보드 확인하기';
+                btn.disabled = false;
+            }
+        }
+    </script>
 
     <!-- 💡 <th:block> 제거 및 스크립트 위치 이동 완료 -->
     <script th:src="@{/js/common.js}"></script>
