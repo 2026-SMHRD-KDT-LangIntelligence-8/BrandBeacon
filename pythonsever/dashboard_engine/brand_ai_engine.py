@@ -374,10 +374,10 @@ def build_user_brand_vector(
         text_vector       : 텍스트 임베딩 벡터
         image_alignments  : 이미지별 텍스트 유사도 목록
     """
-    # 이미지 장수 검증 (8~12장)
-    if not (8 <= len(image_urls) <= 12):
+    # 이미지 장수 검증 (8~32장)
+    if not (8 <= len(image_urls) <= 32):
         raise ValueError(
-            f"이미지는 8~12장이어야 합니다. 현재: {len(image_urls)}장"
+            f"이미지는 8~32장이어야 합니다. 현재: {len(image_urls)}장"
         )
 
     # 태그 개수 검증 (1~4개)
