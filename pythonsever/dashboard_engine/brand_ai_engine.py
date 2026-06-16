@@ -21,7 +21,7 @@ import os
 import numpy as np
 import torch
 import requests
-import open_clip
+import clip
 from PIL import Image
 from io import BytesIO
 from openai import OpenAI
@@ -38,11 +38,8 @@ client = OpenAI()
 # 서버 시작 시 1회만 실행됨
 # API 요청마다 재로드되지 않으므로 속도에 영향 없음
 # =====================================================
-model, _, preprocess = open_clip.create_model_and_transforms(
-    "ViT-B-32",
-    pretrained="laion2b_s34b_b79k"
-)
-tokenizer = open_clip.get_tokenizer("ViT-B-32")
+model, preprocess = clip.load("ViT-B/32", device="cpu")
+model.eval()
 
 
 def build_brand_profile_payload(result: dict) -> dict:
@@ -251,10 +248,10 @@ def embed_text(text: str) -> np.ndarray:
     """
     if not text:
         return np.zeros(512, dtype=np.float32)
-    tokens = tokenizer(str(text))
+    tokens = clip.tokenize([str(text)]).to("cpu")
     with torch.no_grad():
         text_features = model.encode_text(tokens)
-        text_features /= text_features.norm(dim=-1, keepdim=True)
+        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
     return text_features.cpu().numpy()[0]
 
 
