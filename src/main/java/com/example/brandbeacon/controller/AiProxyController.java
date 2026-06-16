@@ -1,6 +1,8 @@
 package com.example.brandbeacon.controller;
 
+import com.example.brandbeacon.repository.ReferenceBrandRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +21,14 @@ public class AiProxyController {
 //    private final String FAST_API_URL = "http://localhost:8001/api";
     private final String MOODBOARD_URL = "http://localhost:8000/api";
     private final String BRAND_AI_URL = "http://localhost:8001/api";
+
+    @Autowired
+    private ReferenceBrandRepository referenceBrandRepository;
+
+    @GetMapping("/reference-brands")
+    public ResponseEntity<?> getReferenceBrands() {
+        return ResponseEntity.ok(referenceBrandRepository.findAll());
+    }
 
     @PostMapping("/generate-moodboard")
     public ResponseEntity<?> generateMoodboard(@RequestBody Map<String, Object> request) {

@@ -46,10 +46,7 @@
                 <div class="axis-label" style="top:50%; left:4px; transform:translateY(-50%);">performance</div>
                 <div class="axis-label" style="top:50%; right:4px; transform:translateY(-50%);">lifestyle</div>
 
-                <div class="brand-dot" style="top:40%; left:20%;">Nike</div>
-                <div class="brand-dot" style="top:30%; left:60%;">HOKA</div>
-                <div class="brand-dot" style="top:42%; left:75%;">On</div>
-                <div class="brand-dot our-brand-dot" style="top:50%; left:65%;">● 도심 코어</div>
+                <div class="brand-dot our-brand-dot" style="top:50%; left:65%;">● 내 브랜드</div>
             </div>
         </div>
 
@@ -195,16 +192,72 @@ if (dashboardData) {
         });
     }
 
-    // 섹션 4: 내 브랜드 포지션
-    if (d.position) {
-        const myDot = document.querySelector('.our-brand-dot');
-        if (myDot) {
-            const leftPct = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90);
-            const topPct = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90);
-            myDot.style.left = leftPct + '%';
-            myDot.style.top = topPct + '%';
-        }
-    }
+    // 섹션 4: 내 브랜드 포지션 + 레퍼런스 브랜드 29개
+if (d.position) {
+    fetch('/api/reference-brands')
+        .then(res => res.json())
+        .then(brands => {
+            const canvas = document.querySelector('.positioning-map-canvas');
+            if (!canvas) return;
+
+            // 기존 하드코딩 dot 제거 (our-brand-dot 제외)
+            canvas.querySelectorAll('.brand-dot:not(.our-brand-dot)').forEach(el => el.remove());
+
+            // 전체 브랜드 + 사용자 좌표 포함해서 정규화
+            // 전체 브랜드 + 사용자 좌표 포함해서 정규화
+            const allX = brands.map(b => b.brandX).concat(d.position.x);
+            const allY = brands.map(b => b.brandY).concat(d.position.y);
+            const minX = Math.min(...allX), maxX = Math.max(...allX);
+            const minY = Math.min(...allY), maxY = Math.max(...allY);
+            const rangeX = maxX - minX || 1;
+            const rangeY = maxY - minY || 1;
+
+            const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
+            const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
+
+            // Top3 브랜드명 목록
+            const top3Names = (d.similarBrands || []).slice(0, 3).map(b => b.name);
+
+            // 레퍼런스 브랜드 29개 렌더링
+            brands.forEach(brand => {
+                const dot = document.createElement('div');
+                dot.className = 'brand-dot';
+                dot.style.position = 'absolute';
+                dot.style.left = toLeft(brand.brandX) + '%';
+                dot.style.top  = toTop(brand.brandY) + '%';
+                dot.textContent = brand.brandName;
+
+                if (top3Names.includes(brand.brandName)) {
+                    dot.style.color = '#ff6b35';
+                    dot.style.fontWeight = 'bold';
+                    dot.style.opacity = '1';
+                } else {
+                    dot.style.color = '#aaa';
+                    dot.style.opacity = '0.6';
+                    dot.style.fontSize = '11px';
+                }
+                canvas.appendChild(dot);
+            });
+
+            // 사용자 브랜드 dot 위치 + 이름
+            const myDot = document.querySelector('.our-brand-dot');
+            if (myDot) {
+                myDot.style.left = toLeft(d.position.x) + '%';
+                myDot.style.top  = toTop(d.position.y) + '%';
+                myDot.textContent = '● 내 브랜드';
+            }
+        })
+        .catch(() => {
+            // fetch 실패 시 기존 방식 fallback
+            const myDot = document.querySelector('.our-brand-dot');
+            if (myDot) {
+                const leftPct = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90);
+                const topPct  = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90);
+                myDot.style.left = leftPct + '%';
+                myDot.style.top  = topPct + '%';
+            }
+        });
+}
 
     // 섹션 5: 인사이트
     const insightList = document.querySelector('.insight-list');
