@@ -47,8 +47,8 @@ class BrandVectorRequest(BaseModel):
     image_urls: List[str] = Field(
         ...,
         min_length=8,
-        max_length=12,
-        description="선택한 이미지 URL 목록 (8~12개)"
+        max_length=32,
+        description="선택한 이미지 URL 목록 (8~32개)"
     )
 
 
