@@ -28,6 +28,16 @@ public class DashboardResponse {
     // 6. 인사이트 리스트
     private List<String> insights;
 
+    // 7. 유사 브랜드 Top3
+    private List<SimilarBrandDto> similarBrands;
+
+    @Getter
+    @Builder
+    public static class SimilarBrandDto {
+        private String brandName;
+        private String category;
+    }
+
     // 기성 브랜드 정보
     @Getter
     @Builder
@@ -36,4 +46,6 @@ public class DashboardResponse {
         private Float brandX;
         private Float brandY;
     }
+
+
 }
