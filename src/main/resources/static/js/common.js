@@ -242,6 +242,7 @@ function navigateTo(idx) {
             // 다른 파일로 페이지 점프가 필요한 핵심 인덱스 분기 처리
             if (idx === 1) { window.location.href = '/'; return; }
             if (idx === 3) { window.location.href = '/login'; return; }
+            if (idx === 4) { window.location.href = '/signup'; return; }
             if (idx === 6) { window.location.href = '/brandsync'; return; }
             if (idx === 7) { window.location.href = '/reference'; return; } // 🚀 7번 스텝 주소 추가 완료!
             if (idx === 8) { window.location.href = '/moodboard'; return; } // 🚀 8번(무드보드) 스텝 주소 추가 완료!
