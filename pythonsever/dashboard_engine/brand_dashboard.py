@@ -88,12 +88,17 @@ df_meta["mds_d2"] = mds_coords[:, 1]
 # =====================================================
 
 GRADE_BANDS = [
-    (40, "A"),
-    (30, "B"),
-    (20, "C"),
-    (10, "D"),
+    (90, "A"),
+    (80, "B"),
+    (70, "C"),
+    (60, "D"),
     (0,  "E"),
 ]
+
+# CLIP ViT-B/32 이미지-텍스트 정합도 실질 최대값
+# (8~32장 이미지 평균 기준, OpenAI CLIP 특성 반영)
+CLIP_IMAGE_TEXT_MAX = 0.35
+
 
 def clip01(x: float) -> float:
     """값을 0~1 범위로 강제 제한"""
@@ -168,12 +173,14 @@ def compute_consistency_bundle(
 ) -> dict:
     """
     최종 일관성 점수 Bundle 생성
-    intent(이미지-텍스트 정합도) 60% + axis(브랜드 축 정합도) 40%
+    이미지-텍스트 정합도(intent_raw)만 사용
+    CLIP_IMAGE_TEXT_MAX로 정규화하여 0~100 점수로 변환
+    axis_alignment_raw는 포지셔닝 지표이므로 일관성 계산에서 제외
     """
     intent_raw = compute_intent_alignment(image_alignments)
     axis_raw = clip01(axis_alignment_raw)
-    consistency_raw = 0.6 * intent_raw + 0.4 * axis_raw
-    consistency_score = score100(consistency_raw * 100)
+    normalized = min(intent_raw / CLIP_IMAGE_TEXT_MAX, 1.0)
+    consistency_score = score100(normalized * 100)
     intent_score = score100(intent_raw * 100)
     axis_score = score100(axis_raw * 100)
 
