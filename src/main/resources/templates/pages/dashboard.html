@@ -184,15 +184,10 @@ if (dashboardData) {
     if (benchmarkList && d.similarBrands) {
         benchmarkList.innerHTML = '';
         d.similarBrands.forEach((brand, i) => {
-            const pct = Math.round(brand.similarity * 100);
             benchmarkList.innerHTML += `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:12px; color:var(--text-gray); min-width:16px;">${i+1}.</span>
-                    <span style="font-size:13px; font-weight:700; min-width:80px;">${brand.name}</span>
-                    <div style="flex:1; background:#2a2a2a; border-radius:4px; height:8px;">
-                        <div style="width:${pct}%; background:var(--primary-orange); height:8px; border-radius:4px;"></div>
-                    </div>
-                    <span style="font-size:12px; color:var(--text-gray);">${pct}%</span>
+                <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border-color);">
+                    <span style="font-size:13px; color:var(--primary-orange); font-weight:700; min-width:28px;">${i+1}위</span>
+                    <span style="font-size:13px; font-weight:700;">${brand.name}</span>
                 </div>`;
         });
     }
