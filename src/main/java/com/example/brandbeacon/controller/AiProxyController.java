@@ -15,7 +15,7 @@ public class AiProxyController {
     // 💡 수정: Config에서 지정한 Bean 이름("aiRestTemplate")과 변수명을 똑같이 맞춰줍니다.
     private final RestTemplate aiRestTemplate;
 
-    private final String FAST_API_URL = "http://localhost:8000/api";
+    private final String FAST_API_URL = "http://localhost:8001/api";
 
     @PostMapping("/generate-moodboard")
     public ResponseEntity<?> generateMoodboard(@RequestBody Map<String, Object> request) {
