@@ -168,14 +168,17 @@ const dashboardData = sessionStorage.getItem("dashboardData");
 if (dashboardData) {
     const d = JSON.parse(dashboardData);
 
-    // 섹션 2: 일관성 점수
+// 하드코딩 제거 실제 파이썬 분석값으로 동적 렌더링
+// 섹션 2: 일관성 점수
     const circle = document.querySelector('.progress-circle');
     if (circle && d.consistency) {
+        const pct = d.consistency.score;
+        circle.style.background = `conic-gradient(var(--primary-orange) 0% ${pct}%, #F3F4F6 ${pct}% 100%)`;
         circle.innerHTML = `
-            <div style="text-align:center;">
-                <div style="font-size:42px; font-weight:900; color:var(--primary-orange);">${d.consistency.score}</div>
-                <div style="font-size:13px; color:var(--text-gray);">/ 100</div>
-                <div style="font-size:16px; font-weight:700; color:var(--primary-blue); margin-top:4px;">${d.consistency.grade}등급</div>
+            <div style="position:absolute; z-index:1; text-align:center;">
+                <div style="font-size:22px; font-weight:900; color:var(--primary-orange);">${pct}</div>
+                <div style="font-size:11px; color:var(--text-gray);">/ 100</div>
+                <div style="font-size:13px; font-weight:700; color:var(--primary-blue); margin-top:2px;">${d.consistency.grade}등급</div>
             </div>`;
     }
 
