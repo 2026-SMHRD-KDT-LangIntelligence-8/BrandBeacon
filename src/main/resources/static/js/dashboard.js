@@ -252,26 +252,7 @@
             if(confirm("성공적으로 저장되었습니다. 프로젝트 저장소로 즉시 이동하시겠습니까?")) navigateTo(10); else navigateTo(4);
         }
 
-        // 브랜드 대시보드 - 처음부터 다시 기획하기
-        function resetAllPlanningData() {
-            document.getElementById('brand-line-summary').value = "";
-            document.getElementById('brand-object-search').value = "";
-            selectedMainMoods = [];
-            selectedSubKeywordsList = [];
-            document.querySelectorAll('.keyword-tag').forEach(el => el.classList.remove('selected-tag', 'disabled-tag'));
 
-            const poolContainer = document.getElementById('q4-dynamic-style-pool');
-            if (poolContainer) {
-                poolContainer.innerHTML = '<div style="grid-column: span 4; text-align: center; color: var(--text-gray); padding: 30px; font-size: 13px;">Q3 무드태그를 선택하시면 상응하는 하위 계층 핵심 이미지셋이 실시간으로 여기에 전개됩니다.</div>';
-            }
-            document.querySelectorAll('.scroll-card').forEach(el => el.classList.remove('chosen'));
-
-            // 대시보드 데이터까지 초기화가 필요하다면 여기서 dashboard.js의 함수를 호출하거나 변수를 초기화
-            organizedDataGlobal = [];
-            currentLiveSessionAssets = [];
-
-            navigateTo(6);
-        }
 
         // 프로젝트 삭제
         function deleteProjectNode(projId) {

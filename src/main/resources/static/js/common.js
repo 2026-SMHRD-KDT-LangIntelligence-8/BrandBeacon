@@ -600,3 +600,20 @@ function navigateTo(idx) {
                 alert("🚨 서버 통신 중 오류가 발생했습니다.");
             });
         }
+
+        // 브랜드 대시보드 - 처음부터 다시 기획하기
+                function resetAllPlanningData() {
+                    // 1. 확인 메시지
+                    if (!confirm("처음부터 다시 기획하시겠습니까? 프로젝트가 저장되지 않습니다.")) return;
+
+                    // 2. 중요: 세션 데이터 모두 삭제
+                    sessionStorage.removeItem("brandQ1");
+                    sessionStorage.removeItem("brandQ2");
+                    sessionStorage.removeItem("brandMoods");
+                    sessionStorage.removeItem("brandKeywords");
+                    sessionStorage.removeItem("finalMoodboardData");
+                    sessionStorage.removeItem("aiMoodboardData");
+
+                    // 3. 페이지 이동
+                    window.location.href = '/brandsync';
+                }
