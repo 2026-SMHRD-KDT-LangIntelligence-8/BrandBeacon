@@ -10,6 +10,7 @@ import com.example.brandbeacon.repository.ReferenceBrandRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Comparator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,14 +45,45 @@ public class DashboardService {
         Float currentX = (map != null) ? map.getCurrentX() : 50.0f;
         Float currentY = (map != null) ? map.getCurrentY() : 50.0f;
 
-        // 4. 지도에 깔아둘 기성 브랜드 좌표 리스트 가져오기
-        List<DashboardResponse.ReferenceBrandDto> refBrands = referenceBrandRepository.findAll().stream()
+//        // 4. 지도에 깔아둘 기성 브랜드 좌표 리스트 가져오기
+//        List<DashboardResponse.ReferenceBrandDto> refBrands = referenceBrandRepository.findAll().stream()
+//                .map(brand -> DashboardResponse.ReferenceBrandDto.builder()
+//                        .brandName(brand.getBrandName())
+//                        .brandX(brand.getBrandX())
+//                        .brandY(brand.getBrandY())
+//                        .build())
+//                .collect(Collectors.toList());
+
+        // 4. 기성 브랜드 전체 조회 (맵 표시 + Top3 계산 공통 사용)
+        var allRefBrands = referenceBrandRepository.findAll();
+
+        List<DashboardResponse.ReferenceBrandDto> refBrands = allRefBrands.stream()
                 .map(brand -> DashboardResponse.ReferenceBrandDto.builder()
                         .brandName(brand.getBrandName())
                         .brandX(brand.getBrandX())
                         .brandY(brand.getBrandY())
                         .build())
                 .collect(Collectors.toList());
+
+        // 4-1. Top3 유사 브랜드 계산 (유클리드 거리)
+        List<DashboardResponse.SimilarBrandDto> similarBrands;
+        if (map != null) {
+            final float ux = currentX;
+            final float uy = currentY;
+            similarBrands = allRefBrands.stream()
+                    .sorted(Comparator.comparingDouble(brand ->
+                            Math.pow(brand.getBrandX() - ux, 2) + Math.pow(brand.getBrandY() - uy, 2)))
+                    .limit(3)
+                    .map(brand -> DashboardResponse.SimilarBrandDto.builder()
+                            .brandName(brand.getBrandName())
+                            .category(brand.getCategory())
+                            .build())
+                    .collect(Collectors.toList());
+        } else {
+            similarBrands = List.of();
+        }
+
+
 
         // 5. 인사이트 문구 세팅
         // (추후 파이썬 서버에서 생성된 텍스트로 대체될 예정입니다!)
@@ -68,6 +100,7 @@ public class DashboardService {
                 .positionY(currentY)
                 .referenceBrands(refBrands)
                 .insights(mockInsights)
+                .similarBrands(similarBrands)
                 .build();
     }
 }
