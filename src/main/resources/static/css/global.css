@@ -253,7 +253,7 @@
         }
 
         /* 레이아웃 범용 구조 */
-        .split-layout { display: flex; align-items: center; gap: 50px; }
+        .split-layout { display: flex; align-items: center; gap: 80px; }
         .split-left { flex: 1.1; }
         .split-right { flex: 1.1; }
 
@@ -283,23 +283,30 @@
         /* 무드보드: 위로 올라가는 애니메이션 */
         .showcase-track-up {
             animation-name: scroll-up;
-            animation-duration: 40s; /* 속도 조절 가능 */
+            animation-duration: 20s; /* 속도 조절 가능 */
         }
 
         /* 대시보드: 아래로 내려가는 애니메이션 */
         .showcase-track-down {
             animation-name: scroll-down;
-            animation-duration: 40s; /* 속도 조절 가능 */
+            animation-duration: 30s; /* 속도 조절 가능 */
         }
 
         /* 호버 시 속도 늦추기 */
         .showcase-track-up:hover, .showcase-track-down:hover {
-            animation-duration: 100s;
+            animation-duration: 700s;
         }
 
         /* 카드 스타일 */
-        .moodboard-card { width: 280px; height: 160px; }
-        .dashboard-card { width: 280px; height: 220px; }
+        .moodboard-card img {
+            object-fit: contain;
+            background-color: #f0f0f0;
+        }
+
+        .dashboard-card img {
+            object-fit: cover;
+            object-position: top;
+        }
 
         .showcase-card {
             border-radius: 12px;
@@ -311,7 +318,7 @@
         .showcase-card img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            display: block;
         }
 
         /* 애니메이션 동작 */
