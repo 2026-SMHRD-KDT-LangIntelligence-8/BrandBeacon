@@ -55,9 +55,12 @@ public class AiProxyController {
             analyzeRequest.put("selected_tags", request.get("selected_tags"));
             analyzeRequest.put("image_alignments", vectorData.get("image_alignments"));
 
-            return aiRestTemplate.postForEntity(
-                    BRAND_AI_URL + "/brand/analyze", analyzeRequest, Object.class
+            // 수정 (Python ResponseEntity 직접 반환 대신 body만 추출하여 반환)
+            ResponseEntity<Map> analyzeResponse = aiRestTemplate.postForEntity(
+                    BRAND_AI_URL + "/brand/analyze", analyzeRequest, Map.class
             );
+            return ResponseEntity.ok(analyzeResponse.getBody());
+
         } catch (Exception e) {
             return ResponseEntity.status(500).body("분석 중 오류: " + e.getMessage());
         }
