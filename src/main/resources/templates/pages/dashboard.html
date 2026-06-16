@@ -161,6 +161,72 @@
                     keywordContainer.innerHTML += `<span style="background:var(--bg-card-inner); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--primary-orange); border:1px solid #ff7a00; font-weight:600;">${kw}</span>`;
                 });
             }
+
+            // 3. AI 분석 결과 렌더링
+const dashboardData = sessionStorage.getItem("dashboardData");
+
+if (dashboardData) {
+    const d = JSON.parse(dashboardData);
+
+    // 섹션 2: 일관성 점수
+    const circle = document.querySelector('.progress-circle');
+    if (circle && d.consistency) {
+        circle.innerHTML = `
+            <div style="text-align:center;">
+                <div style="font-size:42px; font-weight:900; color:var(--primary-orange);">${d.consistency.score}</div>
+                <div style="font-size:13px; color:var(--text-gray);">/ 100</div>
+                <div style="font-size:16px; font-weight:700; color:var(--primary-blue); margin-top:4px;">${d.consistency.grade}등급</div>
+            </div>`;
+    }
+
+    // 섹션 3: Top3 유사 브랜드
+    const benchmarkList = document.getElementById('benchmark-list');
+    if (benchmarkList && d.similarBrands) {
+        benchmarkList.innerHTML = '';
+        d.similarBrands.forEach((brand, i) => {
+            const pct = Math.round(brand.similarity * 100);
+            benchmarkList.innerHTML += `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:12px; color:var(--text-gray); min-width:16px;">${i+1}.</span>
+                    <span style="font-size:13px; font-weight:700; min-width:80px;">${brand.name}</span>
+                    <div style="flex:1; background:#2a2a2a; border-radius:4px; height:8px;">
+                        <div style="width:${pct}%; background:var(--primary-orange); height:8px; border-radius:4px;"></div>
+                    </div>
+                    <span style="font-size:12px; color:var(--text-gray);">${pct}%</span>
+                </div>`;
+        });
+    }
+
+    // 섹션 4: 내 브랜드 포지션
+    if (d.position) {
+        const myDot = document.querySelector('.our-brand-dot');
+        if (myDot) {
+            const leftPct = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90);
+            const topPct = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90);
+            myDot.style.left = leftPct + '%';
+            myDot.style.top = topPct + '%';
+        }
+    }
+
+    // 섹션 5: 인사이트
+    const insightList = document.querySelector('.insight-list');
+    if (insightList && d.insight) {
+        insightList.innerHTML = '';
+        const items = [
+            d.insight['종합평가'],
+            ...(d.insight['강점'] || []),
+            ...(d.insight['액션'] || [])
+        ].filter(Boolean);
+
+        items.forEach(text => {
+            insightList.innerHTML += `
+                <li class="insight-item">
+                    <span class="insight-icon">✦</span>
+                    <div>${text}</div>
+                </li>`;
+        });
+    }
+}
         });
     </script>
 
