@@ -15,18 +15,22 @@ public class AiProxyController {
     // 💡 수정: Config에서 지정한 Bean 이름("aiRestTemplate")과 변수명을 똑같이 맞춰줍니다.
     private final RestTemplate aiRestTemplate;
 
-    private final String FAST_API_URL = "http://localhost:8001/api";
+//    두 엔진 엔드포인트 분리
+//    private final String FAST_API_URL = "http://localhost:8001/api";
+    private final String MOODBOARD_URL = "http://localhost:8000/api";
+    private final String BRAND_AI_URL = "http://localhost:8001/api";
 
     @PostMapping("/generate-moodboard")
     public ResponseEntity<?> generateMoodboard(@RequestBody Map<String, Object> request) {
-        String targetUrl = FAST_API_URL + "/generate-moodboard";
+        //FAST_API_URL 이름 모두 변경
+        String targetUrl = MOODBOARD_URL + "/generate-moodboard";
         // 💡 수정: aiRestTemplate 사용
         return aiRestTemplate.postForEntity(targetUrl, request, Object.class);
     }
 
     @PostMapping("/analyze-dashboard")
     public ResponseEntity<?> analyzeDashboard(@RequestBody Map<String, Object> request) {
-        String targetUrl = FAST_API_URL + "/analyze-dashboard";
+        String targetUrl = MOODBOARD_URL + "/analyze-dashboard";
         // 💡 수정: aiRestTemplate 사용
         return aiRestTemplate.postForEntity(targetUrl, request, Object.class);
     }
@@ -38,7 +42,7 @@ public class AiProxyController {
             // Step 1: 브랜드 벡터 생성
             request.put("project_id", "preview");
             ResponseEntity<Map> vectorResponse = aiRestTemplate.postForEntity(
-                    FAST_API_URL + "/brand/vector", request, Map.class
+                    BRAND_AI_URL + "/brand/vector", request, Map.class
             );
             Map<?, ?> vectorData = vectorResponse.getBody();
 
@@ -52,7 +56,7 @@ public class AiProxyController {
             analyzeRequest.put("image_alignments", vectorData.get("image_alignments"));
 
             return aiRestTemplate.postForEntity(
-                    FAST_API_URL + "/brand/analyze", analyzeRequest, Object.class
+                    BRAND_AI_URL + "/brand/analyze", analyzeRequest, Object.class
             );
         } catch (Exception e) {
             return ResponseEntity.status(500).body("분석 중 오류: " + e.getMessage());
