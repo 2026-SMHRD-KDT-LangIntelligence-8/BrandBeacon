@@ -39,6 +39,9 @@ public class SecurityConfig {
                 // 2. CSRF (보안 해킹 방지) 기능 끄기
                 .csrf(csrf -> csrf.disable())
 
+                // 추가 (HTTP Basic Auth 비활성화 기본 팝업 로그인창 제거)
+                .httpBasic(basic -> basic.disable())
+
                 // 3. 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // 지금은 모든 요청 일단 통과!
