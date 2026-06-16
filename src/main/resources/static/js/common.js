@@ -427,47 +427,7 @@ function navigateTo(idx) {
             syncRenderQ4SubClusterGrid();
         }
 
-        // 세부 키워드 그리드 생성 (✨ 이벤트 델리게이션 적용으로 하위 엘리먼트 클릭 씹힘 방지)
-        function syncRenderQ4SubClusterGrid() {
-            const poolContainer = document.getElementById('q4-dynamic-style-pool');
-            if (!poolContainer) return; // 해당 엘리먼트가 없는 페이지라면 스킵
-            poolContainer.innerHTML = "";
 
-            if (selectedMainMoods.length === 0) {
-                poolContainer.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-gray); padding: 30px; font-size: 13px;">Q3 무드태그를 선택하시면 상응하는 하위 계층 핵심 이미지셋이 실시간으로 여기에 전개됩니다.</div>`;
-                return;
-            }
-
-            selectedMainMoods.forEach(clusterKey => {
-                const subItems = HIERARCHY_DATA_SOURCE[clusterKey];
-                subItems.forEach(keywordValue => {
-                    const isChosen = selectedSubKeywordsList.includes(keywordValue);
-                    const card = document.createElement('div');
-                    card.className = `dynamic-style-card ${isChosen ? 'chosen-style' : ''}`;
-                    card.setAttribute('data-keyword', keywordValue);
-
-                    // 포인터 이벤트 논(none)을 주어 내부 프리뷰, 텍스트가 클릭을 흡수하지 못하게 처리
-                    card.innerHTML = `
-                        <div class="card-img-placeholder" style="pointer-events: none;">[PREVIEW: ${clusterKey}_${keywordValue}]</div>
-                        <div style="text-align:center; font-weight:700; font-size:13px; pointer-events: none;">${keywordValue}</div>
-                        <div style="text-align:center; font-size:10px; color:var(--text-gray); margin-top:2px; pointer-events: none;">${clusterKey} 계층 소속</div>
-                    `;
-                    poolContainer.appendChild(card);
-                });
-            });
-
-            // 부모 컨테이너에 클릭 이벤트 델리게이션 바인딩
-            poolContainer.onclick = function(e) {
-                const targetCard = e.target.closest('.dynamic-style-card');
-                if (!targetCard) return;
-                const kwVal = targetCard.getAttribute('data-keyword');
-                if (kwVal) {
-                    handleSubCardSelection(targetCard, kwVal);
-                }
-            };
-
-            enforceQ4LockingLimit();
-        }
 
         // 브랜드 기획 동기화 - Q1~Q4 모두 입력 후 다음 단계 이동 가능
 
