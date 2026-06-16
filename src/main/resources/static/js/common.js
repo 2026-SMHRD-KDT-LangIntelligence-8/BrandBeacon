@@ -171,33 +171,46 @@ function navigateTo(idx) {
             if (typeof renderFolderTree === "function") renderFolderTree();
             if (typeof renderProjectGallery === "function") renderProjectGallery();
 
-            // 🚀 [소셜 로그인 자동 감지 센서]
-            // 주소창에 ?socialLogin=true 가 붙어 들어왔다면 프론트엔드 로그인 상태도 동기화 시켜줍니다.
+            // 1. 소셜 로그인 감지 (기존 로직 유지)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('socialLogin') === 'true') {
                 sessionStorage.setItem("isLoggedIn", "true");
                 isLoggedIn = true;
-                // 주소창의 지저분한 파라미터(?socialLogin=true)를 사용자 모르게 지워주는 깔끔한 처리
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
-
             syncAuthUI();
 
-            // 멀티 페이지 환경 대응: 현재 URL 경로에 맞게 내부 currentIdx 세팅
+            // 2. 경로별 스텝 설정 (매핑 테이블 활용)
             const path = window.location.pathname;
+            const pathStepMap = {
+                '/brandsync': 6,
+                '/reference': 7,
+                '/moodboard': 8,
+                '/dashboard': 9
+            };
+
+            const currentStep = pathStepMap[path];
+
+            if (currentStep) {
+                currentIdx = currentStep;
+
+                // 스텝바 활성화
+                const stepBar = document.getElementById('global-step-bar');
+                if (stepBar) stepBar.style.display = 'flex';
+
+                // 해당 스텝(st-6, st-7 등) 활성화
+                const activeStep = document.getElementById(`st-${currentStep}`);
+                if (activeStep) activeStep.classList.add('active');
+
+                // 페이지 뷰(page6, page7 등) 활성화 (존재하는 경우만)
+                const activePage = document.getElementById(`page${currentStep}`);
+                if (activePage) activePage.classList.add('active-view');
+            }
+
+            // 그 외 메인 경로 설정
             if (path === '/') currentIdx = 1;
             else if (path === '/login') currentIdx = 3;
             else if (path === '/signup') currentIdx = 4;
-            else if (path === '/brandsync') {
-                currentIdx = 6;
-                // brandsync 페이지 내부의 탭(page6)을 자동으로 활성화
-                const activePage = document.getElementById('page6');
-                if (activePage) activePage.classList.add('active-view');
-                const stepBar = document.getElementById('global-step-bar');
-                if (stepBar) stepBar.style.display = 'flex';
-                const activeStep = document.getElementById('st-6');
-                if (activeStep) activeStep.classList.add('active');
-            }
         };
 
 
@@ -232,6 +245,7 @@ function navigateTo(idx) {
             if (idx === 6) { window.location.href = '/brandsync'; return; }
             if (idx === 7) { window.location.href = '/reference'; return; } // 🚀 7번 스텝 주소 추가 완료!
             if (idx === 8) { window.location.href = '/moodboard'; return; } // 🚀 8번(무드보드) 스텝 주소 추가 완료!
+            if (idx === 9) { window.location.href = '/dashboard'; return; }
 
             // 현재 HTML 내부에 해당 page id 뷰가 존재할 때만 작동 (brandsync 내부 스텝 전환용)
             const activePage = document.getElementById(`page${idx}`);
