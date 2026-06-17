@@ -46,6 +46,10 @@
                 <div class="axis-label" style="top:50%; left:4px; transform:translateY(-50%);">performance</div>
                 <div class="axis-label" style="top:50%; right:4px; transform:translateY(-50%);">lifestyle</div>
 
+                <div style="position:absolute; bottom:8px; right:8px; font-size:11px; color:var(--text-gray); display:flex; align-items:center; gap:6px;">
+                    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#cccccc;"></span>
+                    점에 마우스를 올리면 브랜드명이 표시됩니다
+                </div>
                 <div class="brand-dot our-brand-dot" style="top:50%; left:65%;">● 내 브랜드</div>
             </div>
         </div>
@@ -212,7 +216,6 @@ if (d.position) {
             // 기존 하드코딩 dot 제거
             canvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
 
-            // 전체 브랜드 + 사용자 좌표 포함해서 정규화
             // 전체 브랜드 + 사용자 좌표 포함해서 정규화
             const allX = brands.map(b => b.brandX).concat(d.position.x);
             const allY = brands.map(b => b.brandY).concat(d.position.y);
