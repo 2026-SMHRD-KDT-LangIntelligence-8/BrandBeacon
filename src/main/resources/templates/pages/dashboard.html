@@ -147,6 +147,20 @@
         window.addEventListener('DOMContentLoaded', () => {
 
             // [섹션 6: 무드보드 이미지 렌더링]
+
+            // 섹션 6: imageAlignments 맵 생성
+            const _dashRaw = sessionStorage.getItem("dashboardData");
+            const _alignMap = {};
+            let _alignMedian = null;
+            if (_dashRaw) {
+                const _alignments = JSON.parse(_dashRaw)?.evidence?.imageAlignments || [];
+                _alignments.forEach(a => { _alignMap[a.imageUrl] = a.similarity; });
+                const _sims = _alignments.map(a => a.similarity).sort((a, b) => a - b);
+                const _mid = Math.floor(_sims.length / 2);
+                _alignMedian = _sims.length % 2 === 0 ? (_sims[_mid-1] + _sims[_mid]) / 2 : _sims[_mid];
+            }
+
+
             const canvas = document.getElementById('dashboard-inline-moodboard-canvas');
             const savedMoodboard = sessionStorage.getItem("finalMoodboardData");
 
@@ -171,6 +185,7 @@
                         const imgContainer = document.createElement('div');
                         imgContainer.className = `thumb-${idx}`;
                         imgContainer.style.overflow = 'hidden';
+                        imgContainer.style.position = 'relative';
 
                         if (imgUrl && imgUrl.startsWith('http')) {
                             // crossorigin 속성 제거 (작동했던 버전과 동일하게 복구)
@@ -178,6 +193,19 @@
                         } else {
                             imgContainer.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#fff; font-size:10px;">${imgUrl}</div>`;
                         }
+
+                        // 뱃지: placehold.co 스킵, URL 매칭된 이미지만 표시
+                        if (imgUrl && !imgUrl.includes('placehold.co') && _alignMedian !== null && _alignMap[imgUrl] !== undefined) {
+                            const isGood = _alignMap[imgUrl] >= _alignMedian;
+                            const badge = document.createElement('div');
+                            badge.style.cssText = `position:absolute; top:4px; right:4px;
+                                background:${isGood ? 'rgba(34,197,94,0.9)' : 'rgba(245,158,11,0.9)'};
+                                color:white; font-size:9px; font-weight:700;
+                                padding:2px 6px; border-radius:10px; pointer-events:none;`;
+                            badge.textContent = isGood ? '✓ 방향 적합' : '검토 필요';
+                            imgContainer.appendChild(badge);
+                        }
+
                         itemDiv.appendChild(imgContainer);
                     });
 
