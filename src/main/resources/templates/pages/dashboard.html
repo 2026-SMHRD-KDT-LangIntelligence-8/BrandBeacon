@@ -3,7 +3,7 @@
       th:replace="~{layout :: layout(~{::content})}">
 <body>
 
-<div th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+<div id="page9" th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
 
     <div class="dash-header-title">
         <h2>Brand Kit Dashboard</h2>
@@ -95,41 +95,87 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/dashboard.js}"></script>
 
     <script>
+        // ✅ 작동이 입증된 PDF 내보내기 스크립트 (기존 위치 복구)
+        window.exportToPDF = function() {
+            console.log("1. PDF 다운로드 준비...");
+
+            const element = document.querySelector('.content-wrapper');
+            if (!element) return;
+
+            window.scrollTo(0, 0);
+
+            setTimeout(() => {
+                const opt = {
+                    margin:       [10, 0, 10, 0],
+                    filename:     'Brand-Sync_Report.pdf',
+                    image:        { type: 'jpeg', quality: 1 },
+                    html2canvas:  {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        onclone: function (clonedDoc) {
+                            clonedDoc.documentElement.className = document.documentElement.className;
+                            clonedDoc.body.className = document.body.className;
+
+                            const clonedTarget = clonedDoc.querySelector('.content-wrapper');
+                            if (clonedTarget) {
+                                clonedTarget.style.margin = '0';
+                                clonedTarget.style.width = '1000px';
+
+                                const originalBodyBg = window.getComputedStyle(document.body).backgroundColor;
+                                clonedTarget.style.backgroundColor = originalBodyBg !== 'rgba(0, 0, 0, 0)' ? originalBodyBg : '#1E232E';
+                            }
+                        }
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                console.log("2. PDF 렌더링 중...");
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    console.log("3. PDF 저장 완료!");
+                });
+
+            }, 300);
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
 
-            // 1. 섹션 6: 무드보드 이미지 렌더링
+            // [섹션 6: 무드보드 이미지 렌더링]
             const canvas = document.getElementById('dashboard-inline-moodboard-canvas');
             const savedMoodboard = sessionStorage.getItem("finalMoodboardData");
 
             if (savedMoodboard && canvas) {
                 const parsedData = JSON.parse(savedMoodboard);
-                canvas.innerHTML = ''; // 초기화
+                canvas.innerHTML = '';
 
                 parsedData.forEach(cat => {
                     const assets = cat.assets;
-                    const count = Math.min(assets.length, 4); // 최대 4개 제한
+                    const count = Math.min(assets.length, 4);
 
-                    // 부모 박스 생성
                     const itemDiv = document.createElement('div');
-                    itemDiv.className = `layout-${count}`; // moodboard.html에서 쓰던 그 클래스입니다!
-                    itemDiv.style.display = 'grid'; // 그리드 레이아웃 활성화
+                    itemDiv.className = `layout-${count}`;
+                    itemDiv.style.display = 'grid';
                     itemDiv.style.backgroundColor = '#262F40';
                     itemDiv.style.borderRadius = '6px';
                     itemDiv.style.overflow = 'hidden';
                     itemDiv.style.position = 'relative';
-                    itemDiv.style.height = '120px'; // 대시보드 사이즈 유지
+                    itemDiv.style.height = '120px';
 
-                    // 선택된 이미지들을 순회하며 박스 안에 채우기
                     assets.slice(0, 4).forEach((imgUrl, idx) => {
                         const imgContainer = document.createElement('div');
                         imgContainer.className = `thumb-${idx}`;
                         imgContainer.style.overflow = 'hidden';
 
                         if (imgUrl && imgUrl.startsWith('http')) {
+                            // crossorigin 속성 제거 (작동했던 버전과 동일하게 복구)
                             imgContainer.innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
                         } else {
                             imgContainer.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#fff; font-size:10px;">${imgUrl}</div>`;
@@ -137,7 +183,6 @@
                         itemDiv.appendChild(imgContainer);
                     });
 
-                    // 카테고리 라벨 추가
                     const label = document.createElement('div');
                     label.style.position = 'absolute'; label.style.bottom = '0'; label.style.left = '0'; label.style.right = '0';
                     label.style.background = 'rgba(0,0,0,0.6)'; label.style.color = '#fff';
@@ -151,7 +196,7 @@
                 if(canvas) canvas.innerHTML = '<div style="grid-column: span 4; text-align:center; padding: 20px; color: var(--text-gray);">저장된 무드보드 데이터가 없습니다.</div>';
             }
 
-            // 2. 섹션 1: 브랜드 방향 키워드 렌더링 (보너스 추가)
+            // [섹션 1: 브랜드 방향 키워드 렌더링]
             const keywordContainer = document.getElementById('brand-keyword-container');
             const savedKeywords = sessionStorage.getItem("brandKeywords");
 
@@ -163,143 +208,136 @@
                 });
             }
 
-            // 3. AI 분석 결과 렌더링
-const dashboardData = sessionStorage.getItem("dashboardData");
+            // [섹션 2~5: AI 분석 결과 최신 동적 렌더링]
+            const dashboardData = sessionStorage.getItem("dashboardData");
 
-if (dashboardData) {
-    const d = JSON.parse(dashboardData);
+            if (dashboardData) {
+                const d = JSON.parse(dashboardData);
 
-// 하드코딩 제거 -> 실제 파이썬 분석값으로 동적 렌더링
-// 섹션 2: 일관성 점수
-    const circle = document.querySelector('.progress-circle');
-    if (circle && d.consistency) {
-        const pct = d.consistency.score;
-        const radius = 34;
-        const circumference = 2 * Math.PI * radius;
-        const offset = circumference * (1 - pct / 100);
-        circle.style.background = 'none';
-        circle.innerHTML = `
-            <svg width="85" height="85" style="position:absolute; top:0; left:0; transform:rotate(-90deg);">
-                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
-                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
-                    stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
-                    stroke-linecap="round"/>
-            </svg>
-            <div style="position:absolute; z-index:1; text-align:center;">
-                <div style="font-size:22px; font-weight:900; color:#ff6b35;">${pct}</div>
-                <div style="font-size:11px; color:var(--text-gray);">/ 100</div>
-                <div style="font-size:13px; font-weight:700; color:var(--primary-blue); margin-top:2px;">${d.consistency.grade}등급</div>
-            </div>`;
-    }
-
-    // 섹션 3: Top3 유사 브랜드
-    const benchmarkList = document.getElementById('benchmark-list');
-    if (benchmarkList && d.similarBrands) {
-        benchmarkList.innerHTML = '';
-        d.similarBrands.forEach((brand, i) => {
-            benchmarkList.innerHTML += `
-                <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border-color);">
-                    <span style="font-size:13px; color:var(--primary-orange); font-weight:700; min-width:28px;">${i+1}위</span>
-                    <span style="font-size:13px; font-weight:700;">${brand.name}</span>
-                </div>`;
-        });
-    }
-
-    // 섹션 4: 내 브랜드 포지션 + 레퍼런스 브랜드 29개
-if (d.position) {
-    fetch('/api/reference-brands')
-        .then(res => res.json())
-        .then(brands => {
-            const canvas = document.querySelector('.positioning-map-canvas');
-            if (!canvas) return;
-
-            // 기존 하드코딩 dot 제거
-            canvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
-
-            // 전체 브랜드 + 사용자 좌표 포함해서 정규화
-            const allX = brands.map(b => b.brandX).concat(d.position.x);
-            const allY = brands.map(b => b.brandY).concat(d.position.y);
-            const minX = Math.min(...allX), maxX = Math.max(...allX);
-            const minY = Math.min(...allY), maxY = Math.max(...allY);
-            const rangeX = maxX - minX || 1;
-            const rangeY = maxY - minY || 1;
-
-            const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
-            const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
-
-            // Top3 브랜드명 목록
-            const top3Names = (d.similarBrands || []).slice(0, 3).map(b => b.name);
-
-            // 레퍼런스 브랜드 29개 렌더링
-            brands.forEach(brand => {
-                const isTop3 = top3Names.includes(brand.brandName);
-                const dot = document.createElement('div');
-                dot.style.position = 'absolute';
-                dot.style.left = toLeft(brand.brandX) + '%';
-                dot.style.top  = toTop(brand.brandY) + '%';
-
-                if (isTop3) {
-                    dot.className = 'brand-dot';       // Tier 2: 연한 박스 + 이름
-                    dot.textContent = brand.brandName;
-                } else {
-                    dot.className = 'brand-dot-ref';   // Tier 3: 회색 점 + hover 툴팁
-                    dot.dataset.name = brand.brandName;
+                // 섹션 2: 일관성 점수
+                const circle = document.querySelector('.progress-circle');
+                if (circle && d.consistency) {
+                    const pct = d.consistency.score;
+                    const radius = 34;
+                    const circumference = 2 * Math.PI * radius;
+                    const offset = circumference * (1 - pct / 100);
+                    circle.style.background = 'none';
+                    circle.innerHTML = `
+                        <svg width="85" height="85" style="position:absolute; top:0; left:0; transform:rotate(-90deg);">
+                            <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
+                            <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                                stroke-linecap="round"/>
+                        </svg>
+                        <div style="position:absolute; z-index:1; text-align:center;">
+                            <div style="font-size:22px; font-weight:900; color:#ff6b35;">${pct}</div>
+                            <div style="font-size:11px; color:var(--text-gray);">/ 100</div>
+                            <div style="font-size:13px; font-weight:700; color:var(--primary-blue); margin-top:2px;">${d.consistency.grade}등급</div>
+                        </div>`;
                 }
-                canvas.appendChild(dot);
-            });
 
-            // 사용자 브랜드 dot 위치 + 이름
-            const myDot = document.querySelector('.our-brand-dot');
-            if (myDot) {
-                myDot.style.left = toLeft(d.position.x) + '%';
-                myDot.style.top  = toTop(d.position.y) + '%';
-                myDot.textContent = '● 내 브랜드';
+                // 섹션 3: Top3 유사 브랜드
+                const benchmarkList = document.getElementById('benchmark-list');
+                if (benchmarkList && d.similarBrands) {
+                    benchmarkList.innerHTML = '';
+                    d.similarBrands.forEach((brand, i) => {
+                        benchmarkList.innerHTML += `
+                            <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border-color);">
+                                <span style="font-size:13px; color:var(--primary-orange); font-weight:700; min-width:28px;">${i+1}위</span>
+                                <span style="font-size:13px; font-weight:700;">${brand.name}</span>
+                            </div>`;
+                    });
+                }
+
+                // 섹션 4: 내 브랜드 포지션 + 레퍼런스 브랜드 29개
+                if (d.position) {
+                    fetch('/api/reference-brands')
+                        .then(res => res.json())
+                        .then(brands => {
+                            const canvas = document.querySelector('.positioning-map-canvas');
+                            if (!canvas) return;
+
+                            canvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
+
+                            const allX = brands.map(b => b.brandX).concat(d.position.x);
+                            const allY = brands.map(b => b.brandY).concat(d.position.y);
+                            const minX = Math.min(...allX), maxX = Math.max(...allX);
+                            const minY = Math.min(...allY), maxY = Math.max(...allY);
+                            const rangeX = maxX - minX || 1;
+                            const rangeY = maxY - minY || 1;
+
+                            const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
+                            const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
+
+                            const top3Names = (d.similarBrands || []).slice(0, 3).map(b => b.name);
+
+                            brands.forEach(brand => {
+                                const isTop3 = top3Names.includes(brand.brandName);
+                                const dot = document.createElement('div');
+                                dot.style.position = 'absolute';
+                                dot.style.left = toLeft(brand.brandX) + '%';
+                                dot.style.top  = toTop(brand.brandY) + '%';
+
+                                if (isTop3) {
+                                    dot.className = 'brand-dot';
+                                    dot.textContent = brand.brandName;
+                                } else {
+                                    dot.className = 'brand-dot-ref';
+                                    dot.dataset.name = brand.brandName;
+                                }
+                                canvas.appendChild(dot);
+                            });
+
+                            const myDot = document.querySelector('.our-brand-dot');
+                            if (myDot) {
+                                myDot.style.left = toLeft(d.position.x) + '%';
+                                myDot.style.top  = toTop(d.position.y) + '%';
+                                myDot.textContent = '● 내 브랜드';
+                            }
+
+                        })
+                        .catch(() => {
+                            const myDot = document.querySelector('.our-brand-dot');
+                            if (myDot) {
+                                const leftPct = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90);
+                                const topPct  = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90);
+                                myDot.style.left = leftPct + '%';
+                                myDot.style.top  = topPct + '%';
+                            }
+                        });
+                }
+
+                // 섹션 5: 인사이트
+                const insightList = document.querySelector('.insight-list');
+                if (insightList && d.insight) {
+                    const ins = d.insight;
+
+                    const renderSection = (title, icon, color, items) => {
+                        if (!items || items.length === 0) return '';
+                        const listItems = items.map(t => `
+                            <li style="margin-bottom:8px; line-height:1.7;">${t}</li>
+                        `).join('');
+                        return `
+                            <div style="margin-bottom:20px;">
+                                <div style="font-size:13px; font-weight:700; color:${color}; margin-bottom:8px;">${icon} ${title}</div>
+                                <ul style="padding-left:18px; margin:0; font-size:14px; color:var(--text-dark);">
+                                    ${listItems}
+                                </ul>
+                            </div>`;
+                    };
+
+                    insightList.innerHTML = `
+                        ${ins['종합평가'] ? `
+                            <p style="font-size:14px; line-height:1.8; color:var(--text-dark); margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border-color);">
+                                ${ins['종합평가']}
+                            </p>` : ''}
+                        ${renderSection('강점', '✦', '#22c55e', ins['강점'])}
+                        ${renderSection('기회', '→', '#3b82f6', ins['기회'])}
+                        ${renderSection('액션', '▶', '#ff6b35', ins['액션'])}
+                        ${renderSection('주의점', '!', '#f59e0b', ins['주의점'])}
+                    `;
+                }
             }
-
-        })
-        .catch(() => {
-            // fetch 실패 시 기존 방식 fallback
-            const myDot = document.querySelector('.our-brand-dot');
-            if (myDot) {
-                const leftPct = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90);
-                const topPct  = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90);
-                myDot.style.left = leftPct + '%';
-                myDot.style.top  = topPct + '%';
-            }
-        });
-}
-
-// 섹션 5: 인사이트
-    const insightList = document.querySelector('.insight-list');
-    if (insightList && d.insight) {
-        const ins = d.insight;
-
-        const renderSection = (title, icon, color, items) => {
-            if (!items || items.length === 0) return '';
-            const listItems = items.map(t => `
-                <li style="margin-bottom:8px; line-height:1.7;">${t}</li>
-            `).join('');
-            return `
-                <div style="margin-bottom:20px;">
-                    <div style="font-size:13px; font-weight:700; color:${color}; margin-bottom:8px;">${icon} ${title}</div>
-                    <ul style="padding-left:18px; margin:0; font-size:14px; color:var(--text-dark);">
-                        ${listItems}
-                    </ul>
-                </div>`;
-        };
-
-        insightList.innerHTML = `
-            ${ins['종합평가'] ? `
-                <p style="font-size:14px; line-height:1.8; color:var(--text-dark); margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border-color);">
-                    ${ins['종합평가']}
-                </p>` : ''}
-            ${renderSection('강점', '✦', '#22c55e', ins['강점'])}
-            ${renderSection('기회', '→', '#3b82f6', ins['기회'])}
-            ${renderSection('액션', '▶', '#ff6b35', ins['액션'])}
-            ${renderSection('주의점', '!', '#f59e0b', ins['주의점'])}
-        `;
-    }
-}
         });
     </script>
 

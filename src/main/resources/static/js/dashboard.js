@@ -175,34 +175,7 @@
 
 
       // 현재 화면(대시보드)을 PDF로 변환 및 다운로드
-      function exportToPDF() {
-        const element = document.getElementById('page9');
 
-        // 브랜드 대시보드 - PDF 저장 로직
-        element.classList.add('pdf-export-mode');
-
-        // 0.5초 기다려서 CSS가 먼저 적용되게 함
-        setTimeout(() => {
-            const opt = {
-                margin:       10,
-                filename:     'Brand-Sync_Report.pdf',
-                image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    width: element.clientWidth,
-                    windowWidth: element.clientWidth
-                },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                // 변환 완료 후 원래 스타일로 복구
-                element.classList.remove('pdf-export-mode');
-            });
-        }, 500);
-    }
 
 
         // 저장 모달창 표시 및 폴더 목록 갱신
