@@ -165,15 +165,24 @@ const dashboardData = sessionStorage.getItem("dashboardData");
 if (dashboardData) {
     const d = JSON.parse(dashboardData);
 
-// 하드코딩 제거 실제 파이썬 분석값으로 동적 렌더링
+// 하드코딩 제거 -> 실제 파이썬 분석값으로 동적 렌더링
 // 섹션 2: 일관성 점수
     const circle = document.querySelector('.progress-circle');
     if (circle && d.consistency) {
         const pct = d.consistency.score;
-        circle.style.background = `conic-gradient(var(--primary-orange) 0% ${pct}%, #F3F4F6 ${pct}% 100%)`;
+        const radius = 34;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference * (1 - pct / 100);
+        circle.style.background = 'none';
         circle.innerHTML = `
+            <svg width="85" height="85" style="position:absolute; top:0; left:0; transform:rotate(-90deg);">
+                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
+                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
+                    stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                    stroke-linecap="round"/>
+            </svg>
             <div style="position:absolute; z-index:1; text-align:center;">
-                <div style="font-size:22px; font-weight:900; color:var(--primary-orange);">${pct}</div>
+                <div style="font-size:22px; font-weight:900; color:#ff6b35;">${pct}</div>
                 <div style="font-size:11px; color:var(--text-gray);">/ 100</div>
                 <div style="font-size:13px; font-weight:700; color:var(--primary-blue); margin-top:2px;">${d.consistency.grade}등급</div>
             </div>`;
@@ -200,8 +209,8 @@ if (d.position) {
             const canvas = document.querySelector('.positioning-map-canvas');
             if (!canvas) return;
 
-            // 기존 하드코딩 dot 제거 (our-brand-dot 제외)
-            canvas.querySelectorAll('.brand-dot:not(.our-brand-dot)').forEach(el => el.remove());
+            // 기존 하드코딩 dot 제거
+            canvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
 
             // 전체 브랜드 + 사용자 좌표 포함해서 정규화
             // 전체 브랜드 + 사용자 좌표 포함해서 정규화
@@ -220,21 +229,18 @@ if (d.position) {
 
             // 레퍼런스 브랜드 29개 렌더링
             brands.forEach(brand => {
+                const isTop3 = top3Names.includes(brand.brandName);
                 const dot = document.createElement('div');
-                dot.className = 'brand-dot';
                 dot.style.position = 'absolute';
                 dot.style.left = toLeft(brand.brandX) + '%';
                 dot.style.top  = toTop(brand.brandY) + '%';
-                dot.textContent = brand.brandName;
 
-                if (top3Names.includes(brand.brandName)) {
-                    dot.style.color = '#ff6b35';
-                    dot.style.fontWeight = 'bold';
-                    dot.style.opacity = '1';
+                if (isTop3) {
+                    dot.className = 'brand-dot';       // Tier 2: 연한 박스 + 이름
+                    dot.textContent = brand.brandName;
                 } else {
-                    dot.style.color = '#aaa';
-                    dot.style.opacity = '0.6';
-                    dot.style.fontSize = '11px';
+                    dot.className = 'brand-dot-ref';   // Tier 3: 회색 점 + hover 툴팁
+                    dot.dataset.name = brand.brandName;
                 }
                 canvas.appendChild(dot);
             });
@@ -246,6 +252,7 @@ if (d.position) {
                 myDot.style.top  = toTop(d.position.y) + '%';
                 myDot.textContent = '● 내 브랜드';
             }
+
         })
         .catch(() => {
             // fetch 실패 시 기존 방식 fallback

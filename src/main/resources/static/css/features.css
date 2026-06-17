@@ -199,21 +199,56 @@
             padding: 6px 14px;
             border-radius: 20px;
 
-            background: var(--primary-orange);
-            border: 1px solid var(--accent-orange);
-            color: white;
+            background: rgba(255, 107, 53, 0.08);
+            border: 1px solid #ff6b35;
+            color: #ff6b35;
+            font-size: 12px;
 
             transform: translate(-50%, -50%);
-            font-size: 14px;
             font-weight: 600;
         }
 
         .brand-dot.our-brand-dot {
-            background: white;
-            border: 2px solid var(--primary-orange);
-            color: var(--primary-orange);
-            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.4);
+            background: #ff6b35;
+            border: 2px solid #ff6b35;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(255, 92, 0, 0.45);
+            z-index: 10;
         }
+
+        /* 유사브랜드 top3 제외 기타브랜드 회색점으로 표현 */
+        .brand-dot-ref {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cccccc;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+        /* 마우스 호버시 브랜드네임 툴팁으로 명시 */
+        .brand-dot-ref::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+        .brand-dot-ref:hover::after {
+            opacity: 1;
+        }
+
+
 
         .progress-circle { width: 85px; height: 85px; background: conic-gradient(var(--primary-orange) 0% 0%, #F3F4F6 0% 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
         .progress-circle::after { content: ''; position: absolute; width: 65px; height: 65px; background: var(--bg-main); border-radius: 50%; }
