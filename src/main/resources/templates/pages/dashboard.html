@@ -269,23 +269,35 @@ if (d.position) {
         });
 }
 
-    // 섹션 5: 인사이트
+// 섹션 5: 인사이트
     const insightList = document.querySelector('.insight-list');
     if (insightList && d.insight) {
-        insightList.innerHTML = '';
-        const items = [
-            d.insight['종합평가'],
-            ...(d.insight['강점'] || []),
-            ...(d.insight['액션'] || [])
-        ].filter(Boolean);
+        const ins = d.insight;
 
-        items.forEach(text => {
-            insightList.innerHTML += `
-                <li class="insight-item">
-                    <span class="insight-icon">✦</span>
-                    <div>${text}</div>
-                </li>`;
-        });
+        const renderSection = (title, icon, color, items) => {
+            if (!items || items.length === 0) return '';
+            const listItems = items.map(t => `
+                <li style="margin-bottom:8px; line-height:1.7;">${t}</li>
+            `).join('');
+            return `
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:13px; font-weight:700; color:${color}; margin-bottom:8px;">${icon} ${title}</div>
+                    <ul style="padding-left:18px; margin:0; font-size:14px; color:var(--text-dark);">
+                        ${listItems}
+                    </ul>
+                </div>`;
+        };
+
+        insightList.innerHTML = `
+            ${ins['종합평가'] ? `
+                <p style="font-size:14px; line-height:1.8; color:var(--text-dark); margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border-color);">
+                    ${ins['종합평가']}
+                </p>` : ''}
+            ${renderSection('강점', '✦', '#22c55e', ins['강점'])}
+            ${renderSection('기회', '→', '#3b82f6', ins['기회'])}
+            ${renderSection('액션', '▶', '#ff6b35', ins['액션'])}
+            ${renderSection('주의점', '!', '#f59e0b', ins['주의점'])}
+        `;
     }
 }
         });
