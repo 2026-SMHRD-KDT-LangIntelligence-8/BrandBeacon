@@ -487,8 +487,10 @@ def generate_insight_llm(snapshot: dict) -> dict:
 - userText → 사용자의 실제 의도를 파악해 액션과 기회에 반영
 - similarBrands → 유사한 브랜드와의 비교 맥락 제공에 활용
 - consistency.score → 이미지와 브랜드 설명의 일치 정도를 주의점에 반영
-- evidence.imageAlignments → similarity가 낮은 이미지의 카테고리를 주의점에 구체적으로 언급합니다.
-  예: "스포츠 종류 카테고리 이미지가 전체 방향과 다소 다르게 느껴질 수 있습니다."
+- evidence.imageAlignments → similarity는 CLIP AI가 이미지와 브랜드 텍스트 설명의 의미적 연관성을 측정한 값입니다.
+  낮은 similarity = 시각적으로 나쁜 이미지가 아니라, 브랜드 설명에서 직접 언급되지 않는 요소를 담고 있다는 의미입니다.
+  similarity가 전체 중 하위 50%인 카테고리에 대해 주의점에 언급합니다.
+  예: "소재 카테고리 이미지는 브랜드 설명과 직접 연결이 약해 보완 설명이 있으면 좋습니다."
 
 [데이터 해석 기준]
 - similarBrands: 1위 브랜드명을 종합평가에 직접 언급합니다. (한글 발음 표기로)
@@ -559,6 +561,7 @@ userText에 없는 개념(사회적 이슈, 트렌드, 마케팅 채널 등)을 
 공포감이나 경고처럼 쓰지 않고 중립적으로 씁니다.
 consistency.score와 similarBrands에서 직접 읽히는 내용만 씁니다.
 근거 없는 제품/마케팅 조언은 쓰지 않습니다.
+imageAlignments에서 낮은 카테고리를 언급할 때는 "시각적으로 이상하다"가 아니라 "브랜드 설명과 연결이 약하다"는 표현을 씁니다.
 
 우선순위:
 - 유지 (1~2개): 지금 잘 되고 있어서 그대로 가져갈 것
