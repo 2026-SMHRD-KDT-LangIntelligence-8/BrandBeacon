@@ -6,8 +6,8 @@
 <div id="page9" th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
 
     <div class="dash-header-title">
-        <h2>Brand Kit Dashboard</h2>
-        <p>의사결정을 지원하는 브랜드의 시각화 최종 종합 분석 리포트입니다.</p>
+        <h2> Brand Strategy Dashboard</h2>
+        <p>의사결정을 지원하는 브랜드의 시각화 종합 분석 리포트입니다.</p>
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 25px;">
@@ -208,7 +208,7 @@
                             badge.style.cssText = `position:absolute; top:4px; right:4px;
                                 background:${isGood ? 'rgba(34,197,94,0.9)' : 'rgba(245,158,11,0.9)'};
                                 color:white; font-size:9px; font-weight:700;
-                                padding:2px 6px; border-radius:10px; pointer-events:none;`;
+                                padding:2px 6px; border-radius:10px; cursor:default;`;
                             badge.textContent = isGood ? '✓ 방향 적합' : '검토 필요';
                             badge.title = isGood ? '브랜드 설명과 이미지 방향이 잘 맞습니다' : '다른 이미지로 교체를 고려해보세요';
                             imgContainer.appendChild(badge);
