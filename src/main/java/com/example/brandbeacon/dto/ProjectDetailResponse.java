@@ -3,18 +3,23 @@ package com.example.brandbeacon.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Builder
 public class ProjectDetailResponse {
-    private Long projectId;           // 프로젝트 고유 번호
-    private String projectName;       // 프로젝트 이름
-    private String brandIntro;        // 브랜드 소개
-    private String referenceType;     // 레퍼런스 희망 항목
-    private String brandProfile;      // AI가 생성한 브랜드 프로필 데이터
-    private List<String> keywords;    // 선택했던 키워드 이름들
-    private List<String> imgUrls;     // 등록했던 이미지 주소들
-    private LocalDateTime createdAt;  // 생성 일자
+    private Long projectId;
+    private String projectName;
+    private String brandIntro;
+    private String referenceType;
+    private String brandProfile;
+    private String analysisInsight;    // AI 인사이트 JSON 문자열
+    private BigDecimal similarityScore; // 브랜드 일관성 점수
+    private Float positionX;           // 포지셔닝 맵 X 좌표
+    private Float positionY;           // 포지셔닝 맵 Y 좌표
+    private List<String> keywords;
+    private List<String> imgUrls;
+    private LocalDateTime createdAt;
 }

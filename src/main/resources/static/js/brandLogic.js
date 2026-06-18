@@ -19,10 +19,11 @@ function handleMoodTagClick(clickedTag, opposingTag) {
         oppoBtn.classList.remove('selected-tag');
         selectedMainMoods.push(clickedTag);
 
-        // 반대편 태그 해제 시 하위 키워드도 싹 지워줌
         const keywordsToClear = HIERARCHY_DATA_SOURCE[opposingTag];
         selectedSubKeywordsList = selectedSubKeywordsList.filter(item => !keywordsToClear.includes(item));
     }
+    sessionStorage.setItem("brandMoods", JSON.stringify(selectedMainMoods));
+    sessionStorage.setItem("brandKeywords", JSON.stringify(selectedSubKeywordsList));
     syncRenderQ4SubClusterGrid();
 }
 
@@ -94,6 +95,7 @@ function handleSubCardSelection(cardElement, keywordValue) {
         cardElement.classList.add('chosen-style');
         selectedSubKeywordsList.push(keywordValue);
     }
+    sessionStorage.setItem("brandKeywords", JSON.stringify(selectedSubKeywordsList));
     enforceQ4LockingLimit();
 }
 
@@ -156,15 +158,28 @@ async function generateAiMoodboard(q1, q2) {
             })
         });
 
-        if (!response.ok) throw new Error("서버 에러");
+        if (response.status === 401) {
+            sessionStorage.removeItem("isLoggedIn");
+            alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+            window.location.href = '/login';
+            return;
+        }
+
+        if (!response.ok) {
+            const errText = await response.text().catch(() => "");
+            throw new Error(errText || "서버 에러");
+        }
 
         const data = await response.json();
         sessionStorage.setItem("aiMoodboardData", JSON.stringify(data));
+        sessionStorage.removeItem("referenceSelections");
+        sessionStorage.removeItem("finalMoodboardData");
+        sessionStorage.removeItem("dashboardData");
         window.location.href = '/reference';
 
     } catch (error) {
         console.error("AI 생성 실패:", error);
-        alert("파이썬 서버(8000포트)가 켜져있는지 확인해주세요.");
+        alert("이미지 생성 중 오류가 발생했습니다.\n" + (error.message || "잠시 후 다시 시도해주세요."));
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -182,13 +197,21 @@ function selectSingleReference(card, rowId) {
 
     if (card.classList.contains('chosen')) {
         card.classList.remove('chosen');
-        return;
+    } else {
+        if (rowContainer.querySelectorAll('.scroll-card.chosen').length >= 4) {
+            alert("⚠️ 한 카테고리당 최대 4개까지만 선택할 수 있습니다.");
+            return;
+        }
+        card.classList.add('chosen');
     }
-    if (rowContainer.querySelectorAll('.scroll-card.chosen').length >= 4) {
-        alert("⚠️ 최대 4개까지만 선택 가능합니다.");
-        return;
-    }
-    card.classList.add('chosen');
+
+    // 선택 상태를 세션에 저장 (탭 이동 후 복원용)
+    const allCards = rowContainer.querySelectorAll('.scroll-card');
+    const chosenIndices = [];
+    allCards.forEach((c, idx) => { if (c.classList.contains('chosen')) chosenIndices.push(idx); });
+    const selections = JSON.parse(sessionStorage.getItem("referenceSelections") || "{}");
+    selections[rowId] = chosenIndices;
+    sessionStorage.setItem("referenceSelections", JSON.stringify(selections));
 }
 
 
@@ -260,32 +283,74 @@ function validateAndBuildMoodboard() {
 }
 
 // ---------------------------------------------------------
-// 5. 레퍼런스 페이지 진입 시, 파이썬에서 받은 이미지 화면에 뿌려주기
+// 5. 페이지 진입 시 상태 복원 (brandsync / reference)
 // ---------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
-    const savedData = sessionStorage.getItem("aiMoodboardData");
 
-    // 현재 화면이 레퍼런스 화면(carousel-row-1이 존재하는지)인지 확인
-    if (savedData && document.getElementById('carousel-row-1')) {
-        const data = JSON.parse(savedData);
-        const map = {
-            'essence': 'carousel-row-1', 'sports': 'carousel-row-2', 'lifestyle': 'carousel-row-3',
-            'environment': 'carousel-row-4', 'tone': 'carousel-row-5', 'product': 'carousel-row-6',
-            'palette': 'carousel-row-7', 'material': 'carousel-row-8'
-        };
+    // [brandsync] Q1, Q2, 무드태그, 키워드 복원
+    if (document.getElementById('brand-line-summary')) {
+        const q1 = sessionStorage.getItem("brandQ1");
+        const q2 = sessionStorage.getItem("brandQ2");
+        const savedMoods = JSON.parse(sessionStorage.getItem("brandMoods") || "[]");
+        const savedKeywords = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
 
-        for (const [key, id] of Object.entries(map)) {
-            const urls = data.images[key];
-            if (!urls) continue;
+        if (q1) document.getElementById('brand-line-summary').value = q1;
+        if (q2) document.getElementById('brand-object-search').value = q2;
 
-            const cards = document.getElementById(id)?.querySelectorAll('.scroll-card');
-            urls.forEach((url, i) => {
-                if (cards && cards[i]) {
-                    cards[i].innerHTML = `<img src="${url}" style="width:100%; height:100px; object-fit:cover; border-radius:4px; margin-bottom:6px; display:block;">`;
-                }
+        // textarea 실시간 저장
+        document.getElementById('brand-line-summary').addEventListener('input', function() {
+            sessionStorage.setItem("brandQ1", this.value);
+        });
+        document.getElementById('brand-object-search').addEventListener('input', function() {
+            sessionStorage.setItem("brandQ2", this.value);
+        });
+
+        if (savedMoods.length > 0) {
+            selectedMainMoods = savedMoods;
+            selectedSubKeywordsList = savedKeywords;
+
+            const opposingPairs = { ACTIVE: 'CALM', CALM: 'ACTIVE', PERFORMANCE: 'LIFESTYLE', LIFESTYLE: 'PERFORMANCE' };
+            savedMoods.forEach(mood => {
+                const btn = document.getElementById('main-tag-' + mood);
+                if (btn) btn.classList.add('selected-tag');
+                const oppBtn = document.getElementById('main-tag-' + opposingPairs[mood]);
+                if (oppBtn) { oppBtn.classList.add('disabled-tag'); oppBtn.classList.remove('selected-tag'); }
             });
+
+            syncRenderQ4SubClusterGrid();
         }
-        // 사용한 데이터는 세션에서 삭제 (새로고침 시 방지)
-        sessionStorage.removeItem("aiMoodboardData");
+    }
+
+    // [reference] AI 이미지 복원 + 선택 상태 복원
+    if (document.getElementById('carousel-row-1')) {
+        const savedData = sessionStorage.getItem("aiMoodboardData");
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            const map = {
+                'essence': 'carousel-row-1', 'sports': 'carousel-row-2', 'lifestyle': 'carousel-row-3',
+                'environment': 'carousel-row-4', 'tone': 'carousel-row-5', 'product': 'carousel-row-6',
+                'palette': 'carousel-row-7', 'material': 'carousel-row-8'
+            };
+            for (const [key, id] of Object.entries(map)) {
+                const urls = data.images ? data.images[key] : null;
+                if (!urls) continue;
+                const cards = document.getElementById(id)?.querySelectorAll('.scroll-card');
+                urls.forEach((url, i) => {
+                    if (cards && cards[i]) {
+                        cards[i].innerHTML = `<img src="${url}" style="width:100%; height:100px; object-fit:cover; border-radius:4px; margin-bottom:6px; display:block;">`;
+                    }
+                });
+            }
+            // aiMoodboardData는 삭제하지 않음 — 탭 이동 후 재진입 시 이미지 재복원에 사용
+        }
+
+        // 이전에 선택했던 카드 상태 복원
+        const savedSelections = JSON.parse(sessionStorage.getItem("referenceSelections") || "{}");
+        for (const [rowId, indices] of Object.entries(savedSelections)) {
+            const row = document.getElementById(rowId);
+            if (!row) continue;
+            const allCards = row.querySelectorAll('.scroll-card');
+            indices.forEach(idx => { if (allCards[idx]) allCards[idx].classList.add('chosen'); });
+        }
     }
 });

@@ -230,14 +230,17 @@ function navigateTo(idx) {
         // 로고 클릭 시 메인 페이지로 이동
         function handleLogoClick() { window.location.href = '/'; }
 
-        // 워크스페이스 진입 시 로그인 여부 체크 (✨ 6번 탭이 아니라 /brandsync 주소로 진짜 이동!)
+        // 워크스페이스 진입 시 로그인 여부 체크 (새 프로젝트 시작 → 이전 작업 세션 초기화)
         function handleEntrance() {
             const 찐로그인상태 = sessionStorage.getItem("isLoggedIn") === "true";
             if (찐로그인상태) {
-                window.location.href = '/brandsync'; // 🚀 이제 컨트롤러 주소로 실제 이동합니다!
+                ['brandQ1','brandQ2','brandMoods','brandKeywords',
+                 'aiMoodboardData','referenceSelections','finalMoodboardData','dashboardData'
+                ].forEach(k => sessionStorage.removeItem(k));
+                window.location.href = '/brandsync';
             } else {
                 alert("로그인이 필요한 워크스페이스입니다.");
-                window.location.href = '/login'; // 🚀 로그인 페이지 주소로 이동합니다!
+                window.location.href = '/login';
             }
         }
 
@@ -283,6 +286,38 @@ function navigateTo(idx) {
                 }
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 스텝바 탭 클릭 시 단계 완료 여부 검증 후 이동
+        function navigateToStep(idx) {
+            const ALERT_MSG = "현재 진행중인 단계를 완료한 후에 다음 단계로 넘어갈 수 있습니다.";
+
+            if (idx === 6) { navigateTo(6); return; }
+
+            if (idx === 7) {
+                if (!sessionStorage.getItem("brandQ1") ||
+                    !sessionStorage.getItem("brandMoods") ||
+                    !sessionStorage.getItem("brandKeywords")) {
+                    alert(ALERT_MSG); return;
+                }
+                navigateTo(7); return;
+            }
+
+            if (idx === 8) {
+                if (!sessionStorage.getItem("finalMoodboardData")) {
+                    alert(ALERT_MSG); return;
+                }
+                navigateTo(8); return;
+            }
+
+            if (idx === 9) {
+                if (!sessionStorage.getItem("dashboardData")) {
+                    alert(ALERT_MSG); return;
+                }
+                navigateTo(9); return;
+            }
+
+            navigateTo(idx);
         }
 
         // 이전 페이지 이동 함수
@@ -401,15 +436,14 @@ function navigateTo(idx) {
         // UI 동기화 (로그인 상태에 따라 로그인 버튼 표시 제어)
         function syncAuthUI() {
             const loginMenu = document.getElementById('login-nav-menu');
+            const mypageMenu = document.getElementById('mypage-nav-menu');
 
             if (isLoggedIn) {
-                if (loginMenu) {
-                    loginMenu.style.display = "none";
-                }
+                if (loginMenu) loginMenu.style.display = "none";
+                if (mypageMenu) mypageMenu.style.display = "list-item";
             } else {
-                if (loginMenu) {
-                    loginMenu.style.display = "list-item";
-                }
+                if (loginMenu) loginMenu.style.display = "list-item";
+                if (mypageMenu) mypageMenu.style.display = "none";
             }
         }
 
