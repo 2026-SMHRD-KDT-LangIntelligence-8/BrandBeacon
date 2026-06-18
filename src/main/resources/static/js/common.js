@@ -101,13 +101,14 @@ function navigateTo(idx) {
             }
         ];
 
-
-        // 헤더 메뉴용: 로그인 체크 및 이동 함수
+        // 🚀 헤더 메뉴용: 로그인 체크 및 이동 함수
         function checkLoginOrRedirect(targetUrl) {
+            // 1. 현재 로그인 상태 확인 (파일 상단에 정의된 isLoggedIn 변수 활용)
             if (!isLoggedIn) {
                 alert("로그인 후 이용 가능한 서비스입니다.");
                 window.location.href = '/login';
             } else {
+                // 2. 로그인 상태면 해당 페이지로 이동
                 window.location.href = targetUrl;
             }
         }
