@@ -1,19 +1,11 @@
 package com.example.brandbeacon.service;
 
-import com.example.brandbeacon.domain.Keyword;
-import com.example.brandbeacon.domain.Member;
-import com.example.brandbeacon.domain.MoodboardImg;
-import com.example.brandbeacon.domain.Project;
-import com.example.brandbeacon.domain.PositioningMap;
+import com.example.brandbeacon.domain.*;
 import com.example.brandbeacon.dto.ProjectCreateRequest;
 import com.example.brandbeacon.dto.ProjectDetailResponse;
 import com.example.brandbeacon.dto.AiRequestDto;
 import com.example.brandbeacon.dto.AiResponseDto;
-import com.example.brandbeacon.repository.KeywordRepository;
-import com.example.brandbeacon.repository.MemberRepository;
-import com.example.brandbeacon.repository.MoodboardImgRepository;
-import com.example.brandbeacon.repository.ProjectRepository;
-import com.example.brandbeacon.repository.PositioningMapRepository;
+import com.example.brandbeacon.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +23,7 @@ public class ProjectService {
     private final MemberRepository memberRepository;
     private final KeywordRepository keywordRepository;
     private final MoodboardImgRepository moodboardImgRepository;
+    private final FolderRepository folderRepository;
 
     // AI 연동을 위해 포지셔닝 맵 추가
     private final RestTemplate restTemplate;
@@ -41,13 +34,17 @@ public class ProjectService {
     @Transactional // 로직 수행 중 에러가 발생하면 전체 데이터를 롤백시키는 어노테이션
     public Long createProject(Long userId, ProjectCreateRequest request) {
 
-
-
         // 1. 세션에서 가져온 유저 ID
         // -> 실제 DB에 존재하는 회원인지 확인 후 불러옴
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요."));
 
+        // 폴더 정보 조회
+        Folder folder = null;
+        if (request.getFolderId() != null) {
+            folder = folderRepository.findById(request.getFolderId())
+                    .orElse(null); // 폴더가 없으면 null 유지 (전체 프로젝트로 처리)
+        }
 
         // 2. DB에서 실제 키워드 엔티티 목록을 한 번에 조회
         List<Keyword> keywords = new ArrayList<>();
@@ -62,6 +59,7 @@ public class ProjectService {
         // 3. 빌더 패턴을 사용 -> 새로운 프로젝트(Project) 객체를 조립
         Project project = Project.builder()
                 .member(member)
+                .folder(folder) // 폴더 연관관계 매핑
                 .projectName(request.getProjectName())
                 .brandIntro(request.getBrandIntro())
                 .referenceType(request.getReferenceType())
@@ -110,7 +108,7 @@ public class ProjectService {
 
                 savedProject.updateAiAnalysis(aiResponse.getConsistencyScore(), insightText);
 
-                // 🚀 파이썬에서 보내준 브랜드 프로필 데이터 업데이트 (추가됨)
+                // 파이썬에서 보내준 브랜드 프로필 데이터 업데이트
                 if (aiResponse.getBrandProfile() != null) {
                     savedProject.updateBrandProfile(aiResponse.getBrandProfile());
                 }
@@ -143,7 +141,6 @@ public class ProjectService {
         return savedProject.getProjectId();
     }
 
-
     // 내 프로젝트 상세 조회 로직
     @Transactional(readOnly = true)
     public ProjectDetailResponse getProjectDetail(Long projectId, Long userId) {
@@ -172,14 +169,13 @@ public class ProjectService {
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .brandIntro(project.getBrandIntro())
-                .referenceType(project.getReferenceType()) // 👈 request 대신 이미 조회한 project 객체 사용
-                .brandProfile(project.getBrandProfile())   // 🚀 상세 조회 시 브랜드 프로필 매핑 추가
+                .referenceType(project.getReferenceType())
+                .brandProfile(project.getBrandProfile())
                 .keywords(keywordNames)
                 .imgUrls(imgUrls)
                 .createdAt(project.getCreatedAt())
                 .build();
     }
-
 
     // 프로젝트 삭제 로직
     @Transactional
@@ -219,11 +215,40 @@ public class ProjectService {
                     .projectName(project.getProjectName())
                     .brandIntro(project.getBrandIntro())
                     .referenceType(project.getReferenceType())
-                    .brandProfile(project.getBrandProfile()) // 🚀 목록 조회 시 브랜드 프로필 매핑 추가
+                    .brandProfile(project.getBrandProfile())
                     .keywords(keywordNames)
                     .imgUrls(imgUrls)
                     .createdAt(project.getCreatedAt())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    // 특정 폴더에 속한 프로젝트 목록 조회
+    @Transactional(readOnly = true)
+    public List<ProjectDetailResponse> getProjectsByFolder(Long folderId, Long userId) {
+        List<Project> projects = projectRepository.findByFolder_FolderId(folderId);
+
+        return projects.stream()
+                .filter(p -> p.getMember().getId().equals(userId))
+                .map(project -> {
+                    List<String> keywordNames = project.getKeywords().stream()
+                            .map(Keyword::getKeywordName)
+                            .collect(Collectors.toList());
+
+                    List<String> imgUrls = moodboardImgRepository.findByProject_ProjectId(project.getProjectId()).stream()
+                            .map(MoodboardImg::getImgUrl)
+                            .collect(Collectors.toList());
+
+                    return ProjectDetailResponse.builder()
+                            .projectId(project.getProjectId())
+                            .projectName(project.getProjectName())
+                            .brandIntro(project.getBrandIntro())
+                            .referenceType(project.getReferenceType())
+                            .brandProfile(project.getBrandProfile())
+                            .keywords(keywordNames)
+                            .imgUrls(imgUrls)
+                            .createdAt(project.getCreatedAt())
+                            .build();
+                }).collect(Collectors.toList());
     }
 }

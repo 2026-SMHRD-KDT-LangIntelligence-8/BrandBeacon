@@ -212,7 +212,7 @@ function navigateTo(idx) {
                 const activeStep = document.getElementById(`st-${currentStep}`);
                 if (activeStep) activeStep.classList.add('active');
 
-                // 페이지 뷰(page6, page7 등) 활성화 (존재하는 경우만)
+                // 페이지 뷰(page6, page7 등) 활성화 (존영하는 경우만)
                 const activePage = document.getElementById(`page${currentStep}`);
                 if (activePage) activePage.classList.add('active-view');
             }
@@ -539,13 +539,17 @@ function navigateTo(idx) {
                 }
             });
 
+            // 🚀 [폴더 ID 연동 추가]
+            const folderId = (existingFolder && existingFolder !== "") ? parseInt(existingFolder) : null;
+
             // 백엔드 DTO(ProjectCreateRequest) 규격에 정확히 맞춘 객체 조립
             const payload = {
                 projectName: title,
                 brandIntro: q1,            // 🔥 NOT NULL 제약조건 방어
                 referenceType: q2,         // 참조 타입으로 Q2 값 바인딩
                 keywordIds: keywordIdsList,// 🔥 정상 반영: 세션에서 가져온 키워드 ID 배열 바인딩
-                imgUrls: imgUrlsList       // 이미지 주소 배열
+                imgUrls: imgUrlsList,      // 이미지 주소 배열
+                folderId: folderId         // 🚀 [추가] 폴더 ID 반영
             };
 
             fetch('/api/projects/save', {
@@ -569,6 +573,37 @@ function navigateTo(idx) {
             .catch(error => {
                 console.error("통신 에러:", error);
                 alert("🚨 서버 통신 중 오류가 발생했습니다.");
+            });
+        }
+
+        // 🚀 새 폴더 생성을 위한 함수 정의
+        function createNewFolderInSystem() {
+            const folderName = prompt("새 폴더 이름을 입력하세요:");
+            if (!folderName || folderName.trim() === "") {
+                alert("폴더 이름을 입력해주세요.");
+                return;
+            }
+
+            // 서버로 폴더 생성 요청
+            fetch('/api/folders/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ folderName: folderName })
+            })
+            .then(async response => {
+                if (response.ok) {
+                    alert("폴더가 성공적으로 생성되었습니다!");
+                    location.reload(); // 화면 새로고침
+                } else {
+                    const err = await response.text();
+                    alert("폴더 생성 실패: " + err);
+                }
+            })
+            .catch(error => {
+                console.error("폴더 생성 에러:", error);
+                alert("서버와 통신 중 문제가 발생했습니다.");
             });
         }
 
