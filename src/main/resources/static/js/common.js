@@ -239,7 +239,7 @@ function navigateTo(idx) {
                 ].forEach(k => sessionStorage.removeItem(k));
                 window.location.href = '/brandsync';
             } else {
-                alert("로그인이 필요한 워크스페이스입니다.");
+                alert("로그인 후 이용할 수 있습니다.");
                 window.location.href = '/login';
             }
         }
