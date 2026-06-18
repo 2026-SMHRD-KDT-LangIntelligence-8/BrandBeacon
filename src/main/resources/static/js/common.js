@@ -102,6 +102,16 @@ function navigateTo(idx) {
         ];
 
 
+        // 헤더 메뉴용: 로그인 체크 및 이동 함수
+        function checkLoginOrRedirect(targetUrl) {
+            if (!isLoggedIn) {
+                alert("로그인 후 이용 가능한 서비스입니다.");
+                window.location.href = '/login';
+            } else {
+                window.location.href = targetUrl;
+            }
+        }
+
         // 🚀 [추가 완료] 백엔드에서 실제 프로젝트 데이터를 가져와 마이페이지(저장소)에 그려주는 함수
         function renderProjectGallery() {
             // HTML상의 프로젝트 카드 컨테이너 수집
