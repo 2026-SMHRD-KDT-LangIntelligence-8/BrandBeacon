@@ -31,6 +31,11 @@ public class Project {
     @Column(name = "PROJECT_NAME", nullable = false, length = 255)
     private String projectName; // 프로젝트 이름
 
+    // 🚀 [추가] 폴더와의 연관관계 매핑
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FOLDER_ID")
+    private Folder folder; // 이 프로젝트가 속한 폴더 (선택 사항)
+
     @Column(name = "BRAND_INTRO", nullable = false, columnDefinition = "TEXT")
     private String brandIntro; // 브랜드 소개글
 
@@ -73,4 +78,8 @@ public class Project {
         this.brandProfile = brandProfile;
     }
 
+    // 프로젝트 이동 시 폴더 정보를 업데이트하기 위한 메서드
+    public void updateFolder(Folder folder) {
+        this.folder = folder;
+    }
 }

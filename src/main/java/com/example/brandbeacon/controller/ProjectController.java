@@ -98,7 +98,7 @@ public class ProjectController {
         }
     }
 
-    // 🚀 프론트엔드 fetch('/api/projects/save') 요청을 수신하기 위한 POST 엔드포인트 추가
+    // 프론트엔드 fetch('/api/projects/save') 요청을 수신하기 위한 POST 엔드포인트 추가
     @PostMapping("/save")
     public ResponseEntity<String> saveProjectFromDashboard(@RequestBody ProjectCreateRequest request, HttpServletRequest httpRequest) {
         try {
@@ -127,6 +127,24 @@ public class ProjectController {
             List<ProjectDetailResponse> myProjects = projectService.getMyProjects(userId);
             return ResponseEntity.ok(myProjects);
 
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 🚀 [신규 추가] 특정 폴더를 클릭했을 때 해당 폴더 안의 프로젝트들만 필터링해서 가져오는 API
+    @GetMapping("/folder/{folderId}")
+    public ResponseEntity<?> getProjectsByFolder(@PathVariable("folderId") Long folderId, HttpServletRequest httpRequest) {
+        try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session == null || session.getAttribute("loginUserId") == null) {
+                return ResponseEntity.status(401).body("로그인이 필요한 서비스입니다.");
+            }
+
+            // 서비스 레이어에 폴더별 조회 구현 후 연동 가능하도록 창구 개설
+            // List<ProjectDetailResponse> folderProjects = projectService.getProjectsByFolder(folderId);
+            // return ResponseEntity.ok(folderProjects);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
