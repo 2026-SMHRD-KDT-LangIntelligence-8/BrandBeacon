@@ -6,8 +6,8 @@
 <div id="page9" th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
 
     <div class="dash-header-title">
-        <h2> Brand Strategy Dashboard</h2>
-        <p>의사결정을 지원하는 브랜드의 시각화 종합 분석 리포트입니다.</p>
+        <h2> 브랜드 전략 대시보드 </h2>
+        <p>브랜드 방향성 결정을 돕는 분석 리포트입니다.</p>
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 25px;">
@@ -35,12 +35,12 @@
             <div class="minimal-section">
 
 
-            <div class="section-box-title" style="margin-bottom:15px;">섹션 3. 매칭 벤치마크 톱 3</div>
+            <div class="section-box-title" style="margin-bottom:15px;">섹션 3. 유사브랜드 Top 3</div>
             <div id="benchmark-list" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
         <div class="minimal-section" style="grid-column: span 3;">
-            <div class="section-box-title" style="margin-bottom: 15px;">섹션 4. 최종 마켓 포지션 맵</div>
+            <div class="section-box-title" style="margin-bottom: 15px;">섹션 4. 브랜드 포지셔닝 맵</div>
             <div class="positioning-map-canvas">
                 <div class="axis-x-line"></div><div class="axis-y-line"></div>
                 <div class="axis-label" style="top:4px; left:50%; transform:translateX(-50%);">active</div>
@@ -57,7 +57,7 @@
         </div>
 
         <div class="minimal-section" style="grid-column: span 3;">
-            <div class="section-box-title" style="margin-bottom: 15px;">섹션 5. 방향성 가이드 인사이트</div>
+            <div class="section-box-title" style="margin-bottom: 15px;">섹션 5. 전략 인사이트</div>
             <ul class="insight-list" style="padding-left: 20px;">
                 <li class="insight-item"><span class="insight-icon">✦</span><div>현재 가치 벡터는 글로벌 <strong>On(온 러닝)</strong> 세그먼트에 근접 매칭됩니다.</div></li>
             </ul>
@@ -66,13 +66,13 @@
 
     <div class="minimal-section" style="margin-bottom:25px;">
 
-        <div class="section-box-title" style="margin-bottom: 15px;">섹션 6. 최종 무드보드 결과물</div>
+        <div class="section-box-title" style="margin-bottom: 15px;">섹션 6. 무드보드</div>
         <p style="font-size:11px; color:var(--text-gray); margin:-8px 0 14px 0;">CLIP AI가 브랜드 설명과 이미지의 방향 일치도를 분석했습니다</p>
         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; min-height:200px;" id="dashboard-inline-moodboard-canvas"></div>
 
     </div>
 
-    <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="resetAllPlanningData()">처음부터 다시 기획하기</button>
+    <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="resetAllPlanningData()">다시 기획하기</button>
 
     <div class="save-modal-overlay" id="custom-save-modal-overlay">
         <div class="save-modal-box">
