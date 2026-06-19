@@ -250,8 +250,8 @@
 
 
 
-        .progress-circle { width: 85px; height: 85px; background: conic-gradient(var(--primary-orange) 0% 0%, #F3F4F6 0% 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
-        .progress-circle::after { content: ''; position: absolute; width: 65px; height: 65px; background: var(--bg-main); border-radius: 50%; }
+        .progress-circle { width: 120px; height: 120px; background: conic-gradient(var(--primary-orange) 0% 0%, #F3F4F6 0% 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .progress-circle::after { content: ''; position: absolute; width: 92px; height: 92px; background: var(--bg-main); border-radius: 50%; }
         .insight-list { list-style: none; }
         .insight-item { display: flex; gap: 12px; margin-bottom: 20px; line-height: 1.6; font-size: 14px; }
         .insight-icon { color: #38BDF8; font-size: 16px; flex-shrink: 0; }
