@@ -67,6 +67,17 @@
     }
 
         // 3. 프로젝트 저장소 렌더링 로직
+        // 전체 프로젝트 폴더의 카운트를 실제 API 데이터 기준으로 갱신
+        function updateAllFolderCount(count) {
+            const tree = document.getElementById('system-folder-tree-element');
+            if (!tree) return;
+            const allNode = tree.querySelector('.folder-node[data-folder-id="all"]');
+            if (allNode) {
+                const countSpan = allNode.querySelector('.folder-count');
+                if (countSpan) countSpan.textContent = `(${count})`;
+            }
+        }
+
         // 좌측 폴더 리스트 생성
         function renderFolderTree() {
             const tree = document.getElementById('system-folder-tree-element'); tree.innerHTML = "";
@@ -74,7 +85,8 @@
                 const fCount = f.id === "all" ? virtualProjects.length : virtualProjects.filter(p => p.folder === f.id).length;
                 const li = document.createElement('li');
                 li.className = `folder-node ${f.id === currentSelectedFolderId ? 'selected-node' : ''}`;
-                li.innerHTML = `<span>📁 ${f.name}</span> <span style="font-size:11px; opacity:0.7;">(${fCount})</span>`;
+                li.dataset.folderId = f.id;
+                li.innerHTML = `<span>📁 ${f.name}</span> <span class="folder-count" style="font-size:11px; opacity:0.7;">(${f.id === "all" ? "..." : fCount})</span>`;
                 li.onclick = function() {
                     currentSelectedFolderId = f.id;
                     document.getElementById('current-folder-title-display').innerText = f.name;
@@ -99,9 +111,16 @@
                     target.innerHTML = "";
 
                     if (!projects || projects.length === 0) {
+                        updateAllFolderCount(0);
                         target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>보관 내역이 비어있습니다.</div>";
                         return;
                     }
+
+                    // 총 프로젝트 개수를 전체 프로젝트 폴더에 반영
+                    updateAllFolderCount(projects.length);
+
+                    // 이름순 정렬
+                    projects.sort((a, b) => a.projectName.localeCompare(b.projectName, 'ko'));
 
                     projects.forEach(p => {
                         const dateStr = p.createdAt ? p.createdAt.substring(0, 10) : '';

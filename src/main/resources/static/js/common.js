@@ -219,8 +219,7 @@ function navigateTo(idx) {
                 // 전체 프로젝트 항목
                 const allLi = document.createElement('li');
                 allLi.className = 'folder-node' + (_currentFolderId === null ? ' selected-node' : '');
-                const unfoldered = projects.filter(p => p.folderId == null).length;
-                allLi.innerHTML = `<span>전체 프로젝트</span><span style="font-size:12px; color:var(--text-gray);">${unfoldered}</span>`;
+                allLi.innerHTML = `<span>전체 프로젝트</span><span style="font-size:12px; color:var(--text-gray);">${projects.length}</span>`;
                 allLi.onclick = () => {
                     _currentFolderId = null;
                     _setFolderTitle('전체 프로젝트', null);
@@ -268,8 +267,12 @@ function navigateTo(idx) {
                 })
                 .then(allProjects => {
                     const projects = _currentFolderId === null
-                        ? allProjects.filter(p => p.folderId == null)
+                        ? allProjects
                         : allProjects.filter(p => p.folderId === _currentFolderId);
+
+                    // 이름순 정렬
+                    projects.sort((a, b) => a.projectName.localeCompare(b.projectName, 'ko'));
+
                     gallery.innerHTML = '';
 
                     if (!projects || projects.length === 0) {
@@ -403,6 +406,38 @@ function navigateTo(idx) {
                 .catch(err => alert('삭제 실패: ' + err.message));
         }
 
+
+        // 드래그 중 화면 자동 스크롤
+        (function() {
+            const SCROLL_ZONE = 100; // 화면 상하 끝에서 100px 이내 진입 시 스크롤 시작
+            const SCROLL_SPEED = 12;
+            let _scrollTimer = null;
+
+            document.addEventListener('dragover', function(e) {
+                const y = e.clientY;
+                const vh = window.innerHeight;
+
+                if (_scrollTimer) { clearInterval(_scrollTimer); _scrollTimer = null; }
+
+                if (y < SCROLL_ZONE) {
+                    // 화면 위쪽 영역 → 위로 스크롤
+                    const speed = Math.round(SCROLL_SPEED * (1 - y / SCROLL_ZONE));
+                    _scrollTimer = setInterval(() => window.scrollBy(0, -speed), 16);
+                } else if (y > vh - SCROLL_ZONE) {
+                    // 화면 아래쪽 영역 → 아래로 스크롤
+                    const speed = Math.round(SCROLL_SPEED * (1 - (vh - y) / SCROLL_ZONE));
+                    _scrollTimer = setInterval(() => window.scrollBy(0, speed), 16);
+                }
+            });
+
+            document.addEventListener('dragend', function() {
+                if (_scrollTimer) { clearInterval(_scrollTimer); _scrollTimer = null; }
+            });
+
+            document.addEventListener('drop', function() {
+                if (_scrollTimer) { clearInterval(_scrollTimer); _scrollTimer = null; }
+            });
+        })();
 
         // 페이지 로드 시 초기 화면 렌더링 (✨ 현재 주소창의 위치에 따라 내부 인덱스 동기화 설정)
         window.onload = function() {
