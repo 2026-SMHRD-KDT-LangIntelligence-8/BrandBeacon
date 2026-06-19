@@ -251,7 +251,7 @@
             color: var(--text-white);
             border: none;
         }
-
+        /**/
         /* 레이아웃 범용 구조 */
         .split-layout { display: flex; align-items: center; gap: 80px; }
         .split-left { flex: 1.1; }
