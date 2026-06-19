@@ -4,9 +4,11 @@ import com.example.brandbeacon.domain.Folder;
 import com.example.brandbeacon.domain.Member;
 import com.example.brandbeacon.repository.FolderRepository;
 import com.example.brandbeacon.repository.MemberRepository;
+import com.example.brandbeacon.repository.ProjectRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,11 +22,12 @@ public class FolderController {
 
     private final FolderRepository folderRepository;
     private final MemberRepository memberRepository;
+    private final ProjectRepository projectRepository;
 
     // 1. 내 폴더 목록 불러오기 API
     @GetMapping("/my")
     public ResponseEntity<?> getMyFolders(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId"); // 세션에서 로그인한 유저 확인
+        Long userId = (Long) session.getAttribute("loginUserId");
         if (userId == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
@@ -67,5 +70,52 @@ public class FolderController {
                 "message", "폴더가 성공적으로 생성되었습니다.",
                 "folderId", folder.getFolderId()
         ));
+    }
+
+    // 3. 폴더명 수정 API
+    @Transactional
+    @PatchMapping("/{folderId}")
+    public ResponseEntity<?> renameFolder(@PathVariable Long folderId,
+                                          @RequestBody Map<String, String> body,
+                                          HttpSession session) {
+        Long userId = (Long) session.getAttribute("loginUserId");
+        if (userId == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
+
+        String newName = body.get("folderName");
+        if (newName == null || newName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("폴더 이름을 입력해주세요.");
+        }
+
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 폴더입니다."));
+        if (!folder.getMember().getId().equals(userId)) {
+            return ResponseEntity.status(403).body("본인 폴더만 수정할 수 있습니다.");
+        }
+
+        folder.updateFolderName(newName.trim());
+        return ResponseEntity.ok("폴더명이 수정되었습니다.");
+    }
+
+    // 4. 폴더 삭제 API
+    @Transactional
+    @DeleteMapping("/{folderId}")
+    public ResponseEntity<?> deleteFolder(@PathVariable Long folderId, HttpSession session) {
+        Long userId = (Long) session.getAttribute("loginUserId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 폴더입니다."));
+
+        if (!folder.getMember().getId().equals(userId)) {
+            return ResponseEntity.status(403).body("본인 폴더만 삭제할 수 있습니다.");
+        }
+
+        // 폴더 소속 프로젝트의 folder 참조를 null로 초기화 후 폴더 삭제
+        projectRepository.detachProjectsFromFolder(folderId);
+        folderRepository.delete(folder);
+
+        return ResponseEntity.ok("폴더가 삭제되었습니다.");
     }
 }

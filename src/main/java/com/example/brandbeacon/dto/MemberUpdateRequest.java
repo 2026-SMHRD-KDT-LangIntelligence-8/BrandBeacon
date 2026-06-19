@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class MemberUpdateRequest {
-    private String nickname; // 변경할 닉네임
-    private String password; // 변경할 비밀번호 (변경하지 않을 거라면 프론트에서 비워두고 보냄)
+    private String nickname;
+    private String currentPassword; // 현재 비밀번호 (본인 확인용)
+    private String password;        // 새로운 비밀번호
 }

@@ -16,4 +16,11 @@ public class ProjectCreateRequest {
     private List<String> keywords;
     private List<String> imgUrls; // 사용자가 등록한 무드보드 이미지 주소 목록
     private Long folderId; // 폴더 ID
+    private String moodboardData;
+    private String imageAlignmentsData;
+    private String brandProfile;
+    private String analysisInsight;
+    private Double similarityScore;
+    private Float positionX;
+    private Float positionY;
 }

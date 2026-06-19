@@ -84,33 +84,45 @@
             });
         }
 
-        // 우측 프로젝트 갤러리 리스트 생성
+        // 우측 프로젝트 갤러리 리스트 생성 (실제 API 데이터 사용)
         function renderProjectGallery() {
             const target = document.getElementById('project-archive-gallery-element');
-            target.innerHTML = "";
+            if (!target) return;
+            target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>불러오는 중...</div>";
 
-            let filtered = currentSelectedFolderId === "all" ? virtualProjects : virtualProjects.filter(p => p.folder === currentSelectedFolderId);
+            fetch('/api/projects/my')
+                .then(res => {
+                    if (!res.ok) throw new Error('인증 필요');
+                    return res.json();
+                })
+                .then(projects => {
+                    target.innerHTML = "";
 
-            if(filtered.length === 0) {
-                target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>보관 내역이 비어있습니다.</div>";
-                return;
-            }
+                    if (!projects || projects.length === 0) {
+                        target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>보관 내역이 비어있습니다.</div>";
+                        return;
+                    }
 
-            filtered.forEach(p => {
-                const item = document.createElement('div');
-                item.className = "gallery-item";
-                item.innerHTML = `
-                    <div class="gallery-preview" onclick="loadArchivedProjectToDashboard('${p.id}')">
-                        <span style="color:var(--primary-blue); font-weight:bold; margin-bottom:5px;">[ 무드보드 + 대시보드 열기 ]</span>
-                    </div>
-                    <div style="font-weight:700; font-size:13px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;">${p.title}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
-                        <span style="font-size:11px; color:var(--text-gray);">${p.date}</span>
-                        <button class="btn-action" style="background-color: #B4B4B4; color: black; border: none; padding:5px 15px !important; font-size:13px; border-radius:4px; cursor:pointer;" onclick="deleteProjectNode('${p.id}')">삭제</button>
-                    </div>
-                `;
-                target.appendChild(item);
-            });
+                    projects.forEach(p => {
+                        const dateStr = p.createdAt ? p.createdAt.substring(0, 10) : '';
+                        const item = document.createElement('div');
+                        item.className = "gallery-item";
+                        item.innerHTML = `
+                            <div class="gallery-preview" onclick="loadArchivedProjectToDashboard(${p.projectId})">
+                                <span style="color:var(--primary-blue); font-weight:bold; margin-bottom:5px;">[ 무드보드 + 대시보드 열기 ]</span>
+                            </div>
+                            <div style="font-weight:700; font-size:13px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;">${p.projectName}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
+                                <span style="font-size:11px; color:var(--text-gray);">${dateStr}</span>
+                                <button class="btn-action" style="background-color: #B4B4B4; color: black; border: none; padding:5px 15px !important; font-size:13px; border-radius:4px; cursor:pointer;" onclick="event.stopPropagation(); deleteProjectNode(${p.projectId})">삭제</button>
+                            </div>
+                        `;
+                        target.appendChild(item);
+                    });
+                })
+                .catch(() => {
+                    target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>프로젝트를 불러오지 못했습니다. 로그인 상태를 확인해주세요.</div>";
+                });
         }
 
 
@@ -227,12 +239,15 @@
 
 
 
-        // 프로젝트 삭제
+        // 프로젝트 삭제 (실제 API 연동)
         function deleteProjectNode(projId) {
-            event.stopPropagation();
             if(confirm("선택한 프로젝트 기획 리포트를 영구 삭제하시겠습니까?")) {
-                virtualProjects = virtualProjects.filter(p => p.id !== projId);
-                renderFolderTree(); renderProjectGallery();
+                fetch(`/api/projects/${projId}`, { method: 'DELETE' })
+                    .then(res => {
+                        if (!res.ok) return res.text().then(t => { throw new Error(t); });
+                        renderProjectGallery();
+                    })
+                    .catch(err => alert('삭제 실패: ' + err.message));
             }
         }
 

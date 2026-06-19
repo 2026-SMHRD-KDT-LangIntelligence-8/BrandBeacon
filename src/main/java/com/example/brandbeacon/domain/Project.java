@@ -48,6 +48,12 @@ public class Project {
     @Column(name = "ANALYSIS_INSIGHT", columnDefinition = "TEXT")
     private String analysisInsight; // AI 분석 인사이트 내용
 
+    @Column(name = "MOODBOARD_DATA", columnDefinition = "TEXT")
+    private String moodboardData; // 카테고리별 무드보드 구조 JSON
+
+    @Column(name = "IMAGE_ALIGNMENTS_DATA", columnDefinition = "TEXT")
+    private String imageAlignmentsData; // 이미지별 유사도 데이터 JSON (뱃지 복원용)
+
     // 스프링 부트가 소문자로 강제 변환하지 못하도록 이스케이프 따옴표(\") 씌우기 완료!
     @Column(name = "\"BRAND_PROFILE\"", columnDefinition = "TEXT")
     private String brandProfile; // 모델이 종합해서 전달하는 브랜드 프로필 데이터

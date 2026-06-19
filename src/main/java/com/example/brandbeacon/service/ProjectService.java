@@ -3,19 +3,14 @@ package com.example.brandbeacon.service;
 import com.example.brandbeacon.domain.*;
 import com.example.brandbeacon.dto.ProjectCreateRequest;
 import com.example.brandbeacon.dto.ProjectDetailResponse;
-import com.example.brandbeacon.dto.AiResponseDto;
 import com.example.brandbeacon.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,8 +23,6 @@ public class ProjectService {
     private final MoodboardImgRepository moodboardImgRepository;
     private final FolderRepository folderRepository;
 
-    // AI 연동을 위해 포지셔닝 맵 추가
-    private final RestTemplate restTemplate;
     private final PositioningMapRepository positioningMapRepository;
 
 
@@ -41,6 +34,11 @@ public class ProjectService {
         // -> 실제 DB에 존재하는 회원인지 확인 후 불러옴
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요."));
+
+        // 동일 유저 내 프로젝트명 중복 확인
+        if (projectRepository.existsByMember_IdAndProjectName(userId, request.getProjectName())) {
+            throw new IllegalArgumentException("이미 사용 중인 프로젝트 이름입니다. 다른 이름을 입력해 주세요.");
+        }
 
         // 폴더 정보 조회
         Folder folder = null;
@@ -67,6 +65,8 @@ public class ProjectService {
                 .brandIntro(request.getBrandIntro())
                 .referenceType(request.getReferenceType())
                 .keywords(keywords) // 다대다(ManyToMany) 관계 매핑
+                .moodboardData(request.getMoodboardData()) // 카테고리별 무드보드 구조
+                .imageAlignmentsData(request.getImageAlignmentsData()) // 이미지 유사도 데이터
                 .build();
 
 
@@ -86,76 +86,28 @@ public class ProjectService {
         }
 
 
-        // 파이썬 AI 서버 연동 (brand-dashboard, 2단계 파이프라인)
-        try {
-            ObjectMapper mapper = new ObjectMapper();
+        // 프론트에서 전달한 AI 분석 결과를 바로 저장 (재호출 없음)
+        BigDecimal score = request.getSimilarityScore() != null
+                ? new BigDecimal(request.getSimilarityScore())
+                : BigDecimal.ZERO;
+        String insightText = request.getAnalysisInsight() != null
+                ? request.getAnalysisInsight()
+                : "분석 내용이 없습니다.";
 
-            List<String> keywordNames = keywords.stream()
-                    .map(Keyword::getKeywordName)
-                    .collect(Collectors.toList());
+        savedProject.updateAiAnalysis(score, insightText);
 
-            // 1단계: 브랜드 벡터 생성 (POST /api/brand/vector)
-            Map<String, Object> vectorRequest = new HashMap<>();
-            vectorRequest.put("project_id", savedProject.getProjectId().toString());
-            vectorRequest.put("user_text", request.getBrandIntro());
-            vectorRequest.put("selected_tags", keywordNames);
-            vectorRequest.put("image_urls", request.getImgUrls());
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> vectorResponse = (Map<String, Object>) restTemplate.postForObject(
-                    "http://localhost:8001/api/brand/vector", vectorRequest, Map.class);
-
-            // 2단계: 브랜드 분석 (POST /api/brand/analyze)
-            Map<String, Object> analyzeRequest = new HashMap<>();
-            analyzeRequest.put("project_id", savedProject.getProjectId().toString());
-            analyzeRequest.put("brand_vector", vectorResponse.get("brand_vector"));
-            analyzeRequest.put("brand_profile", vectorResponse.get("brand_profile"));
-            analyzeRequest.put("user_text", request.getBrandIntro());
-            analyzeRequest.put("selected_tags", keywordNames);
-            analyzeRequest.put("image_alignments", vectorResponse.get("image_alignments"));
-
-            AiResponseDto aiResponse = restTemplate.postForObject(
-                    "http://localhost:8001/api/brand/analyze", analyzeRequest, AiResponseDto.class);
-
-            // 결과물 DB에 저장
-            if (aiResponse != null) {
-                // insight: JSON 객체 → 문자열로 변환해서 TEXT 컬럼에 저장
-                String insightText = aiResponse.getInsight() != null
-                        ? mapper.writeValueAsString(aiResponse.getInsight())
-                        : "분석 내용이 없습니다.";
-
-                BigDecimal score = (aiResponse.getConsistency() != null && aiResponse.getConsistency().getScore() != null)
-                        ? new BigDecimal(aiResponse.getConsistency().getScore())
-                        : BigDecimal.ZERO;
-
-                savedProject.updateAiAnalysis(score, insightText);
-
-                // brandProfile: dict → JSON 문자열로 변환
-                if (aiResponse.getBrandProfile() != null) {
-                    savedProject.updateBrandProfile(mapper.writeValueAsString(aiResponse.getBrandProfile()));
-                }
-
-                // 포지셔닝 맵 좌표 저장
-                Float posX = (aiResponse.getPosition() != null) ? aiResponse.getPosition().getX() : 50.0f;
-                Float posY = (aiResponse.getPosition() != null) ? aiResponse.getPosition().getY() : 50.0f;
-                PositioningMap map = PositioningMap.builder()
-                        .project(savedProject)
-                        .currentX(posX)
-                        .currentY(posY)
-                        .build();
-                positioningMapRepository.save(map);
-            }
-
-        } catch (Exception e) {
-            System.out.println("AI 파이썬 서버 연동 실패: " + e.getMessage());
-
-            PositioningMap fallbackMap = PositioningMap.builder()
-                    .project(savedProject)
-                    .currentX(50.0f)
-                    .currentY(50.0f)
-                    .build();
-            positioningMapRepository.save(fallbackMap);
+        if (request.getBrandProfile() != null) {
+            savedProject.updateBrandProfile(request.getBrandProfile());
         }
+
+        Float posX = request.getPositionX() != null ? request.getPositionX() : 50.0f;
+        Float posY = request.getPositionY() != null ? request.getPositionY() : 50.0f;
+        PositioningMap posMap = PositioningMap.builder()
+                .project(savedProject)
+                .currentX(posX)
+                .currentY(posY)
+                .build();
+        positioningMapRepository.save(posMap);
 
 
         // 생성된 프로젝트의 ID 번호를 반환
@@ -201,6 +153,8 @@ public class ProjectService {
                 .positionY(posMap != null ? posMap.getCurrentY() : null)
                 .keywords(keywordNames)
                 .imgUrls(imgUrls)
+                .moodboardData(project.getMoodboardData())
+                .imageAlignmentsData(project.getImageAlignmentsData())
                 .createdAt(project.getCreatedAt())
                 .build();
     }
@@ -213,14 +167,16 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프로젝트입니다."));
 
-        // 내 프로젝트가 맞는지 확인!
-        // 만약 남의 프로젝트면 에러 뱉음.
+        // 내 프로젝트가 맞는지 확인
         if (!project.getMember().getId().equals(userId)) {
             throw new IllegalArgumentException("본인이 생성한 프로젝트만 삭제할 수 있습니다.");
         }
 
-        // 문제없으면 DB에서 시원하게 영구 삭제
-        // 연결된 이미지 데이터들도 같이 삭제
+        // FK 제약 순서에 맞게 연관 데이터 먼저 삭제
+        moodboardImgRepository.deleteByProject_ProjectId(projectId);
+        positioningMapRepository.deleteById(projectId);
+
+        // 프로젝트 삭제 (PROJECT_KEYWORD 중간 테이블은 JPA가 자동 처리)
         projectRepository.delete(project);
     }
 
@@ -240,12 +196,14 @@ public class ProjectService {
 
             return ProjectDetailResponse.builder()
                     .projectId(project.getProjectId())
+                    .folderId(project.getFolder() != null ? project.getFolder().getFolderId() : null)
                     .projectName(project.getProjectName())
                     .brandIntro(project.getBrandIntro())
                     .referenceType(project.getReferenceType())
                     .brandProfile(project.getBrandProfile())
                     .keywords(keywordNames)
                     .imgUrls(imgUrls)
+                    .moodboardData(project.getMoodboardData())
                     .createdAt(project.getCreatedAt())
                     .build();
         }).collect(Collectors.toList());
@@ -278,5 +236,24 @@ public class ProjectService {
                             .createdAt(project.getCreatedAt())
                             .build();
                 }).collect(Collectors.toList());
+    }
+
+    // 프로젝트 폴더 이동
+    @Transactional
+    public void moveProjectToFolder(Long projectId, Long userId, Long folderId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 프로젝트입니다."));
+
+        if (!project.getMember().getId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 생성한 프로젝트만 이동할 수 있습니다.");
+        }
+
+        Folder folder = null;
+        if (folderId != null) {
+            folder = folderRepository.findById(folderId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 폴더입니다."));
+        }
+
+        project.updateFolder(folder);
     }
 }

@@ -3,9 +3,9 @@
       th:replace="~{layout :: layout(~{::content})}">
 <body>
     <div th:fragment="content">
-        <div class="split-layout" style="align-items: flex-start;">
-            <div class="split-left" style="border-right: 1px solid var(--border-color); padding-right: 40px;">
-                <h4 style="margin-bottom: 20px; font-size: 20px;">[Login]</h4>
+        <div style="max-width:520px; margin:40px auto;">
+            <div>
+                <h4 style="margin-bottom: 20px; font-size: 20px;">Login</h4>
 
                 <button class="btn-action" style="width:100%; justify-content:center; background:#FFFFFF; color:#4A5568; border: 1px solid var(--border-color); margin-bottom: 20px;"
                         onclick="location.href='/oauth2/authorization/google'">
