@@ -11,10 +11,10 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <div id="global-step-bar" class="step-container">
-    <div class="step" id="st-6" onclick="navigateTo(6)">01 브랜드기획 동기화</div>
-    <div class="step" id="st-7" onclick="navigateTo(7)">02 레퍼런스 이미지 선택</div>
-    <div class="step" id="st-8" onclick="navigateTo(8)">03 무드보드 생성</div>
-    <div class="step" id="st-9" onclick="navigateTo(9)">04 브랜드 대시보드</div>
+    <div class="step" id="st-6" onclick="navigateToStep(6)">01 브랜드 방향성 입력</div>
+    <div class="step" id="st-7" onclick="navigateToStep(7)">02 레퍼런스 이미지 선택</div>
+    <div class="step" id="st-8" onclick="navigateToStep(8)">03 무드보드 생성</div>
+    <div class="step" id="st-9" onclick="navigateToStep(9)">04 브랜드 대시보드</div>
 </div>
 
 <main th:insert="${content}"></main>

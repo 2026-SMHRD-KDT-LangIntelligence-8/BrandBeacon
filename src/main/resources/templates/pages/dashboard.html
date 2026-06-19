@@ -6,8 +6,8 @@
 <div id="page9" th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
 
     <div class="dash-header-title">
-        <h2> 브랜드 전략 대시보드 </h2>
-        <p>브랜드 방향성 결정을 돕는 분석 리포트입니다.</p>
+        <h2> Brand Strategy Dashboard</h2>
+        <p>브랜드 방향성을 시각화한 종합 분석 결과입니다.</p>
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 25px;">
@@ -19,7 +19,7 @@
 
         <div class="minimal-section" style="cursor:pointer;" onclick="navigateTo(6)">
             <div class="section-box-title" style="margin-bottom:15px;">
-                섹션 1. 브랜드 방향 키워드
+                섹션 1. 브랜드 무드태그
             </div>
             <div id="brand-keyword-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
         </div>
@@ -35,12 +35,12 @@
             <div class="minimal-section">
 
 
-            <div class="section-box-title" style="margin-bottom:15px;">섹션 3. 유사브랜드 Top 3</div>
+            <div class="section-box-title" style="margin-bottom:15px;">섹션 3. 매칭 벤치마크 톱 3</div>
             <div id="benchmark-list" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
         <div class="minimal-section" style="grid-column: span 3;">
-            <div class="section-box-title" style="margin-bottom: 15px;">섹션 4. 브랜드 포지셔닝 맵</div>
+            <div class="section-box-title" style="margin-bottom: 15px;">섹션 4. 최종 마켓 포지션 맵</div>
             <div class="positioning-map-canvas">
                 <div class="axis-x-line"></div><div class="axis-y-line"></div>
                 <div class="axis-label" style="top:4px; left:50%; transform:translateX(-50%);">active</div>
@@ -57,7 +57,7 @@
         </div>
 
         <div class="minimal-section" style="grid-column: span 3;">
-            <div class="section-box-title" style="margin-bottom: 15px;">섹션 5. 전략 인사이트</div>
+            <div class="section-box-title" style="margin-bottom: 15px;">섹션 5. 방향성 가이드 인사이트</div>
             <ul class="insight-list" style="padding-left: 20px;">
                 <li class="insight-item"><span class="insight-icon">✦</span><div>현재 가치 벡터는 글로벌 <strong>On(온 러닝)</strong> 세그먼트에 근접 매칭됩니다.</div></li>
             </ul>
@@ -66,13 +66,13 @@
 
     <div class="minimal-section" style="margin-bottom:25px;">
 
-        <div class="section-box-title" style="margin-bottom: 15px;">섹션 6. 무드보드</div>
-        <p style="font-size:11px; color:var(--text-gray); margin:-8px 0 14px 0;">CLIP AI가 브랜드 설명과 이미지의 방향 일치도를 분석했습니다</p>
+        <div class="section-box-title" style="margin-bottom: 15px;">섹션 6. 최종 무드보드 결과물</div>
+        <p style="font-size:11px; color:var(--text-gray); margin:-8px 0 14px 0;">AI가 브랜드 설명과 이미지의 일치도를 분석했습니다</p>
         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; min-height:200px;" id="dashboard-inline-moodboard-canvas"></div>
 
     </div>
 
-    <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="resetAllPlanningData()">다시 기획하기</button>
+    <button class="btn-action btn-orange" style="width:100%; justify-content:center;" onclick="resetAllPlanningData()">처음부터 다시 기획하기</button>
 
     <div class="save-modal-overlay" id="custom-save-modal-overlay">
         <div class="save-modal-box">
@@ -80,7 +80,7 @@
 
             <div class="input-group">
                 <label>저장할 프로젝트명</label>
-                <input type="text" id="modal-project-title-input" value="신규 생성 매칭 가이드 모델 셋">
+                <input type="text" id="modal-project-title-input" value="새 프로젝트">
             </div>
 
             <div class="input-group">
@@ -151,7 +151,151 @@
             }, 300);
         };
 
+        // 아카이브에서 진입 시 특정 projectId의 데이터를 로드해 렌더링
+        function loadArchivedDashboard(projectId) {
+            fetch(`/api/projects/${projectId}`)
+                .then(res => { if (!res.ok) throw new Error('로드 실패'); return res.json(); })
+                .then(project => {
+
+                    // 섹션 1: 키워드
+                    const keywordContainer = document.getElementById('brand-keyword-container');
+                    if (keywordContainer && project.keywords) {
+                        keywordContainer.innerHTML = '';
+                        project.keywords.forEach(kw => {
+                            keywordContainer.innerHTML += `<span style="background:var(--bg-card-inner); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--primary-orange); border:1px solid #ff7a00; font-weight:600;">${kw}</span>`;
+                        });
+                    }
+
+                    // 섹션 2: 일관성 점수
+                    const pct = project.similarityScore ? Math.round(Number(project.similarityScore)) : 0;
+                    const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'E';
+                    const circle = document.querySelector('.progress-circle');
+                    if (circle) {
+                        const radius = 34, circumference = 2 * Math.PI * radius;
+                        const offset = circumference * (1 - pct / 100);
+                        circle.style.background = 'none';
+                        circle.innerHTML = `
+                            <svg width="85" height="85" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
+                                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
+                                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
+                                    stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+                            </svg>
+                            <div style="position:absolute;z-index:1;text-align:center;">
+                                <div style="font-size:22px;font-weight:900;color:#ff6b35;">${pct}</div>
+                                <div style="font-size:11px;color:var(--text-gray);">/ 100</div>
+                                <div style="font-size:13px;font-weight:700;color:var(--primary-blue);margin-top:2px;">${grade}등급</div>
+                            </div>`;
+                    }
+
+                    // 섹션 3 & 4: 레퍼런스 브랜드 조회 후 Top3 계산 + 맵 렌더링
+                    const posX = project.positionX, posY = project.positionY;
+                    if (posX !== null && posX !== undefined) {
+                        fetch('/api/reference-brands')
+                            .then(r => r.json())
+                            .then(brands => {
+                                // Top3: 유클리드 거리 기준
+                                const ranked = brands
+                                    .map(b => ({ ...b, dist: Math.sqrt(Math.pow(b.brandX - posX, 2) + Math.pow(b.brandY - posY, 2)) }))
+                                    .sort((a, b) => a.dist - b.dist);
+                                const top3 = ranked.slice(0, 3);
+                                const top3Names = top3.map(b => b.brandName);
+
+                                // 섹션 3: 벤치마크
+                                const benchmarkList = document.getElementById('benchmark-list');
+                                if (benchmarkList) {
+                                    benchmarkList.innerHTML = '';
+                                    top3.forEach((brand, i) => {
+                                        benchmarkList.innerHTML += `
+                                            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);">
+                                                <span style="font-size:13px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
+                                                <span style="font-size:13px;font-weight:700;">${brand.brandName}</span>
+                                            </div>`;
+                                    });
+                                }
+
+                                // 섹션 4: 포지셔닝 맵 렌더링
+                                const mapCanvas = document.querySelector('.positioning-map-canvas');
+                                if (mapCanvas) {
+                                    mapCanvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
+                                    const allX = brands.map(b => b.brandX).concat(posX);
+                                    const allY = brands.map(b => b.brandY).concat(posY);
+                                    const minX = Math.min(...allX), maxX = Math.max(...allX);
+                                    const minY = Math.min(...allY), maxY = Math.max(...allY);
+                                    const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
+                                    const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
+                                    const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
+                                    brands.forEach(brand => {
+                                        const dot = document.createElement('div');
+                                        dot.style.position = 'absolute';
+                                        dot.style.left = toLeft(brand.brandX) + '%';
+                                        dot.style.top  = toTop(brand.brandY) + '%';
+                                        if (top3Names.includes(brand.brandName)) {
+                                            dot.className = 'brand-dot'; dot.textContent = brand.brandName;
+                                        } else {
+                                            dot.className = 'brand-dot-ref'; dot.dataset.name = brand.brandName;
+                                        }
+                                        mapCanvas.appendChild(dot);
+                                    });
+                                    const myDot = document.querySelector('.our-brand-dot');
+                                    if (myDot) {
+                                        myDot.style.left = toLeft(posX) + '%';
+                                        myDot.style.top  = toTop(posY) + '%';
+                                        myDot.textContent = '● 내 브랜드';
+                                    }
+                                }
+                            });
+                    }
+
+                    // 섹션 5: 인사이트
+                    const insightList = document.querySelector('.insight-list');
+                    if (insightList && project.analysisInsight) {
+                        try {
+                            const ins = JSON.parse(project.analysisInsight);
+                            const renderSection = (title, icon, color, items) => {
+                                if (!items || items.length === 0) return '';
+                                return `<div style="margin-bottom:20px;">
+                                    <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${title}</div>
+                                    <ul style="padding-left:18px;margin:0;font-size:14px;color:var(--text-dark);">
+                                        ${items.map(t => `<li style="margin-bottom:8px;line-height:1.7;">${t}</li>`).join('')}
+                                    </ul></div>`;
+                            };
+                            insightList.innerHTML = `
+                                ${ins['종합평가'] ? `<p style="font-size:14px;line-height:1.8;color:var(--text-dark);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">${ins['종합평가']}</p>` : ''}
+                                ${renderSection('강점', '✦', '#22c55e', ins['강점'])}
+                                ${renderSection('기회', '→', '#3b82f6', ins['기회'])}
+                                ${renderSection('액션', '▶', '#ff6b35', ins['액션'])}
+                                ${renderSection('주의점', '!', '#f59e0b', ins['주의점'])}`;
+                        } catch(e) {
+                            insightList.innerHTML = `<li><span class="insight-icon">✦</span><div>${project.analysisInsight}</div></li>`;
+                        }
+                    }
+
+                    // 섹션 6: 무드보드 이미지
+                    const moodCanvas = document.getElementById('dashboard-inline-moodboard-canvas');
+                    if (moodCanvas && project.imgUrls && project.imgUrls.length > 0) {
+                        moodCanvas.innerHTML = '';
+                        project.imgUrls.forEach(url => {
+                            const div = document.createElement('div');
+                            div.style.cssText = 'overflow:hidden;border-radius:6px;background:#262F40;height:120px;';
+                            div.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+                            moodCanvas.appendChild(div);
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('아카이브 프로젝트 로드 실패:', err);
+                    alert('프로젝트를 불러오는 데 실패했습니다.');
+                });
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+
+            // 아카이브 진입 감지: URL에 projectId 파라미터가 있으면 해당 프로젝트 로드
+            const _projectIdParam = new URLSearchParams(window.location.search).get('projectId');
+            if (_projectIdParam) {
+                loadArchivedDashboard(_projectIdParam);
+                return;
+            }
 
             // [섹션 6: 무드보드 이미지 렌더링]
 

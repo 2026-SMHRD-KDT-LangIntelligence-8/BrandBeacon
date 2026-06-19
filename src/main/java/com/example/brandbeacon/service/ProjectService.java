@@ -3,16 +3,19 @@ package com.example.brandbeacon.service;
 import com.example.brandbeacon.domain.*;
 import com.example.brandbeacon.dto.ProjectCreateRequest;
 import com.example.brandbeacon.dto.ProjectDetailResponse;
-import com.example.brandbeacon.dto.AiRequestDto;
 import com.example.brandbeacon.dto.AiResponseDto;
 import com.example.brandbeacon.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,51 +86,69 @@ public class ProjectService {
         }
 
 
-        // 파이썬 AI 서버 연동
+        // 파이썬 AI 서버 연동 (brand-dashboard, 2단계 파이프라인)
         try {
-            // 1. 파이썬에 보낼 키워드 이름 쏙쏙 뽑아내기
+            ObjectMapper mapper = new ObjectMapper();
+
             List<String> keywordNames = keywords.stream()
                     .map(Keyword::getKeywordName)
                     .collect(Collectors.toList());
 
-            // 2. 파이썬에 보낼 데이터 정의
-            AiRequestDto aiRequest = AiRequestDto.builder()
-                    .keywords(keywordNames)
-                    .imageUrls(request.getImgUrls())
-                    .build();
+            // 1단계: 브랜드 벡터 생성 (POST /api/brand/vector)
+            Map<String, Object> vectorRequest = new HashMap<>();
+            vectorRequest.put("project_id", savedProject.getProjectId().toString());
+            vectorRequest.put("user_text", request.getBrandIntro());
+            vectorRequest.put("selected_tags", keywordNames);
+            vectorRequest.put("image_urls", request.getImgUrls());
 
-            // 파이썬 서버 -> POST 요청 전송
-            String pythonApiUrl = "http://localhost:8000/api/analyze";
-            AiResponseDto aiResponse = restTemplate.postForObject(pythonApiUrl, aiRequest, AiResponseDto.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> vectorResponse = (Map<String, Object>) restTemplate.postForObject(
+                    "http://localhost:8001/api/brand/vector", vectorRequest, Map.class);
 
-            // 4. 결과물 DB에 업데이트
+            // 2단계: 브랜드 분석 (POST /api/brand/analyze)
+            Map<String, Object> analyzeRequest = new HashMap<>();
+            analyzeRequest.put("project_id", savedProject.getProjectId().toString());
+            analyzeRequest.put("brand_vector", vectorResponse.get("brand_vector"));
+            analyzeRequest.put("brand_profile", vectorResponse.get("brand_profile"));
+            analyzeRequest.put("user_text", request.getBrandIntro());
+            analyzeRequest.put("selected_tags", keywordNames);
+            analyzeRequest.put("image_alignments", vectorResponse.get("image_alignments"));
+
+            AiResponseDto aiResponse = restTemplate.postForObject(
+                    "http://localhost:8001/api/brand/analyze", analyzeRequest, AiResponseDto.class);
+
+            // 결과물 DB에 저장
             if (aiResponse != null) {
-                // 프로젝트 엔티티에 일관성 점수와 인사이트 1번 문구 저장
-                String insightText = (aiResponse.getInsights() != null && !aiResponse.getInsights().isEmpty())
-                        ? aiResponse.getInsights().get(0) : "분석 내용이 없습니다.";
+                // insight: JSON 객체 → 문자열로 변환해서 TEXT 컬럼에 저장
+                String insightText = aiResponse.getInsight() != null
+                        ? mapper.writeValueAsString(aiResponse.getInsight())
+                        : "분석 내용이 없습니다.";
 
-                savedProject.updateAiAnalysis(aiResponse.getConsistencyScore(), insightText);
+                BigDecimal score = (aiResponse.getConsistency() != null && aiResponse.getConsistency().getScore() != null)
+                        ? new BigDecimal(aiResponse.getConsistency().getScore())
+                        : BigDecimal.ZERO;
 
-                // 파이썬에서 보내준 브랜드 프로필 데이터 업데이트
+                savedProject.updateAiAnalysis(score, insightText);
+
+                // brandProfile: dict → JSON 문자열로 변환
                 if (aiResponse.getBrandProfile() != null) {
-                    savedProject.updateBrandProfile(aiResponse.getBrandProfile());
+                    savedProject.updateBrandProfile(mapper.writeValueAsString(aiResponse.getBrandProfile()));
                 }
 
-                // 포지셔닝 맵 좌표 생성 후 DB에 저장
+                // 포지셔닝 맵 좌표 저장
+                Float posX = (aiResponse.getPosition() != null) ? aiResponse.getPosition().getX() : 50.0f;
+                Float posY = (aiResponse.getPosition() != null) ? aiResponse.getPosition().getY() : 50.0f;
                 PositioningMap map = PositioningMap.builder()
                         .project(savedProject)
-                        .currentX(aiResponse.getPositionX())
-                        .currentY(aiResponse.getPositionY())
+                        .currentX(posX)
+                        .currentY(posY)
                         .build();
                 positioningMapRepository.save(map);
             }
 
         } catch (Exception e) {
-            // 만약 파이썬 서버가 꺼져있거나 에러가 나도
-            // 프로젝트 생성이 취소되지 않도록 에러만 로그로 남기기
             System.out.println("AI 파이썬 서버 연동 실패: " + e.getMessage());
 
-            // AI 서버 연동 실패 시 프론트엔드 테스트를 위한 임시 좌표
             PositioningMap fallbackMap = PositioningMap.builder()
                     .project(savedProject)
                     .currentX(50.0f)
@@ -164,13 +185,20 @@ public class ProjectService {
                 .map(MoodboardImg::getImgUrl)
                 .collect(Collectors.toList());
 
-        // 5. DTO 객체로 반환
+        // 5. 포지셔닝 맵 좌표 조회
+        PositioningMap posMap = positioningMapRepository.findById(projectId).orElse(null);
+
+        // 6. DTO 객체로 반환
         return ProjectDetailResponse.builder()
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .brandIntro(project.getBrandIntro())
                 .referenceType(project.getReferenceType())
                 .brandProfile(project.getBrandProfile())
+                .analysisInsight(project.getAnalysisInsight())
+                .similarityScore(project.getSimilarityScore())
+                .positionX(posMap != null ? posMap.getCurrentX() : null)
+                .positionY(posMap != null ? posMap.getCurrentY() : null)
                 .keywords(keywordNames)
                 .imgUrls(imgUrls)
                 .createdAt(project.getCreatedAt())
