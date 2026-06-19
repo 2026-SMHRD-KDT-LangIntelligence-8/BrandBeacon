@@ -45,31 +45,33 @@ public class FolderController {
     // 2. 새 폴더 생성하기 API
     @PostMapping("/create")
     public ResponseEntity<?> createFolder(@RequestBody Map<String, String> body, HttpSession session) {
-        Long userId = (Long) session.getAttribute("loginUserId");
-        if (userId == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        try {
+            Long userId = (Long) session.getAttribute("loginUserId");
+            if (userId == null) {
+                return ResponseEntity.status(401).body("로그인이 필요합니다.");
+            }
+
+            String folderName = body.get("folderName");
+            if (folderName == null || folderName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("폴더 이름을 입력해주세요.");
+            }
+
+            Member member = memberRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+            Folder folder = Folder.builder()
+                    .member(member)
+                    .folderName(folderName)
+                    .build();
+            folderRepository.save(folder);
+
+            return ResponseEntity.ok(Map.<String, Object>of(
+                    "message", "폴더가 성공적으로 생성되었습니다.",
+                    "folderId", folder.getFolderId()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("폴더 생성 중 오류: " + e.getMessage());
         }
-
-        String folderName = body.get("folderName");
-        if (folderName == null || folderName.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("폴더 이름을 입력해주세요.");
-        }
-
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        // 새 폴더 객체 조립 후 DB에 저장!
-        Folder folder = Folder.builder()
-                .member(member)
-                .folderName(folderName)
-                .build();
-        folderRepository.save(folder);
-
-        // 숫자(ID)와 문자(메시지)가 섞여 있으므로 <String, Object> 명시!
-        return ResponseEntity.ok(Map.<String, Object>of(
-                "message", "폴더가 성공적으로 생성되었습니다.",
-                "folderId", folder.getFolderId()
-        ));
     }
 
     // 3. 폴더명 수정 API

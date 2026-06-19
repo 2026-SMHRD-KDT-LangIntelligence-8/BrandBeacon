@@ -112,6 +112,8 @@ public class ProjectController {
             return ResponseEntity.ok("프로젝트가 성공적으로 생성되었습니다! 프로젝트 ID: " + projectId);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("저장 중 오류: " + e.getMessage());
         }
     }
 

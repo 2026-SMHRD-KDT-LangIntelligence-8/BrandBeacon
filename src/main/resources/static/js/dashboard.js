@@ -209,51 +209,112 @@
 
 
 
-        // 저장 모달창 표시 및 폴더 목록 갱신
+        // 저장 모달창 표시 및 실제 폴더 목록 로드
         function openSaveProjectModal() {
             const overlay = document.getElementById('custom-save-modal-overlay');
             const selectBox = document.getElementById('modal-existing-folder-select');
-            selectBox.innerHTML = "";
-            virtualFolders.forEach(f => {
-                if(f.id !== "all") selectBox.innerHTML += `<option value="${f.id}">${f.name}</option>`;
-            });
-            overlay.style.display = "flex";
+
+            selectBox.innerHTML = '<option value="">폴더 없음 (미분류)</option>';
+            fetch('/api/folders/my')
+                .then(r => r.ok ? r.json() : [])
+                .then(folders => {
+                    folders.forEach(f => {
+                        selectBox.innerHTML += `<option value="${f.folderId}">${f.folderName}</option>`;
+                    });
+                })
+                .catch(() => {});
+
+            if (overlay) overlay.style.display = 'flex';
         }
 
         // 저장 모달창 닫기
         function closeSaveProjectModal() {
-            document.getElementById('custom-save-modal-overlay').style.display = "none";
-            document.getElementById('modal-new-folder-input').value = "";
+            const modal = document.getElementById('custom-save-modal-overlay');
+            if (modal) modal.style.display = 'none';
+            const newFolderInput = document.getElementById('modal-new-folder-input');
+            if (newFolderInput) newFolderInput.value = '';
         }
 
-        // 프로젝트 데이터 저장 및 폴더 생성 처리
+        // 프로젝트 저장 실행 (새 폴더 생성 → 프로젝트 저장 순서 보장)
         function executeAdvancedProjectSave() {
             const projTitle = document.getElementById('modal-project-title-input').value.trim();
-            const existingFolderId = document.getElementById('modal-existing-folder-select').value;
             const newFolderName = document.getElementById('modal-new-folder-input').value.trim();
+            const existingFolderId = document.getElementById('modal-existing-folder-select').value;
 
-            if(!projTitle) { alert("프로젝트 가이드북의 이름을 인풋하십시오."); return; }
-            let targetFolderId = existingFolderId;
+            if (!projTitle) { alert("저장할 프로젝트명을 입력해주세요."); return; }
 
-            if(newFolderName !== "") {
-                const isFolderExists = virtualFolders.find(f => f.name === newFolderName);
-                if(!isFolderExists) {
-                    targetFolderId = "custom_gen_" + Date.now();
-                    virtualFolders.push({ id: targetFolderId, name: newFolderName, isSystem: false });
-                } else { targetFolderId = isFolderExists.id; }
+            if (newFolderName) {
+                // 새 폴더를 먼저 생성한 뒤 반환된 folderId로 프로젝트 저장
+                fetch('/api/folders/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName: newFolderName })
+                })
+                .then(r => r.ok ? r.json() : Promise.reject('폴더 생성 실패'))
+                .then(data => _doSaveProject(projTitle, data.folderId))
+                .catch(err => alert('폴더 생성 중 오류가 발생했습니다: ' + err));
+            } else {
+                const folderId = existingFolderId ? parseInt(existingFolderId) : null;
+                _doSaveProject(projTitle, folderId);
             }
+        }
 
-            virtualProjects.push({
-                id: "p_user_built_" + Date.now(),
-                folder: targetFolderId,
-                title: projTitle,
-                date: new Date().toISOString().substring(0,10),
-                moodboardData: organizedDataGlobal,
-                assets: [...currentLiveSessionAssets]
+        // 실제 프로젝트 저장 API 호출
+        function _doSaveProject(title, folderId) {
+            const q1 = sessionStorage.getItem("brandQ1") || "브랜드 라인 요약 기본값";
+            const q2 = sessionStorage.getItem("brandQ2") || "타겟 오브젝트 검색 기본값";
+            const keywordIdsList = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
+            const moodboardDataRaw = sessionStorage.getItem("finalMoodboardData") || "[]";
+
+            let imgUrlsList = [];
+            JSON.parse(moodboardDataRaw).forEach(cat => {
+                if (cat.assets && Array.isArray(cat.assets)) imgUrlsList = imgUrlsList.concat(cat.assets);
             });
 
-            renderFolderTree(); renderProjectGallery(); closeSaveProjectModal();
-            if(confirm("성공적으로 저장되었습니다. 프로젝트 저장소로 즉시 이동하시겠습니까?")) navigateTo(10); else navigateTo(4);
+            const dashRaw = sessionStorage.getItem("dashboardData");
+            let imageAlignmentsRaw = "[]", brandProfileRaw = null, analysisInsightRaw = null;
+            let similarityScore = null, positionX = null, positionY = null;
+            if (dashRaw) {
+                try {
+                    const d = JSON.parse(dashRaw);
+                    imageAlignmentsRaw = JSON.stringify(d?.evidence?.imageAlignments || []);
+                    if (d?.brandProfile) brandProfileRaw = JSON.stringify(d.brandProfile);
+                    if (d?.insight) analysisInsightRaw = JSON.stringify(d.insight);
+                    if (d?.consistency?.score != null) similarityScore = d.consistency.score;
+                    if (d?.position?.x != null) positionX = d.position.x;
+                    if (d?.position?.y != null) positionY = d.position.y;
+                } catch(e) {}
+            }
+
+            fetch('/api/projects/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: title,
+                    brandIntro: q1,
+                    referenceType: q2,
+                    keywordIds: keywordIdsList,
+                    imgUrls: imgUrlsList,
+                    folderId: folderId,
+                    moodboardData: moodboardDataRaw,
+                    imageAlignmentsData: imageAlignmentsRaw,
+                    brandProfile: brandProfileRaw,
+                    analysisInsight: analysisInsightRaw,
+                    similarityScore: similarityScore,
+                    positionX: positionX,
+                    positionY: positionY
+                })
+            })
+            .then(async response => {
+                if (response.ok) {
+                    closeSaveProjectModal();
+                    const dialog = document.getElementById('after-save-dialog');
+                    if (dialog) dialog.style.display = 'flex';
+                } else {
+                    alert(await response.text());
+                }
+            })
+            .catch(() => alert("서버 통신 중 오류가 발생했습니다."));
         }
 
 

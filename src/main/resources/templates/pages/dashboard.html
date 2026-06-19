@@ -114,8 +114,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script th:src="@{/js/common.js}"></script>
-    <script th:src="@{/js/dashboard.js}"></script>
+    <script th:src="@{/js/dashboard.js(v=3)}"></script>
 
     <script>
         // --- 공통 헬퍼 함수 ---
@@ -415,6 +414,95 @@
             const insightList = document.querySelector('.insight-list');
             if (insightList && d.insight) renderInsights(insightList, d.insight);
         });
+    </script>
+
+    <script>
+        // 저장 모달 함수 재정의 (common.js 덮어쓰기 방지용 — 인라인 스크립트는 가장 마지막에 실행)
+        function openSaveProjectModal() {
+            const overlay = document.getElementById('custom-save-modal-overlay');
+            const selectBox = document.getElementById('modal-existing-folder-select');
+            if (!selectBox || !overlay) return;
+            selectBox.innerHTML = '<option value="">폴더 없음 (미분류)</option>';
+            fetch('/api/folders/my')
+                .then(r => r.ok ? r.json() : [])
+                .then(folders => {
+                    folders.forEach(f => {
+                        selectBox.innerHTML += '<option value="' + f.folderId + '">' + f.folderName + '</option>';
+                    });
+                })
+                .catch(() => {});
+            overlay.style.display = 'flex';
+        }
+
+        function closeSaveProjectModal() {
+            const modal = document.getElementById('custom-save-modal-overlay');
+            if (modal) modal.style.display = 'none';
+            const inp = document.getElementById('modal-new-folder-input');
+            if (inp) inp.value = '';
+        }
+
+        function executeAdvancedProjectSave() {
+            const projTitle = document.getElementById('modal-project-title-input').value.trim();
+            const newFolderName = document.getElementById('modal-new-folder-input').value.trim();
+            const existingFolderId = document.getElementById('modal-existing-folder-select').value;
+            if (!projTitle) { alert('저장할 프로젝트명을 입력해주세요.'); return; }
+
+            if (newFolderName) {
+                fetch('/api/folders/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName: newFolderName })
+                })
+                .then(r => r.ok ? r.json() : Promise.reject('폴더 생성 실패'))
+                .then(data => _doSaveProject(projTitle, data.folderId))
+                .catch(err => alert('폴더 생성 중 오류: ' + err));
+            } else {
+                _doSaveProject(projTitle, existingFolderId ? parseInt(existingFolderId) : null);
+            }
+        }
+
+        function _doSaveProject(title, folderId) {
+            const q1 = sessionStorage.getItem('brandQ1') || '브랜드 라인 요약 기본값';
+            const q2 = sessionStorage.getItem('brandQ2') || '타겟 오브젝트 검색 기본값';
+            const keywordIdsList = JSON.parse(sessionStorage.getItem('brandKeywords') || '[]');
+            const moodboardDataRaw = sessionStorage.getItem('finalMoodboardData') || '[]';
+            let imgUrlsList = [];
+            try { JSON.parse(moodboardDataRaw).forEach(function(cat) { if (cat.assets) imgUrlsList = imgUrlsList.concat(cat.assets); }); } catch(e) {}
+            const dashRaw = sessionStorage.getItem('dashboardData');
+            let imageAlignmentsRaw = '[]', brandProfileRaw = null, analysisInsightRaw = null, similarityScore = null, positionX = null, positionY = null;
+            if (dashRaw) {
+                try {
+                    const d = JSON.parse(dashRaw);
+                    imageAlignmentsRaw = JSON.stringify(d && d.evidence && d.evidence.imageAlignments ? d.evidence.imageAlignments : []);
+                    if (d && d.brandProfile) brandProfileRaw = JSON.stringify(d.brandProfile);
+                    if (d && d.insight) analysisInsightRaw = JSON.stringify(d.insight);
+                    if (d && d.consistency && d.consistency.score != null) similarityScore = d.consistency.score;
+                    if (d && d.position && d.position.x != null) positionX = d.position.x;
+                    if (d && d.position && d.position.y != null) positionY = d.position.y;
+                } catch(e) {}
+            }
+            fetch('/api/projects/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: title, brandIntro: q1, referenceType: q2,
+                    keywordIds: keywordIdsList, imgUrls: imgUrlsList, folderId: folderId,
+                    moodboardData: moodboardDataRaw, imageAlignmentsData: imageAlignmentsRaw,
+                    brandProfile: brandProfileRaw, analysisInsight: analysisInsightRaw,
+                    similarityScore: similarityScore, positionX: positionX, positionY: positionY
+                })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    closeSaveProjectModal();
+                    var dialog = document.getElementById('after-save-dialog');
+                    if (dialog) dialog.style.display = 'flex';
+                } else {
+                    response.text().then(function(err) { alert(err); });
+                }
+            })
+            .catch(function() { alert('서버 통신 중 오류가 발생했습니다.'); });
+        }
     </script>
 
 </div> </body>
