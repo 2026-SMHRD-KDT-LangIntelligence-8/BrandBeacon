@@ -25,22 +25,22 @@
         </div>
 
 
-            <div class="minimal-section">
-                <div class="section-box-title" style="margin-bottom:6px;">섹션 2. 브랜드 일관성 점수</div>
-                <p style="font-size:13px; color:var(--text-gray); margin:0 0 12px 0;">브랜드 설명과 이미지가 얼마나 잘 맞는지 보여줍니다</p>
-                <div style="display:flex; justify-content:center; align-items:center; min-height:100px;">
-                    <div class="progress-circle"></div>
-                </div>
+        <div class="minimal-section">
+            <div class="section-box-title" style="margin-bottom:6px;">섹션 2. 브랜드 일관성 점수</div>
+            <p style="font-size:16px; color:var(--text-gray); margin:0 0 12px 0;">브랜드 설명과 이미지가 얼마나 잘 맞는지 보여줍니다</p>
+            <div style="display:flex; justify-content:center; align-items:center; min-height:150px;">
+                <div class="progress-circle"></div>
             </div>
-            <div class="minimal-section">
+        </div>
+        <div class="minimal-section">
 
 
-            <div class="section-box-title" style="margin-bottom:15px;">섹션 3. 매칭 벤치마크 톱 3</div>
+            <div class="section-box-title" style="margin-bottom:15px;">섹션 3. 유사브랜드 Top 3</div>
             <div id="benchmark-list" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
         <div class="minimal-section" style="grid-column: span 3;">
-            <div class="section-box-title" style="margin-bottom: 15px;">섹션 4. 최종 마켓 포지션 맵</div>
+            <div class="section-box-title" style="margin-bottom: 15px;">섹션 4. 브랜드 포지셔닝 맵</div>
             <div class="positioning-map-canvas">
                 <div class="axis-x-line"></div><div class="axis-y-line"></div>
                 <div class="axis-label" style="top:4px; left:50%; transform:translateX(-50%);">active</div>
@@ -48,7 +48,7 @@
                 <div class="axis-label" style="top:50%; left:4px; transform:translateY(-50%);">performance</div>
                 <div class="axis-label" style="top:50%; right:4px; transform:translateY(-50%);">lifestyle</div>
 
-                <div style="position:absolute; bottom:8px; right:8px; font-size:11px; color:var(--text-gray); display:flex; align-items:center; gap:6px;">
+                <div style="position:absolute; bottom:8px; right:8px; font-size:14px; color:var(--text-gray); display:flex; align-items:center; gap:6px;">
                     <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#cccccc;"></span>
                     점에 마우스를 올리면 브랜드명이 표시됩니다
                 </div>
@@ -57,7 +57,7 @@
         </div>
 
         <div class="minimal-section" style="grid-column: span 3;">
-            <div class="section-box-title" style="margin-bottom: 15px;">섹션 5. 방향성 가이드 인사이트</div>
+            <div class="section-box-title" style="margin-bottom: 15px;">섹션 5. 전략 인사이트</div>
             <ul class="insight-list" style="padding-left: 20px;">
                 <li class="insight-item"><span class="insight-icon">✦</span><div>현재 가치 벡터는 글로벌 <strong>On(온 러닝)</strong> 세그먼트에 근접 매칭됩니다.</div></li>
             </ul>
@@ -80,7 +80,7 @@
 
             <div class="input-group">
                 <label>저장할 프로젝트명</label>
-                <input type="text" id="modal-project-title-input" value="신규 생성 매칭 가이드 모델 셋">
+                <input type="text" id="modal-project-title-input" value="새 프로젝트">
             </div>
 
             <div class="input-group">
@@ -100,149 +100,194 @@
         </div>
     </div>
 
+    <!-- 저장 완료 후 안내 모달 -->
+    <div class="save-modal-overlay" id="after-save-dialog" style="display:none;">
+        <div class="save-modal-box" style="max-width:420px; text-align:center;">
+            <div style="font-size:36px; margin-bottom:14px;">✅</div>
+            <h3 style="margin-bottom:10px; font-size:18px; color:var(--primary-orange);">프로젝트가 저장되었습니다.</h3>
+            <p style="font-size:16px; color:var(--text-gray); margin-bottom:24px;">저장소로 이동하시겠습니까?</p>
+            <div style="display:flex; justify-content:center; gap:12px;">
+                <button class="btn-action" onclick="document.getElementById('after-save-dialog').style.display='none'; window.location.href='/'">아니오</button>
+                <button class="btn-action btn-orange" onclick="window.location.href='/archive'">네</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script th:src="@{/js/common.js}"></script>
-    <script th:src="@{/js/dashboard.js}"></script>
+    <script th:src="@{/js/dashboard.js(v=3)}"></script>
 
     <script>
-        // ✅ 작동이 입증된 PDF 내보내기 스크립트 (기존 위치 복구)
-        window.exportToPDF = function() {
-            console.log("1. PDF 다운로드 준비...");
+        // --- 공통 헬퍼 함수 ---
 
+        function renderProgressCircle(circle, pct, grade) {
+            pct = Math.min(100, Math.max(0, Math.round(Number(pct) || 0)));
+            const radius = 48, circumference = 2 * Math.PI * radius;
+            const offset = circumference * (1 - pct / 100);
+            circle.style.background = 'none';
+            circle.innerHTML = `
+                <svg width="120" height="120" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
+                    <circle cx="60" cy="60" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
+                    <circle cx="60" cy="60" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
+                        stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+                </svg>
+                <div style="position:absolute;z-index:1;text-align:center;">
+                    <div style="font-size:27px;font-weight:900;color:#ff6b35;">${pct}</div>
+                    <div style="font-size:16px;color:var(--text-gray);">/ 100</div>
+                    <div style="font-size:17px;font-weight:700;color:var(--primary-blue);margin-top:3px;">${grade}등급</div>
+                </div>`;
+        }
+
+        function renderInsightSection(title, icon, color, items) {
+            if (!items || items.length === 0) return '';
+            return `<div style="margin-bottom:20px;">
+                <div style="font-size:17px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${title}</div>
+                <ul style="padding-left:18px;margin:0;font-size:16px;color:var(--text-dark);">
+                    ${items.map(t => `<li style="margin-bottom:8px;line-height:1.7;">${t}</li>`).join('')}
+                </ul></div>`;
+        }
+
+        function renderInsights(insightList, ins) {
+            insightList.innerHTML = `
+                ${ins['종합평가'] ? `<p style="font-size:17px;line-height:1.8;color:var(--text-dark);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">${ins['종합평가']}</p>` : ''}
+                ${renderInsightSection('강점', '✦', '#22c55e', ins['강점'])}
+                ${renderInsightSection('기회', '→', '#3b82f6', ins['기회'])}
+                ${renderInsightSection('액션', '▶', '#ff6b35', ins['액션'])}
+                ${renderInsightSection('주의점', '!', '#f59e0b', ins['주의점'])}`;
+        }
+
+        function renderMoodboard(canvas, parsedData, alignMap, alignMedian) {
+            canvas.innerHTML = '';
+            parsedData.forEach(cat => {
+                const assets = cat.assets || [];
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `layout-${Math.min(assets.length, 4)}`;
+                itemDiv.style.cssText = 'display:grid;background:#262F40;border-radius:6px;overflow:hidden;position:relative;height:120px;';
+                assets.slice(0, 4).forEach((imgUrl, idx) => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = `thumb-${idx}`;
+                    imgContainer.style.cssText = 'overflow:hidden;position:relative;';
+                    imgContainer.innerHTML = imgUrl && imgUrl.startsWith('http')
+                        ? `<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+                        : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:14px;">${imgUrl}</div>`;
+                    if (imgUrl && !imgUrl.includes('placehold.co') && alignMedian !== null && alignMap[imgUrl] !== undefined) {
+                        const isGood = alignMap[imgUrl] >= alignMedian;
+                        const badge = document.createElement('div');
+                        badge.style.cssText = `position:absolute;top:4px;right:4px;background:${isGood ? 'rgba(34,197,94,0.9)' : 'rgba(245,158,11,0.9)'};color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;cursor:default;`;
+                        badge.textContent = isGood ? '✓ 방향 적합' : '검토 필요';
+                        badge.title = isGood ? '브랜드 설명과 이미지 방향이 잘 맞습니다' : '다른 이미지로 교체를 고려해보세요';
+                        imgContainer.appendChild(badge);
+                    }
+                    itemDiv.appendChild(imgContainer);
+                });
+                const label = document.createElement('div');
+                label.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:4px;font-size:16px;text-align:center;';
+                label.innerText = cat.category;
+                itemDiv.appendChild(label);
+                canvas.appendChild(itemDiv);
+            });
+        }
+
+        function renderPositioningMap(mapCanvas, brands, posX, posY, top3Names) {
+            mapCanvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
+            const allX = brands.map(b => b.brandX).concat(posX);
+            const allY = brands.map(b => b.brandY).concat(posY);
+            const minX = Math.min(...allX), maxX = Math.max(...allX);
+            const minY = Math.min(...allY), maxY = Math.max(...allY);
+            const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
+            const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
+            const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
+            brands.forEach(brand => {
+                const dot = document.createElement('div');
+                dot.style.cssText = `position:absolute;left:${toLeft(brand.brandX)}%;top:${toTop(brand.brandY)}%;`;
+                if (top3Names.includes(brand.brandName)) {
+                    dot.className = 'brand-dot'; dot.textContent = brand.brandName;
+                } else {
+                    dot.className = 'brand-dot-ref'; dot.dataset.name = brand.brandName;
+                }
+                mapCanvas.appendChild(dot);
+            });
+            const myDot = document.querySelector('.our-brand-dot');
+            if (myDot) {
+                myDot.style.left = toLeft(posX) + '%';
+                myDot.style.top  = toTop(posY) + '%';
+                myDot.textContent = '● 내 브랜드';
+            }
+        }
+
+        // --- PDF 내보내기 ---
+
+        window.exportToPDF = function() {
             const element = document.querySelector('.content-wrapper');
             if (!element) return;
-
             window.scrollTo(0, 0);
-
             setTimeout(() => {
-                const opt = {
-                    margin:       [10, 0, 10, 0],
-                    filename:     'Brand-Sync_Report.pdf',
-                    image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        onclone: function (clonedDoc) {
+                html2pdf().set({
+                    margin: [10, 0, 10, 0],
+                    filename: 'Brand-Sync_Report.pdf',
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: {
+                        scale: 2, useCORS: true, allowTaint: true, scrollX: 0, scrollY: 0,
+                        onclone: function(clonedDoc) {
                             clonedDoc.documentElement.className = document.documentElement.className;
                             clonedDoc.body.className = document.body.className;
-
                             const clonedTarget = clonedDoc.querySelector('.content-wrapper');
                             if (clonedTarget) {
                                 clonedTarget.style.margin = '0';
                                 clonedTarget.style.width = '1000px';
-
-                                const originalBodyBg = window.getComputedStyle(document.body).backgroundColor;
-                                clonedTarget.style.backgroundColor = originalBodyBg !== 'rgba(0, 0, 0, 0)' ? originalBodyBg : '#1E232E';
+                                const bg = window.getComputedStyle(document.body).backgroundColor;
+                                clonedTarget.style.backgroundColor = bg !== 'rgba(0, 0, 0, 0)' ? bg : '#1E232E';
                             }
                         }
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                console.log("2. PDF 렌더링 중...");
-
-                html2pdf().set(opt).from(element).save().then(() => {
-                    console.log("3. PDF 저장 완료!");
-                });
-
+                }).from(element).save();
             }, 300);
         };
 
-        // 아카이브에서 진입 시 특정 projectId의 데이터를 로드해 렌더링
+        // --- 아카이브 진입 시 프로젝트 로드 ---
+
         function loadArchivedDashboard(projectId) {
             fetch(`/api/projects/${projectId}`)
                 .then(res => { if (!res.ok) throw new Error('로드 실패'); return res.json(); })
                 .then(project => {
-
                     // 섹션 1: 키워드
                     const keywordContainer = document.getElementById('brand-keyword-container');
                     if (keywordContainer && project.keywords) {
-                        keywordContainer.innerHTML = '';
-                        project.keywords.forEach(kw => {
-                            keywordContainer.innerHTML += `<span style="background:var(--bg-card-inner); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--primary-orange); border:1px solid #ff7a00; font-weight:600;">${kw}</span>`;
-                        });
+                        keywordContainer.innerHTML = project.keywords.map(kw =>
+                            `<span style="background:var(--bg-card-inner);padding:6px 12px;border-radius:20px;font-size:15px;color:var(--primary-orange);border:1px solid #ff7a00;font-weight:600;">${kw}</span>`
+                        ).join('');
                     }
 
                     // 섹션 2: 일관성 점수
                     const pct = project.similarityScore ? Math.round(Number(project.similarityScore)) : 0;
                     const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'E';
                     const circle = document.querySelector('.progress-circle');
-                    if (circle) {
-                        const radius = 34, circumference = 2 * Math.PI * radius;
-                        const offset = circumference * (1 - pct / 100);
-                        circle.style.background = 'none';
-                        circle.innerHTML = `
-                            <svg width="85" height="85" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
-                                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
-                                <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
-                                    stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
-                            </svg>
-                            <div style="position:absolute;z-index:1;text-align:center;">
-                                <div style="font-size:22px;font-weight:900;color:#ff6b35;">${pct}</div>
-                                <div style="font-size:11px;color:var(--text-gray);">/ 100</div>
-                                <div style="font-size:13px;font-weight:700;color:var(--primary-blue);margin-top:2px;">${grade}등급</div>
-                            </div>`;
-                    }
+                    if (circle) renderProgressCircle(circle, pct, grade);
 
-                    // 섹션 3 & 4: 레퍼런스 브랜드 조회 후 Top3 계산 + 맵 렌더링
+                    // 섹션 3 & 4
                     const posX = project.positionX, posY = project.positionY;
                     if (posX !== null && posX !== undefined) {
                         fetch('/api/reference-brands')
                             .then(r => r.json())
                             .then(brands => {
-                                // Top3: 유클리드 거리 기준
-                                const ranked = brands
+                                const top3 = brands
                                     .map(b => ({ ...b, dist: Math.sqrt(Math.pow(b.brandX - posX, 2) + Math.pow(b.brandY - posY, 2)) }))
-                                    .sort((a, b) => a.dist - b.dist);
-                                const top3 = ranked.slice(0, 3);
+                                    .sort((a, b) => a.dist - b.dist)
+                                    .slice(0, 3);
                                 const top3Names = top3.map(b => b.brandName);
 
-                                // 섹션 3: 벤치마크
                                 const benchmarkList = document.getElementById('benchmark-list');
                                 if (benchmarkList) {
-                                    benchmarkList.innerHTML = '';
-                                    top3.forEach((brand, i) => {
-                                        benchmarkList.innerHTML += `
-                                            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);">
-                                                <span style="font-size:13px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
-                                                <span style="font-size:13px;font-weight:700;">${brand.brandName}</span>
-                                            </div>`;
-                                    });
+                                    benchmarkList.innerHTML = top3.map((brand, i) =>
+                                        `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);">
+                                            <span style="font-size:16px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
+                                            <span style="font-size:16px;font-weight:700;">${brand.brandName}</span>
+                                        </div>`
+                                    ).join('');
                                 }
 
-                                // 섹션 4: 포지셔닝 맵 렌더링
                                 const mapCanvas = document.querySelector('.positioning-map-canvas');
-                                if (mapCanvas) {
-                                    mapCanvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
-                                    const allX = brands.map(b => b.brandX).concat(posX);
-                                    const allY = brands.map(b => b.brandY).concat(posY);
-                                    const minX = Math.min(...allX), maxX = Math.max(...allX);
-                                    const minY = Math.min(...allY), maxY = Math.max(...allY);
-                                    const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
-                                    const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
-                                    const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
-                                    brands.forEach(brand => {
-                                        const dot = document.createElement('div');
-                                        dot.style.position = 'absolute';
-                                        dot.style.left = toLeft(brand.brandX) + '%';
-                                        dot.style.top  = toTop(brand.brandY) + '%';
-                                        if (top3Names.includes(brand.brandName)) {
-                                            dot.className = 'brand-dot'; dot.textContent = brand.brandName;
-                                        } else {
-                                            dot.className = 'brand-dot-ref'; dot.dataset.name = brand.brandName;
-                                        }
-                                        mapCanvas.appendChild(dot);
-                                    });
-                                    const myDot = document.querySelector('.our-brand-dot');
-                                    if (myDot) {
-                                        myDot.style.left = toLeft(posX) + '%';
-                                        myDot.style.top  = toTop(posY) + '%';
-                                        myDot.textContent = '● 내 브랜드';
-                                    }
-                                }
+                                if (mapCanvas) renderPositioningMap(mapCanvas, brands, posX, posY, top3Names);
                             });
                     }
 
@@ -250,36 +295,39 @@
                     const insightList = document.querySelector('.insight-list');
                     if (insightList && project.analysisInsight) {
                         try {
-                            const ins = JSON.parse(project.analysisInsight);
-                            const renderSection = (title, icon, color, items) => {
-                                if (!items || items.length === 0) return '';
-                                return `<div style="margin-bottom:20px;">
-                                    <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${title}</div>
-                                    <ul style="padding-left:18px;margin:0;font-size:14px;color:var(--text-dark);">
-                                        ${items.map(t => `<li style="margin-bottom:8px;line-height:1.7;">${t}</li>`).join('')}
-                                    </ul></div>`;
-                            };
-                            insightList.innerHTML = `
-                                ${ins['종합평가'] ? `<p style="font-size:14px;line-height:1.8;color:var(--text-dark);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">${ins['종합평가']}</p>` : ''}
-                                ${renderSection('강점', '✦', '#22c55e', ins['강점'])}
-                                ${renderSection('기회', '→', '#3b82f6', ins['기회'])}
-                                ${renderSection('액션', '▶', '#ff6b35', ins['액션'])}
-                                ${renderSection('주의점', '!', '#f59e0b', ins['주의점'])}`;
+                            renderInsights(insightList, JSON.parse(project.analysisInsight));
                         } catch(e) {
                             insightList.innerHTML = `<li><span class="insight-icon">✦</span><div>${project.analysisInsight}</div></li>`;
                         }
                     }
 
-                    // 섹션 6: 무드보드 이미지
+                    // 섹션 6: 무드보드
                     const moodCanvas = document.getElementById('dashboard-inline-moodboard-canvas');
-                    if (moodCanvas && project.imgUrls && project.imgUrls.length > 0) {
-                        moodCanvas.innerHTML = '';
-                        project.imgUrls.forEach(url => {
-                            const div = document.createElement('div');
-                            div.style.cssText = 'overflow:hidden;border-radius:6px;background:#262F40;height:120px;';
-                            div.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
-                            moodCanvas.appendChild(div);
-                        });
+                    if (moodCanvas) {
+                        let alignMap = {}, alignMedian = null;
+                        if (project.imageAlignmentsData) {
+                            try {
+                                const alignments = JSON.parse(project.imageAlignmentsData);
+                                alignments.forEach(a => { alignMap[a.imageUrl] = a.similarity; });
+                                const sims = alignments.map(a => a.similarity).sort((a, b) => a - b);
+                                const mid = Math.floor(sims.length / 2);
+                                alignMedian = sims.length % 2 === 0 ? (sims[mid-1] + sims[mid]) / 2 : sims[mid];
+                            } catch(e) {}
+                        }
+                        if (project.moodboardData) {
+                            try { renderMoodboard(moodCanvas, JSON.parse(project.moodboardData), alignMap, alignMedian); }
+                            catch(e) { moodCanvas.innerHTML = '<div style="grid-column:span 4;text-align:center;padding:20px;color:var(--text-gray);">무드보드 데이터를 불러올 수 없습니다.</div>'; }
+                        } else if (project.imgUrls && project.imgUrls.length > 0) {
+                            moodCanvas.innerHTML = '';
+                            project.imgUrls.forEach(url => {
+                                const div = document.createElement('div');
+                                div.style.cssText = 'overflow:hidden;border-radius:6px;background:#262F40;height:120px;';
+                                div.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+                                moodCanvas.appendChild(div);
+                            });
+                        } else {
+                            moodCanvas.innerHTML = '<div style="grid-column:span 4;text-align:center;padding:20px;color:var(--text-gray);">저장된 무드보드 데이터가 없습니다.</div>';
+                        }
                     }
                 })
                 .catch(err => {
@@ -288,235 +336,173 @@
                 });
         }
 
+        // --- DOMContentLoaded: 세션 데이터 렌더링 ---
+
         window.addEventListener('DOMContentLoaded', () => {
+            const projectIdParam = new URLSearchParams(window.location.search).get('projectId');
+            if (projectIdParam) { loadArchivedDashboard(projectIdParam); return; }
 
-            // 아카이브 진입 감지: URL에 projectId 파라미터가 있으면 해당 프로젝트 로드
-            const _projectIdParam = new URLSearchParams(window.location.search).get('projectId');
-            if (_projectIdParam) {
-                loadArchivedDashboard(_projectIdParam);
-                return;
+            // 섹션 6: 이미지 유사도 맵 생성
+            const dashRaw = sessionStorage.getItem("dashboardData");
+            const alignMap = {};
+            let alignMedian = null;
+            if (dashRaw) {
+                const alignments = JSON.parse(dashRaw)?.evidence?.imageAlignments || [];
+                alignments.forEach(a => { alignMap[a.imageUrl] = a.similarity; });
+                const sims = alignments.map(a => a.similarity).sort((a, b) => a - b);
+                const mid = Math.floor(sims.length / 2);
+                alignMedian = sims.length % 2 === 0 ? (sims[mid-1] + sims[mid]) / 2 : sims[mid];
             }
 
-            // [섹션 6: 무드보드 이미지 렌더링]
-
-            // 섹션 6: imageAlignments 맵 생성
-            const _dashRaw = sessionStorage.getItem("dashboardData");
-            const _alignMap = {};
-            let _alignMedian = null;
-            if (_dashRaw) {
-                const _alignments = JSON.parse(_dashRaw)?.evidence?.imageAlignments || [];
-                _alignments.forEach(a => { _alignMap[a.imageUrl] = a.similarity; });
-                const _sims = _alignments.map(a => a.similarity).sort((a, b) => a - b);
-                const _mid = Math.floor(_sims.length / 2);
-                _alignMedian = _sims.length % 2 === 0 ? (_sims[_mid-1] + _sims[_mid]) / 2 : _sims[_mid];
-            }
-
-
-            const canvas = document.getElementById('dashboard-inline-moodboard-canvas');
+            const moodCanvas = document.getElementById('dashboard-inline-moodboard-canvas');
             const savedMoodboard = sessionStorage.getItem("finalMoodboardData");
-
-            if (savedMoodboard && canvas) {
-                const parsedData = JSON.parse(savedMoodboard);
-                canvas.innerHTML = '';
-
-                parsedData.forEach(cat => {
-                    const assets = cat.assets;
-                    const count = Math.min(assets.length, 4);
-
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = `layout-${count}`;
-                    itemDiv.style.display = 'grid';
-                    itemDiv.style.backgroundColor = '#262F40';
-                    itemDiv.style.borderRadius = '6px';
-                    itemDiv.style.overflow = 'hidden';
-                    itemDiv.style.position = 'relative';
-                    itemDiv.style.height = '120px';
-
-                    assets.slice(0, 4).forEach((imgUrl, idx) => {
-                        const imgContainer = document.createElement('div');
-                        imgContainer.className = `thumb-${idx}`;
-                        imgContainer.style.overflow = 'hidden';
-                        imgContainer.style.position = 'relative';
-
-                        if (imgUrl && imgUrl.startsWith('http')) {
-                            // crossorigin 속성 제거 (작동했던 버전과 동일하게 복구)
-                            imgContainer.innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
-                        } else {
-                            imgContainer.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#fff; font-size:10px;">${imgUrl}</div>`;
-                        }
-
-                        // 뱃지: placehold.co 스킵, URL 매칭된 이미지만 표시
-                        if (imgUrl && !imgUrl.includes('placehold.co') && _alignMedian !== null && _alignMap[imgUrl] !== undefined) {
-                            const isGood = _alignMap[imgUrl] >= _alignMedian;
-                            const badge = document.createElement('div');
-                            badge.style.cssText = `position:absolute; top:4px; right:4px;
-                                background:${isGood ? 'rgba(34,197,94,0.9)' : 'rgba(245,158,11,0.9)'};
-                                color:white; font-size:9px; font-weight:700;
-                                padding:2px 6px; border-radius:10px; cursor:default;`;
-                            badge.textContent = isGood ? '✓ 방향 적합' : '검토 필요';
-                            badge.title = isGood ? '브랜드 설명과 이미지 방향이 잘 맞습니다' : '다른 이미지로 교체를 고려해보세요';
-                            imgContainer.appendChild(badge);
-                        }
-
-                        itemDiv.appendChild(imgContainer);
-                    });
-
-                    const label = document.createElement('div');
-                    label.style.position = 'absolute'; label.style.bottom = '0'; label.style.left = '0'; label.style.right = '0';
-                    label.style.background = 'rgba(0,0,0,0.6)'; label.style.color = '#fff';
-                    label.style.padding = '4px'; label.style.fontSize = '11px'; label.style.textAlign = 'center';
-                    label.innerText = cat.category;
-
-                    itemDiv.appendChild(label);
-                    canvas.appendChild(itemDiv);
-                });
+            if (savedMoodboard && moodCanvas) {
+                try { renderMoodboard(moodCanvas, JSON.parse(savedMoodboard), alignMap, alignMedian); }
+                catch(e) { if(moodCanvas) moodCanvas.innerHTML = '<div style="grid-column:span 4;text-align:center;padding:20px;color:var(--text-gray);">무드보드 데이터를 불러올 수 없습니다.</div>'; }
             } else {
-                if(canvas) canvas.innerHTML = '<div style="grid-column: span 4; text-align:center; padding: 20px; color: var(--text-gray);">저장된 무드보드 데이터가 없습니다.</div>';
+                if(moodCanvas) moodCanvas.innerHTML = '<div style="grid-column:span 4;text-align:center;padding:20px;color:var(--text-gray);">저장된 무드보드 데이터가 없습니다.</div>';
             }
 
-            // [섹션 1: 브랜드 방향 키워드 렌더링]
+            // 섹션 1: 브랜드 키워드
             const keywordContainer = document.getElementById('brand-keyword-container');
             const savedKeywords = sessionStorage.getItem("brandKeywords");
-
             if (savedKeywords && keywordContainer) {
-                const parsedKeywords = JSON.parse(savedKeywords);
-                keywordContainer.innerHTML = '';
-                parsedKeywords.forEach(kw => {
-                    keywordContainer.innerHTML += `<span style="background:var(--bg-card-inner); padding:6px 12px; border-radius:20px; font-size:13px; color:var(--primary-orange); border:1px solid #ff7a00; font-weight:600;">${kw}</span>`;
-                });
+                keywordContainer.innerHTML = JSON.parse(savedKeywords).map(kw =>
+                    `<span style="background:var(--bg-card-inner);padding:6px 12px;border-radius:20px;font-size:15px;color:var(--primary-orange);border:1px solid #ff7a00;font-weight:600;">${kw}</span>`
+                ).join('');
             }
 
-            // [섹션 2~5: AI 분석 결과 최신 동적 렌더링]
+            // 섹션 2~5: AI 분석 결과
             const dashboardData = sessionStorage.getItem("dashboardData");
+            if (!dashboardData) return;
+            const d = JSON.parse(dashboardData);
 
-            if (dashboardData) {
-                const d = JSON.parse(dashboardData);
+            // 섹션 2: 일관성 점수
+            const circle = document.querySelector('.progress-circle');
+            if (circle && d.consistency) renderProgressCircle(circle, d.consistency.score, d.consistency.grade);
 
-                // 섹션 2: 일관성 점수
-                const circle = document.querySelector('.progress-circle');
-                if (circle && d.consistency) {
-                    const pct = d.consistency.score;
-                    const radius = 34;
-                    const circumference = 2 * Math.PI * radius;
-                    const offset = circumference * (1 - pct / 100);
-                    circle.style.background = 'none';
-                    circle.innerHTML = `
-                        <svg width="85" height="85" style="position:absolute; top:0; left:0; transform:rotate(-90deg);">
-                            <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#F3F4F6" stroke-width="8"/>
-                            <circle cx="42.5" cy="42.5" r="${radius}" fill="none" stroke="#ff6b35" stroke-width="8"
-                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
-                                stroke-linecap="round"/>
-                        </svg>
-                        <div style="position:absolute; z-index:1; text-align:center;">
-                            <div style="font-size:22px; font-weight:900; color:#ff6b35;">${pct}</div>
-                            <div style="font-size:11px; color:var(--text-gray);">/ 100</div>
-                            <div style="font-size:13px; font-weight:700; color:var(--primary-blue); margin-top:2px;">${d.consistency.grade}등급</div>
-                        </div>`;
-                }
-
-                // 섹션 3: Top3 유사 브랜드
-                const benchmarkList = document.getElementById('benchmark-list');
-                if (benchmarkList && d.similarBrands) {
-                    benchmarkList.innerHTML = '';
-                    d.similarBrands.forEach((brand, i) => {
-                        benchmarkList.innerHTML += `
-                            <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border-color);">
-                                <span style="font-size:13px; color:var(--primary-orange); font-weight:700; min-width:28px;">${i+1}위</span>
-                                <span style="font-size:13px; font-weight:700;">${brand.name}</span>
-                            </div>`;
-                    });
-                }
-
-                // 섹션 4: 내 브랜드 포지션 + 레퍼런스 브랜드 29개
-                if (d.position) {
-                    fetch('/api/reference-brands')
-                        .then(res => res.json())
-                        .then(brands => {
-                            const canvas = document.querySelector('.positioning-map-canvas');
-                            if (!canvas) return;
-
-                            canvas.querySelectorAll('.brand-dot:not(.our-brand-dot), .brand-dot-ref').forEach(el => el.remove());
-
-                            const allX = brands.map(b => b.brandX).concat(d.position.x);
-                            const allY = brands.map(b => b.brandY).concat(d.position.y);
-                            const minX = Math.min(...allX), maxX = Math.max(...allX);
-                            const minY = Math.min(...allY), maxY = Math.max(...allY);
-                            const rangeX = maxX - minX || 1;
-                            const rangeY = maxY - minY || 1;
-
-                            const toLeft = x => Math.min(Math.max(((x - minX) / rangeX) * 80 + 10, 5), 92);
-                            const toTop  = y => Math.min(Math.max((1 - (y - minY) / rangeY) * 80 + 10, 5), 92);
-
-                            const top3Names = (d.similarBrands || []).slice(0, 3).map(b => b.name);
-
-                            brands.forEach(brand => {
-                                const isTop3 = top3Names.includes(brand.brandName);
-                                const dot = document.createElement('div');
-                                dot.style.position = 'absolute';
-                                dot.style.left = toLeft(brand.brandX) + '%';
-                                dot.style.top  = toTop(brand.brandY) + '%';
-
-                                if (isTop3) {
-                                    dot.className = 'brand-dot';
-                                    dot.textContent = brand.brandName;
-                                } else {
-                                    dot.className = 'brand-dot-ref';
-                                    dot.dataset.name = brand.brandName;
-                                }
-                                canvas.appendChild(dot);
-                            });
-
-                            const myDot = document.querySelector('.our-brand-dot');
-                            if (myDot) {
-                                myDot.style.left = toLeft(d.position.x) + '%';
-                                myDot.style.top  = toTop(d.position.y) + '%';
-                                myDot.textContent = '● 내 브랜드';
-                            }
-
-                        })
-                        .catch(() => {
-                            const myDot = document.querySelector('.our-brand-dot');
-                            if (myDot) {
-                                const leftPct = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90);
-                                const topPct  = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90);
-                                myDot.style.left = leftPct + '%';
-                                myDot.style.top  = topPct + '%';
-                            }
-                        });
-                }
-
-                // 섹션 5: 인사이트
-                const insightList = document.querySelector('.insight-list');
-                if (insightList && d.insight) {
-                    const ins = d.insight;
-
-                    const renderSection = (title, icon, color, items) => {
-                        if (!items || items.length === 0) return '';
-                        const listItems = items.map(t => `
-                            <li style="margin-bottom:8px; line-height:1.7;">${t}</li>
-                        `).join('');
-                        return `
-                            <div style="margin-bottom:20px;">
-                                <div style="font-size:13px; font-weight:700; color:${color}; margin-bottom:8px;">${icon} ${title}</div>
-                                <ul style="padding-left:18px; margin:0; font-size:14px; color:var(--text-dark);">
-                                    ${listItems}
-                                </ul>
-                            </div>`;
-                    };
-
-                    insightList.innerHTML = `
-                        ${ins['종합평가'] ? `
-                            <p style="font-size:14px; line-height:1.8; color:var(--text-dark); margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border-color);">
-                                ${ins['종합평가']}
-                            </p>` : ''}
-                        ${renderSection('강점', '✦', '#22c55e', ins['강점'])}
-                        ${renderSection('기회', '→', '#3b82f6', ins['기회'])}
-                        ${renderSection('액션', '▶', '#ff6b35', ins['액션'])}
-                        ${renderSection('주의점', '!', '#f59e0b', ins['주의점'])}
-                    `;
-                }
+            // 섹션 3: Top3 유사 브랜드
+            const benchmarkList = document.getElementById('benchmark-list');
+            if (benchmarkList && d.similarBrands) {
+                benchmarkList.innerHTML = d.similarBrands.map((brand, i) =>
+                    `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);">
+                        <span style="font-size:16px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
+                        <span style="font-size:16px;font-weight:700;">${brand.name}</span>
+                    </div>`
+                ).join('');
             }
+
+            // 섹션 4: 포지셔닝 맵
+            if (d.position) {
+                const top3Names = (d.similarBrands || []).slice(0, 3).map(b => b.name);
+                fetch('/api/reference-brands')
+                    .then(res => res.json())
+                    .then(brands => {
+                        const mapCanvas = document.querySelector('.positioning-map-canvas');
+                        if (mapCanvas) renderPositioningMap(mapCanvas, brands, d.position.x, d.position.y, top3Names);
+                    })
+                    .catch(() => {
+                        const myDot = document.querySelector('.our-brand-dot');
+                        if (myDot) {
+                            myDot.style.left = Math.min(Math.max((d.position.x + 0.5) * 100, 5), 90) + '%';
+                            myDot.style.top  = Math.min(Math.max((0.5 - d.position.y) * 100, 5), 90) + '%';
+                        }
+                    });
+            }
+
+            // 섹션 5: 인사이트
+            const insightList = document.querySelector('.insight-list');
+            if (insightList && d.insight) renderInsights(insightList, d.insight);
         });
+    </script>
+
+    <script>
+        // 저장 모달 함수 재정의 (common.js 덮어쓰기 방지용 — 인라인 스크립트는 가장 마지막에 실행)
+        function openSaveProjectModal() {
+            const overlay = document.getElementById('custom-save-modal-overlay');
+            const selectBox = document.getElementById('modal-existing-folder-select');
+            if (!selectBox || !overlay) return;
+            selectBox.innerHTML = '<option value="">폴더 없음 (미분류)</option>';
+            fetch('/api/folders/my')
+                .then(r => r.ok ? r.json() : [])
+                .then(folders => {
+                    folders.forEach(f => {
+                        selectBox.innerHTML += '<option value="' + f.folderId + '">' + f.folderName + '</option>';
+                    });
+                })
+                .catch(() => {});
+            overlay.style.display = 'flex';
+        }
+
+        function closeSaveProjectModal() {
+            const modal = document.getElementById('custom-save-modal-overlay');
+            if (modal) modal.style.display = 'none';
+            const inp = document.getElementById('modal-new-folder-input');
+            if (inp) inp.value = '';
+        }
+
+        function executeAdvancedProjectSave() {
+            const projTitle = document.getElementById('modal-project-title-input').value.trim();
+            const newFolderName = document.getElementById('modal-new-folder-input').value.trim();
+            const existingFolderId = document.getElementById('modal-existing-folder-select').value;
+            if (!projTitle) { alert('저장할 프로젝트명을 입력해주세요.'); return; }
+
+            if (newFolderName) {
+                fetch('/api/folders/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName: newFolderName })
+                })
+                .then(r => r.ok ? r.json() : Promise.reject('폴더 생성 실패'))
+                .then(data => _doSaveProject(projTitle, data.folderId))
+                .catch(err => alert('폴더 생성 중 오류: ' + err));
+            } else {
+                _doSaveProject(projTitle, existingFolderId ? parseInt(existingFolderId) : null);
+            }
+        }
+
+        function _doSaveProject(title, folderId) {
+            const q1 = sessionStorage.getItem('brandQ1') || '브랜드 라인 요약 기본값';
+            const q2 = sessionStorage.getItem('brandQ2') || '타겟 오브젝트 검색 기본값';
+            const keywordIdsList = JSON.parse(sessionStorage.getItem('brandKeywords') || '[]');
+            const moodboardDataRaw = sessionStorage.getItem('finalMoodboardData') || '[]';
+            let imgUrlsList = [];
+            try { JSON.parse(moodboardDataRaw).forEach(function(cat) { if (cat.assets) imgUrlsList = imgUrlsList.concat(cat.assets); }); } catch(e) {}
+            const dashRaw = sessionStorage.getItem('dashboardData');
+            let imageAlignmentsRaw = '[]', brandProfileRaw = null, analysisInsightRaw = null, similarityScore = null, positionX = null, positionY = null;
+            if (dashRaw) {
+                try {
+                    const d = JSON.parse(dashRaw);
+                    imageAlignmentsRaw = JSON.stringify(d && d.evidence && d.evidence.imageAlignments ? d.evidence.imageAlignments : []);
+                    if (d && d.brandProfile) brandProfileRaw = JSON.stringify(d.brandProfile);
+                    if (d && d.insight) analysisInsightRaw = JSON.stringify(d.insight);
+                    if (d && d.consistency && d.consistency.score != null) similarityScore = d.consistency.score;
+                    if (d && d.position && d.position.x != null) positionX = d.position.x;
+                    if (d && d.position && d.position.y != null) positionY = d.position.y;
+                } catch(e) {}
+            }
+            fetch('/api/projects/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: title, brandIntro: q1, referenceType: q2,
+                    keywordIds: keywordIdsList, imgUrls: imgUrlsList, folderId: folderId,
+                    moodboardData: moodboardDataRaw, imageAlignmentsData: imageAlignmentsRaw,
+                    brandProfile: brandProfileRaw, analysisInsight: analysisInsightRaw,
+                    similarityScore: similarityScore, positionX: positionX, positionY: positionY
+                })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    closeSaveProjectModal();
+                    var dialog = document.getElementById('after-save-dialog');
+                    if (dialog) dialog.style.display = 'flex';
+                } else {
+                    response.text().then(function(err) { alert(err); });
+                }
+            })
+            .catch(function() { alert('서버 통신 중 오류가 발생했습니다.'); });
+        }
     </script>
 
 </div> </body>
