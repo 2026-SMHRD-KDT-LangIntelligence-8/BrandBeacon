@@ -143,7 +143,7 @@ async function generateAiMoodboard(q1, q2) {
     const submitBtn = document.querySelector('button[onclick="checkInputsAndNavigate()"]');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = "AI 디렉터가 이미지를 발굴 중입니다... (약 10초 소요)";
+        submitBtn.innerText = "AI가 레퍼런스 이미지를 찾고 있습니다. (약 10초 소요)";
     }
 
     try {

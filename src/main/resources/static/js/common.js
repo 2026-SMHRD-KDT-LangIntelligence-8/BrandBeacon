@@ -239,7 +239,7 @@ function navigateTo(idx) {
                 ].forEach(k => sessionStorage.removeItem(k));
                 window.location.href = '/brandsync';
             } else {
-                alert("로그인이 필요한 워크스페이스입니다.");
+                alert("로그인 후 이용할 수 있습니다.");
                 window.location.href = '/login';
             }
         }
@@ -286,38 +286,6 @@ function navigateTo(idx) {
                 }
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // 스텝바 탭 클릭 시 단계 완료 여부 검증 후 이동
-        function navigateToStep(idx) {
-            const ALERT_MSG = "현재 진행중인 단계를 완료한 후에 다음 단계로 넘어갈 수 있습니다.";
-
-            if (idx === 6) { navigateTo(6); return; }
-
-            if (idx === 7) {
-                if (!sessionStorage.getItem("brandQ1") ||
-                    !sessionStorage.getItem("brandMoods") ||
-                    !sessionStorage.getItem("brandKeywords")) {
-                    alert(ALERT_MSG); return;
-                }
-                navigateTo(7); return;
-            }
-
-            if (idx === 8) {
-                if (!sessionStorage.getItem("finalMoodboardData")) {
-                    alert(ALERT_MSG); return;
-                }
-                navigateTo(8); return;
-            }
-
-            if (idx === 9) {
-                if (!sessionStorage.getItem("dashboardData")) {
-                    alert(ALERT_MSG); return;
-                }
-                navigateTo(9); return;
-            }
-
-            navigateTo(idx);
         }
 
         // 이전 페이지 이동 함수
@@ -436,14 +404,15 @@ function navigateTo(idx) {
         // UI 동기화 (로그인 상태에 따라 로그인 버튼 표시 제어)
         function syncAuthUI() {
             const loginMenu = document.getElementById('login-nav-menu');
-            const mypageMenu = document.getElementById('mypage-nav-menu');
 
             if (isLoggedIn) {
-                if (loginMenu) loginMenu.style.display = "none";
-                if (mypageMenu) mypageMenu.style.display = "list-item";
+                if (loginMenu) {
+                    loginMenu.style.display = "none";
+                }
             } else {
-                if (loginMenu) loginMenu.style.display = "list-item";
-                if (mypageMenu) mypageMenu.style.display = "none";
+                if (loginMenu) {
+                    loginMenu.style.display = "list-item";
+                }
             }
         }
 
