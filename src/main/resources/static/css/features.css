@@ -29,18 +29,18 @@
         }
 
         .q-title {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--text-white);
             margin-bottom: 12px;
         }
         .textarea-input {
-            width: 100%; height: 90px; padding: 14px; border: 1px solid var(--border-color); border-radius: 6px; background: #FFFFFF; color: var(--text-dark); font-size: 14px; resize: none; outline: none;
+            width: 100%; height: 90px; padding: 14px; border: 1px solid var(--border-color); border-radius: 6px; background: #FFFFFF; color: var(--text-dark); font-size: 16px; resize: none; outline: none;
         }
         .textarea-input:focus { border-color: var(--primary-orange); }
         .keyword-pool { display: flex; flex-wrap: wrap; gap: 12px; }
         .keyword-tag {
-            padding: 10px 20px; border: 1px solid var(--border-color); background: var(--bg-card-inner); border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-light);
+            padding: 10px 20px; border: 1px solid var(--border-color); background: var(--bg-card-inner); border-radius: 20px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-light);
             user-select: none;
         }
         .keyword-tag.selected-tag { background-color: var(--selected-bg); color: black; border-color: var(--primary-orange); transform: scale(1.03); }
@@ -59,7 +59,7 @@
             display: flex; /* 이미지가 없거나 로딩 실패 시 플레이스홀더를 보여주기 위해 flex 유지 */
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 16px;
             color: var(--text-gray);
         }
 
@@ -99,6 +99,9 @@
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 24px;
+        }
+        .category-title{
+            font-size: 18px;
         }
         .scroll-card:hover { border-color: var(--border-color); background-color: var(--bg-card-inner); }
         .scroll-card.chosen { border: 2px solid var(--primary-orange) !important; background-color: var(--selected-bg) !important; transform: translateY(-2px); }
@@ -166,22 +169,22 @@
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 14px;
+                    font-size: 16px;
                     padding: 6px;
                     text-align: center;
                     font-weight: 600;
                     border-radius: 0 !important;
                     border: none !important;
                 }
-        .mood-tile-desc { font-size: 10px; color: var(--text-gray); margin-top: 4px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mood-tile-desc { font-size: 13px; color: var(--text-gray); margin-top: 4px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* screen 9 브랜드 대시보드 */
-        .dash-header-title { text-align: center; margin-bottom: 35px; }
-        .dash-header-title h2 { font-size: 32px; font-weight: 800; color: var(--text-white); letter-spacing: -0.5px; margin-bottom: 8px; }
-        .dash-header-title p { font-size: 16px; color: var(--text-gray); }
+        .dash-header-title { text-align: center; margin-bottom: 38px; }
+        .dash-header-title h2 { font-size: 35px; font-weight: 800; color: var(--text-white); letter-spacing: -0.5px; margin-bottom: 8px; }
+        .dash-header-title p { font-size: 18px; color: var(--text-gray); }
         .dash-action-bar { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 25px; }
         .section-box { border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; background: var(--bg-main); }
-        .section-box-title { font-size: 16px; font-weight: 700; color: var(--text-gray); margin-bottom: 18px; }
+        .section-box-title { font-size: 18px; font-weight: 700; color: var(--text-gray); margin-bottom: 18px; }
         .positioning-map-canvas {
             width: 100%;
             height: 350px;
@@ -191,7 +194,7 @@
             border-radius: 0;
             background: transparent;
         }
-        .axis-label { position: absolute; font-size: 13px; font-weight: 700; color: var(--text-gray); }
+        .axis-label { position: absolute; font-size: 14px; font-weight: 700; color: var(--text-gray); }
         .axis-x-line { position: absolute; top: 50%; left: 5%; right: 5%; height: 1px; background: var(--border-color); }
         .axis-y-line { position: absolute; left: 50%; top: 5%; bottom: 5%; width: 1px; background: var(--border-color); }
         .brand-dot {
@@ -202,7 +205,7 @@
             background: rgba(255, 107, 53, 0.08);
             border: 1px solid #ff6b35;
             color: #ff6b35;
-            font-size: 12px;
+            font-size: 14px;
 
             transform: translate(-50%, -50%);
             font-weight: 600;
@@ -236,7 +239,7 @@
             transform: translateX(-50%);
             background: rgba(0,0,0,0.75);
             color: white;
-            font-size: 11px;
+            font-size: 14px;
             padding: 3px 8px;
             border-radius: 4px;
             white-space: nowrap;
@@ -253,8 +256,8 @@
         .progress-circle { width: 120px; height: 120px; background: conic-gradient(var(--primary-orange) 0% 0%, #F3F4F6 0% 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
         .progress-circle::after { content: ''; position: absolute; width: 92px; height: 92px; background: var(--bg-main); border-radius: 50%; }
         .insight-list { list-style: none; }
-        .insight-item { display: flex; gap: 12px; margin-bottom: 20px; line-height: 1.6; font-size: 14px; }
-        .insight-icon { color: #38BDF8; font-size: 16px; flex-shrink: 0; }
+        .insight-item { display: flex; gap: 12px; margin-bottom: 20px; line-height: 1.6; font-size: 16px; }
+        .insight-icon { color: #38BDF8; font-size: 17px; flex-shrink: 0; }
 
         .minimal-section {
                     border: 1px solid var(--border-color);
@@ -282,13 +285,13 @@
         .sidebar-folders { width: 260px; border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; background: var(--bg-main); }
         .main-contents { flex: 1; border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; background: var(--bg-main); }
         .folder-tree { list-style: none; margin-top: 15px; }
-        .folder-node { padding: 12px 14px; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border: 1px solid transparent; transition: all 0.15s ease; }
+        .folder-node { padding: 12px 14px; cursor: pointer; border-radius: 6px; font-size: 17px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border: 1px solid transparent; transition: all 0.15s ease; }
         .folder-node:hover { background-color: var(--bg-card-inner); color: var(--text-white); }
         .folder-node.selected-node { background-color: var(--bg-card-inner); color: var(--primary-blue); border-color: var(--border-color); border-left: 4px solid var(--primary-orange); }
-        .grid-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
+        .grid-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; font-size: 16px;}
         .gallery-item { border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; background: var(--bg-card); transition: transform 0.2s; }
         .gallery-item:hover { transform: translateY(-2px); }
-        .gallery-preview { width: 100%; height: 180px; background: var(--bg-card-inner); border-radius: 6px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; color: var(--text-gray); border: 1px dashed #3A4A63; cursor: pointer; text-align: center; padding: 10px; }
+        .gallery-preview { width: 100%; height: 180px; background: var(--bg-card-inner); border-radius: 6px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; color: var(--text-gray); border: 1px dashed #3A4A63; cursor: pointer; text-align: center; padding: 10px; }
 
          /* PDF 출력 전용 스타일 */
         .pdf-export-mode {

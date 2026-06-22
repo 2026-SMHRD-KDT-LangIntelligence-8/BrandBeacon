@@ -4,15 +4,15 @@
 <body>
 <div th:fragment="content" class="content-wrapper" style="max-width: 900px; margin: 0 auto; padding: 20px;">
 
-    <div class="step-title" style="display: flex; align-items: center; font-size: 20px; font-weight: 800; color: var(--primary-orange); margin-bottom: 25px;">
-        <span class="step-badge" style="font-size: 13px; color: var(--text-gray); background: var(--bg-card-inner); padding: 4px 10px; border-radius: 4px; margin-right: 12px;">스텝 02</span>
+    <div class="step-title" style="display: flex; align-items: center; font-size: 22px; font-weight: 800; color: var(--primary-orange); margin-bottom: 25px;">
+        <span class="step-badge" style="font-size: 18px; color: var(--text-gray); background: var(--bg-card-inner); padding: 4px 10px; border-radius: 4px; margin-right: 12px;">스텝 02</span>
         레퍼런스 이미지 선택
     </div>
-    <p class="page-desc" style="margin: 20px">각 카테고리당 1개 이상의 레퍼런스 이미지를 선택해주세요.</p>
+    <p class="page-desc" style="margin: 22px">각 카테고리당 1개 이상의 레퍼런스 이미지를 선택해주세요.</p>
 
     <div class="category-scroll-block" data-cat-id="essence" data-cat-name="브랜드 에센스">
-        <p class="category-title">1. 브랜드 에센스 (Brand Essence)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드의 핵심 가치와 아이덴티티를 상징하는 이미지를 선택해주세요.</p>
+        <p class="category-title ">1. 브랜드 에센스 (Brand Essence)</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드의 핵심 가치와 아이덴티티를 상징하는 이미지를 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-1">
             <button class="nav-arrow prev" onclick="moveCarousel('row-1', -1)">❮</button>
             <div class="carousel-pages">
@@ -36,7 +36,7 @@
 
     <div class="category-scroll-block" data-cat-id="sports" data-cat-name="스포츠 종류">
         <p class="category-title">2. 스포츠 종류 (Sports)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">우리 브랜드가 지향하는 스포츠 활동이나 타겟층을 보여주는 장면을 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">우리 브랜드가 지향하는 스포츠 활동이나 타겟층을 보여주는 장면을 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-2">
             <button class="nav-arrow prev" onclick="moveCarousel('row-2', -1)">❮</button>
             <div class="carousel-pages">
@@ -60,7 +60,7 @@
 
     <div class="category-scroll-block" data-cat-id="lifestyle" data-cat-name="라이프 스타일">
         <p class="category-title">3. 라이프 스타일 (Lifestyle)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">고객의 일상이나 브랜드와 함께하는 하루의 장면을 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">고객의 일상이나 브랜드와 함께하는 하루의 장면을 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-3">
             <button class="nav-arrow prev" onclick="moveCarousel('row-3', -1)">❮</button>
             <div class="carousel-pages">
@@ -84,7 +84,7 @@
 
     <div class="category-scroll-block" data-cat-id="environment" data-cat-name="환경">
         <p class="category-title">4. 환경 (Environment)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드가 주로 활동하거나 존재하는 공간과 배경을 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드가 주로 활동하거나 존재하는 공간과 배경을 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-4">
             <button class="nav-arrow prev" onclick="moveCarousel('row-4', -1)">❮</button>
             <div class="carousel-pages">
@@ -108,7 +108,7 @@
 
     <div class="category-scroll-block" data-cat-id="visual" data-cat-name="비주얼 톤">
         <p class="category-title">5. 비주얼 톤 (Visual Tone)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드가 전달하고자 하는 전반적인 색감, 조명, 분위기를 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드가 전달하고자 하는 전반적인 색감, 조명, 분위기를 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-5">
             <button class="nav-arrow prev" onclick="moveCarousel('row-5', -1)">❮</button>
             <div class="carousel-pages">
@@ -132,7 +132,7 @@
 
     <div class="category-scroll-block" data-cat-id="product" data-cat-name="제품 방향성">
         <p class="category-title">6. 제품 방향성 (Product Direction)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드가 만들고자 하는 제품의 구성 요소나 형태를 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드가 만들고자 하는 제품의 구성 요소나 형태를 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-6">
             <button class="nav-arrow prev" onclick="moveCarousel('row-6', -1)">❮</button>
             <div class="carousel-pages">
@@ -156,7 +156,7 @@
 
     <div class="category-scroll-block" data-cat-id="palette" data-cat-name="컬러 팔레트">
         <p class="category-title">7. 컬러 팔레트 (Color Palette)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드를 대표하는 주요 색상 조합을 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">브랜드를 대표하는 주요 색상 조합을 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-7">
             <button class="nav-arrow prev" onclick="moveCarousel('row-7', -1)">❮</button>
             <div class="carousel-pages">
@@ -180,7 +180,7 @@
 
     <div class="category-scroll-block" data-cat-id="material" data-cat-name="소재">
         <p class="category-title">8. 소재 (Material & Texture)</p>
-        <p style="font-size: 14px; color: var(--text-gray); margin: 5px 0 15px 0;">제품에 주로 사용되는 원단이나 질감을 나타내는 이미지를 선택해주세요.</p>
+        <p style="font-size: 16px; color: var(--text-gray); margin: 5px 0 15px 0;">제품에 주로 사용되는 원단이나 질감을 나타내는 이미지를 선택해주세요.</p>
         <div class="carousel-wrapper" id="carousel-row-8">
             <button class="nav-arrow prev" onclick="moveCarousel('row-8', -1)">❮</button>
             <div class="carousel-pages">

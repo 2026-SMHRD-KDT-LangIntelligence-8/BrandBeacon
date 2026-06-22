@@ -99,7 +99,7 @@
             display: flex;
             gap: 24px;
             list-style: none;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             align-items: center;
         }
@@ -178,7 +178,7 @@
         }
 
         .step {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text-gray);
             cursor: pointer;
@@ -223,7 +223,7 @@
             color: var(--text-light);
             border: 1px solid var(--border-color);
             padding: 15px 60px !important;
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 600;
             border-radius: 6px;
             cursor: pointer;

@@ -27,7 +27,7 @@
 
             <div class="minimal-section">
                 <div class="section-box-title" style="margin-bottom:6px;">섹션 2. 브랜드 일관성 점수</div>
-                <p style="font-size:13px; color:var(--text-gray); margin:0 0 12px 0;">브랜드 설명과 이미지가 얼마나 잘 맞는지 보여줍니다</p>
+                <p style="font-size:16px; color:var(--text-gray); margin:0 0 12px 0;">브랜드 설명과 이미지가 얼마나 잘 맞는지 보여줍니다</p>
                 <div style="display:flex; justify-content:center; align-items:center; min-height:150px;">
                     <div class="progress-circle"></div>
                 </div>
@@ -48,7 +48,7 @@
                 <div class="axis-label" style="top:50%; left:4px; transform:translateY(-50%);">performance</div>
                 <div class="axis-label" style="top:50%; right:4px; transform:translateY(-50%);">lifestyle</div>
 
-                <div style="position:absolute; bottom:8px; right:8px; font-size:11px; color:var(--text-gray); display:flex; align-items:center; gap:6px;">
+                <div style="position:absolute; bottom:8px; right:8px; font-size:14px; color:var(--text-gray); display:flex; align-items:center; gap:6px;">
                     <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#cccccc;"></span>
                     점에 마우스를 올리면 브랜드명이 표시됩니다
                 </div>
@@ -67,7 +67,7 @@
     <div class="minimal-section" style="margin-bottom:25px;">
 
         <div class="section-box-title" style="margin-bottom: 15px;">섹션 6. 무드보드</div>
-        <p style="font-size:11px; color:var(--text-gray); margin:-8px 0 14px 0;">AI가 브랜드 설명과 이미지의 일치도를 분석했습니다</p>
+        <p style="font-size:14px; color:var(--text-gray); margin:-8px 0 14px 0;">AI가 브랜드 설명과 이미지의 일치도를 분석했습니다</p>
         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; min-height:200px;" id="dashboard-inline-moodboard-canvas"></div>
 
     </div>
@@ -105,7 +105,7 @@
         <div class="save-modal-box" style="max-width:420px; text-align:center;">
             <div style="font-size:36px; margin-bottom:14px;">✅</div>
             <h3 style="margin-bottom:10px; font-size:18px; color:var(--primary-orange);">프로젝트가 저장되었습니다.</h3>
-            <p style="font-size:14px; color:var(--text-gray); margin-bottom:24px;">저장소로 이동하시겠습니까?</p>
+            <p style="font-size:16px; color:var(--text-gray); margin-bottom:24px;">저장소로 이동하시겠습니까?</p>
             <div style="display:flex; justify-content:center; gap:12px;">
                 <button class="btn-action" onclick="document.getElementById('after-save-dialog').style.display='none'; window.location.href='/'">아니오</button>
                 <button class="btn-action btn-orange" onclick="window.location.href='/archive'">네</button>
@@ -131,24 +131,24 @@
                         stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
                 </svg>
                 <div style="position:absolute;z-index:1;text-align:center;">
-                    <div style="font-size:26px;font-weight:900;color:#ff6b35;">${pct}</div>
-                    <div style="font-size:12px;color:var(--text-gray);">/ 100</div>
-                    <div style="font-size:14px;font-weight:700;color:var(--primary-blue);margin-top:3px;">${grade}등급</div>
+                    <div style="font-size:27px;font-weight:900;color:#ff6b35;">${pct}</div>
+                    <div style="font-size:16px;color:var(--text-gray);">/ 100</div>
+                    <div style="font-size:17px;font-weight:700;color:var(--primary-blue);margin-top:3px;">${grade}등급</div>
                 </div>`;
         }
 
         function renderInsightSection(title, icon, color, items) {
             if (!items || items.length === 0) return '';
             return `<div style="margin-bottom:20px;">
-                <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${title}</div>
-                <ul style="padding-left:18px;margin:0;font-size:14px;color:var(--text-dark);">
+                <div style="font-size:17px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${title}</div>
+                <ul style="padding-left:18px;margin:0;font-size:16px;color:var(--text-dark);">
                     ${items.map(t => `<li style="margin-bottom:8px;line-height:1.7;">${t}</li>`).join('')}
                 </ul></div>`;
         }
 
         function renderInsights(insightList, ins) {
             insightList.innerHTML = `
-                ${ins['종합평가'] ? `<p style="font-size:14px;line-height:1.8;color:var(--text-dark);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">${ins['종합평가']}</p>` : ''}
+                ${ins['종합평가'] ? `<p style="font-size:17px;line-height:1.8;color:var(--text-dark);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">${ins['종합평가']}</p>` : ''}
                 ${renderInsightSection('강점', '✦', '#22c55e', ins['강점'])}
                 ${renderInsightSection('기회', '→', '#3b82f6', ins['기회'])}
                 ${renderInsightSection('액션', '▶', '#ff6b35', ins['액션'])}
@@ -168,7 +168,7 @@
                     imgContainer.style.cssText = 'overflow:hidden;position:relative;';
                     imgContainer.innerHTML = imgUrl && imgUrl.startsWith('http')
                         ? `<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">`
-                        : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:10px;">${imgUrl}</div>`;
+                        : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:14px;">${imgUrl}</div>`;
                     if (imgUrl && !imgUrl.includes('placehold.co') && alignMedian !== null && alignMap[imgUrl] !== undefined) {
                         const isGood = alignMap[imgUrl] >= alignMedian;
                         const badge = document.createElement('div');
@@ -180,7 +180,7 @@
                     itemDiv.appendChild(imgContainer);
                 });
                 const label = document.createElement('div');
-                label.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:4px;font-size:11px;text-align:center;';
+                label.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:4px;font-size:16px;text-align:center;';
                 label.innerText = cat.category;
                 itemDiv.appendChild(label);
                 canvas.appendChild(itemDiv);
@@ -254,7 +254,7 @@
                     const keywordContainer = document.getElementById('brand-keyword-container');
                     if (keywordContainer && project.keywords) {
                         keywordContainer.innerHTML = project.keywords.map(kw =>
-                            `<span style="background:var(--bg-card-inner);padding:6px 12px;border-radius:20px;font-size:13px;color:var(--primary-orange);border:1px solid #ff7a00;font-weight:600;">${kw}</span>`
+                            `<span style="background:var(--bg-card-inner);padding:6px 12px;border-radius:20px;font-size:15px;color:var(--primary-orange);border:1px solid #ff7a00;font-weight:600;">${kw}</span>`
                         ).join('');
                     }
 
@@ -280,8 +280,8 @@
                                 if (benchmarkList) {
                                     benchmarkList.innerHTML = top3.map((brand, i) =>
                                         `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);">
-                                            <span style="font-size:13px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
-                                            <span style="font-size:13px;font-weight:700;">${brand.brandName}</span>
+                                            <span style="font-size:16px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
+                                            <span style="font-size:16px;font-weight:700;">${brand.brandName}</span>
                                         </div>`
                                     ).join('');
                                 }
@@ -368,7 +368,7 @@
             const savedKeywords = sessionStorage.getItem("brandKeywords");
             if (savedKeywords && keywordContainer) {
                 keywordContainer.innerHTML = JSON.parse(savedKeywords).map(kw =>
-                    `<span style="background:var(--bg-card-inner);padding:6px 12px;border-radius:20px;font-size:13px;color:var(--primary-orange);border:1px solid #ff7a00;font-weight:600;">${kw}</span>`
+                    `<span style="background:var(--bg-card-inner);padding:6px 12px;border-radius:20px;font-size:15px;color:var(--primary-orange);border:1px solid #ff7a00;font-weight:600;">${kw}</span>`
                 ).join('');
             }
 
@@ -386,8 +386,8 @@
             if (benchmarkList && d.similarBrands) {
                 benchmarkList.innerHTML = d.similarBrands.map((brand, i) =>
                     `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);">
-                        <span style="font-size:13px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
-                        <span style="font-size:13px;font-weight:700;">${brand.name}</span>
+                        <span style="font-size:16px;color:var(--primary-orange);font-weight:700;min-width:28px;">${i+1}위</span>
+                        <span style="font-size:16px;font-weight:700;">${brand.name}</span>
                     </div>`
                 ).join('');
             }
