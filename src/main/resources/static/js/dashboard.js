@@ -67,6 +67,17 @@
     }
 
         // 3. 프로젝트 저장소 렌더링 로직
+        // 전체 프로젝트 폴더의 카운트를 실제 API 데이터 기준으로 갱신
+        function updateAllFolderCount(count) {
+            const tree = document.getElementById('system-folder-tree-element');
+            if (!tree) return;
+            const allNode = tree.querySelector('.folder-node[data-folder-id="all"]');
+            if (allNode) {
+                const countSpan = allNode.querySelector('.folder-count');
+                if (countSpan) countSpan.textContent = `(${count})`;
+            }
+        }
+
         // 좌측 폴더 리스트 생성
         function renderFolderTree() {
             const tree = document.getElementById('system-folder-tree-element'); tree.innerHTML = "";
@@ -74,7 +85,8 @@
                 const fCount = f.id === "all" ? virtualProjects.length : virtualProjects.filter(p => p.folder === f.id).length;
                 const li = document.createElement('li');
                 li.className = `folder-node ${f.id === currentSelectedFolderId ? 'selected-node' : ''}`;
-                li.innerHTML = `<span>📁 ${f.name}</span> <span style="font-size:11px; opacity:0.7;">(${fCount})</span>`;
+                li.dataset.folderId = f.id;
+                li.innerHTML = `<span>📁 ${f.name}</span> <span class="folder-count" style="font-size:11px; opacity:0.7;">(${f.id === "all" ? "..." : fCount})</span>`;
                 li.onclick = function() {
                     currentSelectedFolderId = f.id;
                     document.getElementById('current-folder-title-display').innerText = f.name;
@@ -84,33 +96,52 @@
             });
         }
 
-        // 우측 프로젝트 갤러리 리스트 생성
+        // 우측 프로젝트 갤러리 리스트 생성 (실제 API 데이터 사용)
         function renderProjectGallery() {
             const target = document.getElementById('project-archive-gallery-element');
-            target.innerHTML = "";
+            if (!target) return;
+            target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>불러오는 중...</div>";
 
-            let filtered = currentSelectedFolderId === "all" ? virtualProjects : virtualProjects.filter(p => p.folder === currentSelectedFolderId);
+            fetch('/api/projects/my')
+                .then(res => {
+                    if (!res.ok) throw new Error('인증 필요');
+                    return res.json();
+                })
+                .then(projects => {
+                    target.innerHTML = "";
 
-            if(filtered.length === 0) {
-                target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>보관 내역이 비어있습니다.</div>";
-                return;
-            }
+                    if (!projects || projects.length === 0) {
+                        updateAllFolderCount(0);
+                        target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>보관 내역이 비어있습니다.</div>";
+                        return;
+                    }
 
-            filtered.forEach(p => {
-                const item = document.createElement('div');
-                item.className = "gallery-item";
-                item.innerHTML = `
-                    <div class="gallery-preview" onclick="loadArchivedProjectToDashboard('${p.id}')">
-                        <span style="color:var(--primary-blue); font-weight:bold; margin-bottom:5px;">[ 무드보드 + 대시보드 열기 ]</span>
-                    </div>
-                    <div style="font-weight:700; font-size:13px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;">${p.title}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
-                        <span style="font-size:11px; color:var(--text-gray);">${p.date}</span>
-                        <button class="btn-action" style="background-color: #B4B4B4; color: black; border: none; padding:5px 15px !important; font-size:13px; border-radius:4px; cursor:pointer;" onclick="deleteProjectNode('${p.id}')">삭제</button>
-                    </div>
-                `;
-                target.appendChild(item);
-            });
+                    // 총 프로젝트 개수를 전체 프로젝트 폴더에 반영
+                    updateAllFolderCount(projects.length);
+
+                    // 이름순 정렬
+                    projects.sort((a, b) => a.projectName.localeCompare(b.projectName, 'ko'));
+
+                    projects.forEach(p => {
+                        const dateStr = p.createdAt ? p.createdAt.substring(0, 10) : '';
+                        const item = document.createElement('div');
+                        item.className = "gallery-item";
+                        item.innerHTML = `
+                            <div class="gallery-preview" onclick="loadArchivedProjectToDashboard(${p.projectId})">
+                                <span style="color:var(--primary-blue); font-weight:bold; margin-bottom:5px;">[ 무드보드 + 대시보드 열기 ]</span>
+                            </div>
+                            <div style="font-weight:700; font-size:13px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;">${p.projectName}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;">
+                                <span style="font-size:11px; color:var(--text-gray);">${dateStr}</span>
+                                <button class="btn-action" style="background-color: #B4B4B4; color: black; border: none; padding:5px 15px !important; font-size:13px; border-radius:4px; cursor:pointer;" onclick="event.stopPropagation(); deleteProjectNode(${p.projectId})">삭제</button>
+                            </div>
+                        `;
+                        target.appendChild(item);
+                    });
+                })
+                .catch(() => {
+                    target.innerHTML = "<div style='grid-column: span 3; text-align:center; padding:40px; color:var(--text-gray); font-size:13px;'>프로젝트를 불러오지 못했습니다. 로그인 상태를 확인해주세요.</div>";
+                });
         }
 
 
@@ -178,61 +209,125 @@
 
 
 
-        // 저장 모달창 표시 및 폴더 목록 갱신
+        // 저장 모달창 표시 및 실제 폴더 목록 로드
         function openSaveProjectModal() {
             const overlay = document.getElementById('custom-save-modal-overlay');
             const selectBox = document.getElementById('modal-existing-folder-select');
-            selectBox.innerHTML = "";
-            virtualFolders.forEach(f => {
-                if(f.id !== "all") selectBox.innerHTML += `<option value="${f.id}">${f.name}</option>`;
-            });
-            overlay.style.display = "flex";
+
+            selectBox.innerHTML = '<option value="">폴더 없음 (미분류)</option>';
+            fetch('/api/folders/my')
+                .then(r => r.ok ? r.json() : [])
+                .then(folders => {
+                    folders.forEach(f => {
+                        selectBox.innerHTML += `<option value="${f.folderId}">${f.folderName}</option>`;
+                    });
+                })
+                .catch(() => {});
+
+            if (overlay) overlay.style.display = 'flex';
         }
 
         // 저장 모달창 닫기
         function closeSaveProjectModal() {
-            document.getElementById('custom-save-modal-overlay').style.display = "none";
-            document.getElementById('modal-new-folder-input').value = "";
+            const modal = document.getElementById('custom-save-modal-overlay');
+            if (modal) modal.style.display = 'none';
+            const newFolderInput = document.getElementById('modal-new-folder-input');
+            if (newFolderInput) newFolderInput.value = '';
         }
 
-        // 프로젝트 데이터 저장 및 폴더 생성 처리
+        // 프로젝트 저장 실행 (새 폴더 생성 → 프로젝트 저장 순서 보장)
         function executeAdvancedProjectSave() {
             const projTitle = document.getElementById('modal-project-title-input').value.trim();
-            const existingFolderId = document.getElementById('modal-existing-folder-select').value;
             const newFolderName = document.getElementById('modal-new-folder-input').value.trim();
+            const existingFolderId = document.getElementById('modal-existing-folder-select').value;
 
-            if(!projTitle) { alert("프로젝트 가이드북의 이름을 인풋하십시오."); return; }
-            let targetFolderId = existingFolderId;
+            if (!projTitle) { alert("저장할 프로젝트명을 입력해주세요."); return; }
 
-            if(newFolderName !== "") {
-                const isFolderExists = virtualFolders.find(f => f.name === newFolderName);
-                if(!isFolderExists) {
-                    targetFolderId = "custom_gen_" + Date.now();
-                    virtualFolders.push({ id: targetFolderId, name: newFolderName, isSystem: false });
-                } else { targetFolderId = isFolderExists.id; }
+            if (newFolderName) {
+                // 새 폴더를 먼저 생성한 뒤 반환된 folderId로 프로젝트 저장
+                fetch('/api/folders/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName: newFolderName })
+                })
+                .then(r => r.ok ? r.json() : Promise.reject('폴더 생성 실패'))
+                .then(data => _doSaveProject(projTitle, data.folderId))
+                .catch(err => alert('폴더 생성 중 오류가 발생했습니다: ' + err));
+            } else {
+                const folderId = existingFolderId ? parseInt(existingFolderId) : null;
+                _doSaveProject(projTitle, folderId);
             }
+        }
 
-            virtualProjects.push({
-                id: "p_user_built_" + Date.now(),
-                folder: targetFolderId,
-                title: projTitle,
-                date: new Date().toISOString().substring(0,10),
-                moodboardData: organizedDataGlobal,
-                assets: [...currentLiveSessionAssets]
+        // 실제 프로젝트 저장 API 호출
+        function _doSaveProject(title, folderId) {
+            const q1 = sessionStorage.getItem("brandQ1") || "브랜드 라인 요약 기본값";
+            const q2 = sessionStorage.getItem("brandQ2") || "타겟 오브젝트 검색 기본값";
+            const keywordIdsList = JSON.parse(sessionStorage.getItem("brandKeywords") || "[]");
+            const moodboardDataRaw = sessionStorage.getItem("finalMoodboardData") || "[]";
+
+            let imgUrlsList = [];
+            JSON.parse(moodboardDataRaw).forEach(cat => {
+                if (cat.assets && Array.isArray(cat.assets)) imgUrlsList = imgUrlsList.concat(cat.assets);
             });
 
-            renderFolderTree(); renderProjectGallery(); closeSaveProjectModal();
-            if(confirm("성공적으로 저장되었습니다. 프로젝트 저장소로 즉시 이동하시겠습니까?")) navigateTo(10); else navigateTo(4);
+            const dashRaw = sessionStorage.getItem("dashboardData");
+            let imageAlignmentsRaw = "[]", brandProfileRaw = null, analysisInsightRaw = null;
+            let similarityScore = null, positionX = null, positionY = null;
+            if (dashRaw) {
+                try {
+                    const d = JSON.parse(dashRaw);
+                    imageAlignmentsRaw = JSON.stringify(d?.evidence?.imageAlignments || []);
+                    if (d?.brandProfile) brandProfileRaw = JSON.stringify(d.brandProfile);
+                    if (d?.insight) analysisInsightRaw = JSON.stringify(d.insight);
+                    if (d?.consistency?.score != null) similarityScore = d.consistency.score;
+                    if (d?.position?.x != null) positionX = d.position.x;
+                    if (d?.position?.y != null) positionY = d.position.y;
+                } catch(e) {}
+            }
+
+            fetch('/api/projects/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: title,
+                    brandIntro: q1,
+                    referenceType: q2,
+                    keywordIds: keywordIdsList,
+                    imgUrls: imgUrlsList,
+                    folderId: folderId,
+                    moodboardData: moodboardDataRaw,
+                    imageAlignmentsData: imageAlignmentsRaw,
+                    brandProfile: brandProfileRaw,
+                    analysisInsight: analysisInsightRaw,
+                    similarityScore: similarityScore,
+                    positionX: positionX,
+                    positionY: positionY
+                })
+            })
+            .then(async response => {
+                if (response.ok) {
+                    closeSaveProjectModal();
+                    const dialog = document.getElementById('after-save-dialog');
+                    if (dialog) dialog.style.display = 'flex';
+                } else {
+                    alert(await response.text());
+                }
+            })
+            .catch(() => alert("서버 통신 중 오류가 발생했습니다."));
         }
 
 
 
-        // 프로젝트 삭제
+        // 프로젝트 삭제 (실제 API 연동)
         function deleteProjectNode(projId) {
-            event.stopPropagation();
             if(confirm("선택한 프로젝트 기획 리포트를 영구 삭제하시겠습니까?")) {
-                virtualProjects = virtualProjects.filter(p => p.id !== projId);
-                renderFolderTree(); renderProjectGallery();
+                fetch(`/api/projects/${projId}`, { method: 'DELETE' })
+                    .then(res => {
+                        if (!res.ok) return res.text().then(t => { throw new Error(t); });
+                        renderProjectGallery();
+                    })
+                    .catch(err => alert('삭제 실패: ' + err.message));
             }
         }
 

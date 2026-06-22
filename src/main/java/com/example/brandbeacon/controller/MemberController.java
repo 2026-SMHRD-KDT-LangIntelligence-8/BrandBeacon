@@ -3,6 +3,7 @@ package com.example.brandbeacon.controller;
 import com.example.brandbeacon.domain.Member;
 import com.example.brandbeacon.dto.JoinRequest;
 import com.example.brandbeacon.dto.MemberUpdateRequest;
+import com.example.brandbeacon.repository.MemberRepository;
 import com.example.brandbeacon.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -15,10 +16,23 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberController {
 
-    // Service 클래스 불러오기
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
-    // 1. 일반 회원가입 요청 받기
+    // 1. 이메일 중복 확인
+    @GetMapping("/check-email")
+    public ResponseEntity<String> checkEmail(@RequestParam String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("이메일을 입력해주세요.");
+        }
+        boolean exists = memberRepository.findByEmail(email.trim()).isPresent();
+        if (exists) {
+            return ResponseEntity.status(409).body("이미 사용 중인 이메일입니다.");
+        }
+        return ResponseEntity.ok("사용 가능한 이메일입니다.");
+    }
+
+    // 2. 일반 회원가입 요청 받기
     @PostMapping("/join")
     public ResponseEntity<String> joinLocal(@RequestBody JoinRequest request) {
         try {
@@ -66,7 +80,7 @@ public class MemberController {
             Long userId = (Long) session.getAttribute("loginUserId");
 
             // 서비스로 수정 데이터 전달
-            memberService.updateMember(userId, request.getNickname(), request.getPassword());
+            memberService.updateMember(userId, request.getCurrentPassword(), request.getNickname(), request.getPassword());
             return ResponseEntity.ok("회원 정보가 성공적으로 수정되었습니다.");
 
         } catch (IllegalArgumentException e) {

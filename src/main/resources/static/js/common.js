@@ -113,69 +113,331 @@ function navigateTo(idx) {
             }
         }
 
-        // 🚀 [추가 완료] 백엔드에서 실제 프로젝트 데이터를 가져와 마이페이지(저장소)에 그려주는 함수
-        function renderProjectGallery() {
-            // HTML상의 프로젝트 카드 컨테이너 수집
-            const gallery = document.getElementById('project-gallery-grid') ||
-                            document.getElementById('project-list') ||
-                            document.querySelector('.project-gallery') ||
-                            document.querySelector('[class*="gallery"]');
+        // 현재 선택된 폴더 ID (null = 전체 프로젝트)
+        let _currentFolderId = null;
 
+        // 오른쪽 타이틀 영역 업데이트 (연필 아이콘 포함)
+        function _setFolderTitle(name, folderId) {
+            const el = document.getElementById('current-folder-title-display');
+            if (!el) return;
+            el.textContent = name;
+
+            // 기존 연필 아이콘 제거
+            const prev = document.getElementById('_folder-edit-btn');
+            if (prev) prev.remove();
+
+            if (folderId == null) return; // 전체 프로젝트는 아이콘 없음
+
+            const btn = document.createElement('span');
+            btn.id = '_folder-edit-btn';
+            btn.title = '폴더명 수정';
+            btn.textContent = '✏️';
+            btn.style.cssText = 'margin-left:8px; font-size:13px; opacity:0.45; cursor:pointer; user-select:none; vertical-align:middle;';
+            btn.onmouseenter = () => { btn.style.opacity = '0.85'; };
+            btn.onmouseleave = () => { btn.style.opacity = '0.45'; };
+            btn.onclick = () => {
+                const current = el.textContent;
+                const input = document.createElement('input');
+                input.value = current;
+                input.style.cssText = 'font-size:14px; color:var(--text-white); background:var(--bg-card-inner); border:1px solid var(--primary-orange); border-radius:4px; padding:2px 8px; outline:none; width:180px;';
+
+                el.replaceWith(input);
+                btn.remove();
+                input.focus();
+                input.select();
+
+                function saveRename() {
+                    const newName = input.value.trim();
+                    if (!newName || newName === current) {
+                        input.replaceWith(el);
+                        _setFolderTitle(current, folderId);
+                        return;
+                    }
+                    fetch(`/api/folders/${folderId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ folderName: newName })
+                    }).then(res => {
+                        if (res.ok) {
+                            input.replaceWith(el);
+                            _setFolderTitle(newName, folderId);
+                            renderFolderTree();
+                        } else {
+                            res.text().then(t => { alert('수정 실패: ' + t); input.replaceWith(el); _setFolderTitle(current, folderId); });
+                        }
+                    });
+                }
+
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') saveRename();
+                    if (e.key === 'Escape') { input.replaceWith(el); _setFolderTitle(current, folderId); }
+                });
+                input.addEventListener('blur', saveRename);
+            };
+
+            el.after(btn);
+        }
+
+        // 폴더 트리 렌더링
+        function renderFolderTree() {
+            const tree = document.getElementById('system-folder-tree-element');
+            if (!tree) return;
+
+            Promise.all([
+                fetch('/api/folders/my').then(r => r.ok ? r.json() : []),
+                fetch('/api/projects/my').then(r => r.ok ? r.json() : [])
+            ]).then(([folders, projects]) => {
+                tree.innerHTML = '';
+
+                function _makeDrop(li, targetFolderId) {
+                    li.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        li.style.background = 'var(--selected-bg)';
+                        li.style.borderColor = 'var(--primary-orange)';
+                    });
+                    li.addEventListener('dragleave', () => {
+                        li.style.background = '';
+                        li.style.borderColor = '';
+                    });
+                    li.addEventListener('drop', e => {
+                        e.preventDefault();
+                        li.style.background = '';
+                        li.style.borderColor = '';
+                        const projectId = e.dataTransfer.getData('projectId');
+                        if (!projectId) return;
+                        fetch(`/api/projects/${projectId}/folder`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ folderId: targetFolderId })
+                        }).then(res => {
+                            if (res.ok) { renderFolderTree(); renderProjectGallery(); }
+                            else res.text().then(t => alert('이동 실패: ' + t));
+                        });
+                    });
+                }
+
+                // 전체 프로젝트 항목
+                const allLi = document.createElement('li');
+                allLi.className = 'folder-node' + (_currentFolderId === null ? ' selected-node' : '');
+                allLi.innerHTML = `<span>전체 프로젝트</span><span style="font-size:12px; color:var(--text-gray);">${projects.length}</span>`;
+                allLi.onclick = () => {
+                    _currentFolderId = null;
+                    _setFolderTitle('전체 프로젝트', null);
+                    renderFolderTree();
+                    renderProjectGallery();
+                };
+                _makeDrop(allLi, null);
+                tree.appendChild(allLi);
+
+                // 폴더별 항목
+                folders.forEach(f => {
+                    const count = projects.filter(p => p.folderId === f.folderId).length;
+                    const li = document.createElement('li');
+                    li.className = 'folder-node' + (_currentFolderId === f.folderId ? ' selected-node' : '');
+                    li.innerHTML = `<span>📁 ${f.folderName}</span><span style="font-size:12px; color:var(--text-gray);">${count}</span>`;
+                    li.onclick = () => {
+                        _currentFolderId = f.folderId;
+                        _setFolderTitle(f.folderName, f.folderId);
+                        renderFolderTree();
+                        renderProjectGallery();
+                    };
+                    _makeDrop(li, f.folderId);
+                    tree.appendChild(li);
+                });
+
+                // 현재 선택된 폴더가 있으면 타이틀 갱신 (렌더 후에도 연필 아이콘 유지)
+                if (_currentFolderId !== null) {
+                    const current = folders.find(f => f.folderId === _currentFolderId);
+                    if (current) _setFolderTitle(current.folderName, current.folderId);
+                }
+            }).catch(() => {});
+        }
+
+        // 백엔드에서 실제 프로젝트 데이터를 가져와 저장소에 그려주는 함수
+        function renderProjectGallery() {
+            const gallery = document.getElementById('project-archive-gallery-element');
             if (!gallery) return;
 
-            gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; font-size: 14px; color: var(--text-gray);">프로젝트를 불러오는 중입니다...</div>';
+            gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; font-size: 14px; color: var(--text-gray);">불러오는 중...</div>';
 
-            // 백엔드 API에서 실제 내 프로젝트 데이터를 요청
             fetch('/api/projects/my')
                 .then(response => {
-                    if (!response.ok) throw new Error('데이터 불러오기 실패');
+                    if (!response.ok) throw new Error('인증 필요');
                     return response.json();
                 })
-                .then(data => {
+                .then(allProjects => {
+                    const projects = _currentFolderId === null
+                        ? allProjects
+                        : allProjects.filter(p => p.folderId === _currentFolderId);
+
+                    // 이름순 정렬
+                    projects.sort((a, b) => a.projectName.localeCompare(b.projectName, 'ko'));
+
                     gallery.innerHTML = '';
 
-                    if (data.length === 0) {
-                        gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; color: var(--text-gray);">저장된 프로젝트가 없습니다.</div>';
+                    if (!projects || projects.length === 0) {
+                        gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; color: var(--text-gray);">보관 내역이 비어있습니다.</div>';
                         return;
                     }
 
-                    // 데이터를 순회하며 실제 카드를 생성
-                    data.forEach(project => {
-                        const card = document.createElement('div');
-                        card.className = 'project-card';
-                        card.style.cursor = 'pointer';
+                    projects.forEach(project => {
+                        const dateStr = project.createdAt ? project.createdAt.substring(0, 10) : '';
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        item.draggable = true;
+                        item.dataset.projectId = project.projectId;
+                        item.addEventListener('dragstart', e => {
+                            e.dataTransfer.setData('projectId', project.projectId);
+                            item.style.opacity = '0.5';
+                        });
+                        item.addEventListener('dragend', () => { item.style.opacity = ''; });
 
-                        const displayDate = project.createdAt ? project.createdAt.substring(0, 10) : '날짜 없음';
-                        const keywordText = project.keywords && project.keywords.length > 0 ? project.keywords.join(', ') : '선택된 키워드 없음';
+                        // 프리뷰 영역
+                        const preview = document.createElement('div');
+                        preview.className = 'gallery-preview';
+                        preview.style.cursor = 'pointer';
+                        preview.onclick = () => window.location.href = '/dashboard?projectId=' + project.projectId;
 
-                        card.innerHTML = `
-                            <div class="project-thumb" style="background-color: #f8f9fa; height: 140px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #adb5bd; font-size: 13px;">
-                                [프로젝트 미리보기]
-                            </div>
-                            <div class="project-info">
-                                <div class="project-title" style="font-weight: bold; font-size: 16px; margin-bottom: 6px; color: #212529;">${project.projectName}</div>
-                                <div class="project-date" style="font-size: 12px; color: #868e96; margin-bottom: 8px;">생성일: ${displayDate}</div>
-                                <div class="project-assets-preview">
-                                    <span style="font-size: 12px; color: #495057;">📍 키워드: ${keywordText}</span>
-                                </div>
-                            </div>
-                        `;
+                        // moodboardData에서 카테고리별 이미지 배열 전체 추출
+                        let categoryThumbs = [];
+                        if (project.moodboardData) {
+                            try {
+                                const parsed = JSON.parse(project.moodboardData);
+                                parsed.forEach(cat => {
+                                    const validAssets = (cat.assets || []).filter(u => u && u.startsWith('http'));
+                                    if (validAssets.length > 0) {
+                                        categoryThumbs.push({ category: cat.category, assets: validAssets });
+                                    }
+                                });
+                            } catch(e) {}
+                        }
 
-                        // 🚀 클릭 시 대시보드 화면으로 이동하는 로직 적용
-                        card.onclick = () => {
-                            sessionStorage.setItem("currentProjectId", project.projectId);
-                            window.location.href = '/dashboard?projectId=' + project.projectId;
-                        };
+                        if (categoryThumbs.length > 0) {
+                            preview.style.padding = '0';
+                            preview.style.border = 'none';
+                            preview.style.overflow = 'hidden';
+                            // 4칸 × 2줄 외부 그리드
+                            const outerGrid = document.createElement('div');
+                            outerGrid.style.cssText = 'display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(2,1fr); width:100%; height:100%; gap:2px;';
 
-                        gallery.appendChild(card);
+                            for (let i = 0; i < 8; i++) {
+                                const cell = document.createElement('div');
+                                cell.style.cssText = 'overflow:hidden; position:relative; background:var(--bg-card-inner);';
+
+                                if (i < categoryThumbs.length) {
+                                    const { category, assets } = categoryThumbs[i];
+                                    const count = Math.min(assets.length, 4);
+
+                                    // 기존 layout-N / thumb-N CSS 클래스로 카테고리 내 이미지 그리드
+                                    const innerGrid = document.createElement('div');
+                                    innerGrid.className = `layout-${count}`;
+                                    innerGrid.style.cssText = 'display:grid; width:100%; height:100%; overflow:hidden; gap:1px;';
+
+                                    assets.slice(0, 4).forEach((url, idx) => {
+                                        const thumb = document.createElement('div');
+                                        thumb.className = `thumb-${idx}`;
+                                        thumb.style.overflow = 'hidden';
+                                        const img = document.createElement('img');
+                                        img.src = url;
+                                        img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
+                                        thumb.appendChild(img);
+                                        innerGrid.appendChild(thumb);
+                                    });
+
+                                    cell.appendChild(innerGrid);
+
+                                    const label = document.createElement('div');
+                                    label.style.cssText = 'position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.55); color:#fff; font-size:8px; text-align:center; padding:2px 1px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; z-index:1;';
+                                    label.textContent = category;
+                                    cell.appendChild(label);
+                                }
+
+                                outerGrid.appendChild(cell);
+                            }
+                            preview.appendChild(outerGrid);
+                        } else {
+                            const placeholder = document.createElement('span');
+                            placeholder.style.cssText = 'color:var(--primary-blue); font-weight:bold;';
+                            placeholder.textContent = '[ 무드보드 + 대시보드 열기 ]';
+                            preview.appendChild(placeholder);
+                        }
+
+                        // 프로젝트명
+                        const titleDiv = document.createElement('div');
+                        titleDiv.style.cssText = 'font-weight:700; font-size:13px; margin-bottom:12px; color:var(--text-dark); line-height:1.4;';
+                        titleDiv.textContent = project.projectName;
+
+                        // 하단 날짜 + 삭제 버튼
+                        const footer = document.createElement('div');
+                        footer.style.cssText = 'display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:10px;';
+
+                        const dateSpan = document.createElement('span');
+                        dateSpan.style.cssText = 'font-size:11px; color:var(--text-gray);';
+                        dateSpan.textContent = dateStr;
+
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn-action';
+                        deleteBtn.style.cssText = 'background-color:#B4B4B4; color:black; border:none; padding:5px 15px !important; font-size:13px; border-radius:4px; cursor:pointer;';
+                        deleteBtn.textContent = '삭제';
+                        deleteBtn.onclick = (e) => { e.stopPropagation(); deleteProjectFromApi(project.projectId); };
+
+                        footer.appendChild(dateSpan);
+                        footer.appendChild(deleteBtn);
+
+                        item.appendChild(preview);
+                        item.appendChild(titleDiv);
+                        item.appendChild(footer);
+                        gallery.appendChild(item);
                     });
                 })
-                .catch(error => {
-                    console.error("통신 에러:", error);
-                    gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; color: #fa5252;">서버에서 프로젝트를 불러오는 데 실패했습니다.</div>';
+                .catch(() => {
+                    gallery.innerHTML = '<div style="text-align:center; padding: 50px; grid-column: span 3; color: var(--text-gray);">프로젝트를 불러오지 못했습니다. 로그인 상태를 확인해주세요.</div>';
                 });
         }
 
+        // 프로젝트 개별 삭제 (실제 API 연동)
+        function deleteProjectFromApi(projectId) {
+            if (!confirm("선택한 프로젝트 기획 리포트를 영구 삭제하시겠습니까?")) return;
+            fetch(`/api/projects/${projectId}`, { method: 'DELETE' })
+                .then(res => {
+                    if (!res.ok) return res.text().then(t => { throw new Error(t); });
+                    renderProjectGallery();
+                })
+                .catch(err => alert('삭제 실패: ' + err.message));
+        }
+
+
+        // 드래그 중 화면 자동 스크롤
+        (function() {
+            const SCROLL_ZONE = 100; // 화면 상하 끝에서 100px 이내 진입 시 스크롤 시작
+            const SCROLL_SPEED = 12;
+            let _scrollTimer = null;
+
+            document.addEventListener('dragover', function(e) {
+                const y = e.clientY;
+                const vh = window.innerHeight;
+
+                if (_scrollTimer) { clearInterval(_scrollTimer); _scrollTimer = null; }
+
+                if (y < SCROLL_ZONE) {
+                    // 화면 위쪽 영역 → 위로 스크롤
+                    const speed = Math.round(SCROLL_SPEED * (1 - y / SCROLL_ZONE));
+                    _scrollTimer = setInterval(() => window.scrollBy(0, -speed), 16);
+                } else if (y > vh - SCROLL_ZONE) {
+                    // 화면 아래쪽 영역 → 아래로 스크롤
+                    const speed = Math.round(SCROLL_SPEED * (1 - (vh - y) / SCROLL_ZONE));
+                    _scrollTimer = setInterval(() => window.scrollBy(0, speed), 16);
+                }
+            });
+
+            document.addEventListener('dragend', function() {
+                if (_scrollTimer) { clearInterval(_scrollTimer); _scrollTimer = null; }
+            });
+
+            document.addEventListener('drop', function() {
+                if (_scrollTimer) { clearInterval(_scrollTimer); _scrollTimer = null; }
+            });
+        })();
 
         // 페이지 로드 시 초기 화면 렌더링 (✨ 현재 주소창의 위치에 따라 내부 인덱스 동기화 설정)
         window.onload = function() {
@@ -300,8 +562,18 @@ function navigateTo(idx) {
 
         // 4. 로그인/ 인증로직
 
-        // 회원가입(사용가능한 이메일인지 확인하는 로직 추가)
-        function checkEmailDuplicate() { alert("사용가능한 이메일 포맷입니다."); }
+        // 이메일 중복 확인
+        function checkEmailDuplicate() {
+            const email = (document.getElementById('join-email')?.value || '').trim();
+            if (!email) { alert("이메일을 입력해주세요."); return; }
+
+            fetch(`/api/members/check-email?email=${encodeURIComponent(email)}`)
+                .then(async res => {
+                    const msg = await res.text();
+                    alert(msg);
+                })
+                .catch(() => alert("서버와 통신 중 문제가 발생했습니다."));
+        }
 
         // 로그인 (✨ 성공 시 메인으로 주소 이동)
         function executeLogin() {
@@ -329,7 +601,6 @@ function navigateTo(idx) {
             .then(async response => {
                 if (response.ok) {
                     const msg = await response.text();
-                    alert("🎉 " + msg);
 
                     sessionStorage.setItem("isLoggedIn", "true");
                     isLoggedIn = true;
@@ -356,6 +627,11 @@ function navigateTo(idx) {
 
             if (!name || !email || !pw || !pwConfirm) {
                 alert("⚠️ 모든 항목을 입력해주세요.");
+                return;
+            }
+
+            if (pw.length < 8) {
+                alert("⚠️ 비밀번호는 최소 8자 이상이어야 합니다.");
                 return;
             }
 
@@ -417,7 +693,30 @@ function navigateTo(idx) {
         }
 
 
-        function executeModify() { alert("저장되었습니다."); window.location.href = '/'; }
+        function executeModify() {
+            const currentPw = (document.getElementById('modify-pw-current')?.value || '').trim();
+            const newPw     = (document.getElementById('modify-pw')?.value || '').trim();
+            const newPwConfirm = (document.getElementById('modify-pw-confirm')?.value || '').trim();
+
+            if (!currentPw) { alert("현재 비밀번호를 입력해주세요."); return; }
+            if (!newPw)     { alert("새로운 비밀번호를 입력해주세요."); return; }
+            if (newPw.length < 8) { alert("새로운 비밀번호는 최소 8자 이상이어야 합니다."); return; }
+            if (newPw !== newPwConfirm) { alert("새로운 비밀번호가 일치하지 않습니다."); return; }
+
+            fetch('/api/members/me', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword: currentPw, password: newPw })
+            }).then(async res => {
+                const msg = await res.text();
+                if (res.ok) {
+                    alert("비밀번호가 성공적으로 변경되었습니다.");
+                    window.location.href = '/';
+                } else {
+                    alert(msg);
+                }
+            }).catch(() => alert("서버와 통신 중 문제가 발생했습니다."));
+        }
 
         // 5. 브랜드기획 동기화 - 무드태그 선택 상반 비활성화 & 이미지 6개/12개 동적 연동
         function handleMoodTagClick(clickedTag, opposingTag) {
@@ -512,6 +811,11 @@ function navigateTo(idx) {
             if (modal) modal.style.display = 'none';
         }
 
+        function showAfterSaveDialog() {
+            const dialog = document.getElementById('after-save-dialog');
+            if (dialog) dialog.style.display = 'flex';
+        }
+
         // 🔥 DB NOT NULL 제약조건(BRAND_INTRO) 및 키워드 매핑을 완벽히 준수하는 DTO 매핑 저장 함수
         function executeAdvancedProjectSave() {
             const titleInput = document.getElementById('modal-project-title-input');
@@ -546,14 +850,44 @@ function navigateTo(idx) {
             // 🚀 [폴더 ID 연동 추가]
             const folderId = (existingFolder && existingFolder !== "") ? parseInt(existingFolder) : null;
 
+            // 카테고리 구조 포함한 무드보드 전체 데이터 (섹션6 복원용)
+            const moodboardDataRaw = sessionStorage.getItem("finalMoodboardData") || "[]";
+
+            // 대시보드 AI 분석 결과 추출 (재호출 방지용 — 이미 계산된 결과 재활용)
+            const dashRaw = sessionStorage.getItem("dashboardData");
+            let imageAlignmentsRaw = "[]";
+            let brandProfileRaw = null;
+            let analysisInsightRaw = null;
+            let similarityScore = null;
+            let positionX = null;
+            let positionY = null;
+            if (dashRaw) {
+                try {
+                    const d = JSON.parse(dashRaw);
+                    imageAlignmentsRaw = JSON.stringify(d?.evidence?.imageAlignments || []);
+                    if (d?.brandProfile) brandProfileRaw = JSON.stringify(d.brandProfile);
+                    if (d?.insight) analysisInsightRaw = JSON.stringify(d.insight);
+                    if (d?.consistency?.score != null) similarityScore = d.consistency.score;
+                    if (d?.position?.x != null) positionX = d.position.x;
+                    if (d?.position?.y != null) positionY = d.position.y;
+                } catch(e) {}
+            }
+
             // 백엔드 DTO(ProjectCreateRequest) 규격에 정확히 맞춘 객체 조립
             const payload = {
                 projectName: title,
-                brandIntro: q1,            // 🔥 NOT NULL 제약조건 방어
-                referenceType: q2,         // 참조 타입으로 Q2 값 바인딩
-                keywordIds: keywordIdsList,// 🔥 정상 반영: 세션에서 가져온 키워드 ID 배열 바인딩
-                imgUrls: imgUrlsList,      // 이미지 주소 배열
-                folderId: folderId         // 🚀 [추가] 폴더 ID 반영
+                brandIntro: q1,
+                referenceType: q2,
+                keywordIds: keywordIdsList,
+                imgUrls: imgUrlsList,
+                folderId: folderId,
+                moodboardData: moodboardDataRaw,
+                imageAlignmentsData: imageAlignmentsRaw,
+                brandProfile: brandProfileRaw,
+                analysisInsight: analysisInsightRaw,
+                similarityScore: similarityScore,
+                positionX: positionX,
+                positionY: positionY
             };
 
             fetch('/api/projects/save', {
@@ -565,19 +899,41 @@ function navigateTo(idx) {
             })
             .then(async response => {
                 if (response.ok) {
-                    const msg = await response.text();
-                    alert("🎉 " + (msg || "프로젝트가 성공적으로 저장되었습니다."));
                     closeSaveProjectModal();
-                    window.location.href = '/dashboard';
+                    showAfterSaveDialog();
                 } else {
                     const err = await response.text();
-                    alert("❌ 저장 실패: " + err);
+                    alert(err);
                 }
             })
             .catch(error => {
                 console.error("통신 에러:", error);
                 alert("🚨 서버 통신 중 오류가 발생했습니다.");
             });
+        }
+
+        // 현재 선택된 폴더 삭제
+        function deleteSelectedFolderInSystem() {
+            if (_currentFolderId === null) {
+                alert("삭제할 폴더를 먼저 선택해주세요.");
+                return;
+            }
+            if (!confirm("선택한 폴더를 삭제하시겠습니까?\n폴더 내 프로젝트는 전체 프로젝트로 이동됩니다.")) return;
+
+            fetch(`/api/folders/${_currentFolderId}`, { method: 'DELETE' })
+                .then(async res => {
+                    if (res.ok) {
+                        _currentFolderId = null;
+                        const titleEl = document.getElementById('current-folder-title-display');
+                        if (titleEl) titleEl.innerText = '전체 프로젝트';
+                        renderFolderTree();
+                        renderProjectGallery();
+                    } else {
+                        const err = await res.text();
+                        alert("폴더 삭제 실패: " + err);
+                    }
+                })
+                .catch(() => alert("서버와 통신 중 문제가 발생했습니다."));
         }
 
         // 🚀 새 폴더 생성을 위한 함수 정의
@@ -599,7 +955,7 @@ function navigateTo(idx) {
             .then(async response => {
                 if (response.ok) {
                     alert("폴더가 성공적으로 생성되었습니다!");
-                    location.reload(); // 화면 새로고침
+                    renderFolderTree();
                 } else {
                     const err = await response.text();
                     alert("폴더 생성 실패: " + err);

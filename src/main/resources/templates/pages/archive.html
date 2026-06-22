@@ -6,10 +6,10 @@
         <div th:fragment="content" class="content-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 20px;">
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 style="font-size:22px; color:var(--text-white);">My Project</h3>
+                <h3 style="font-size:24px; color:var(--text-white);">My Project</h3>
                 <div style="display:flex; gap:10px;">
                     <button class="btn-action btn-blue" onclick="createNewFolderInSystem()">📁 새 폴더 생성</button>
-                    <button class="btn-action btn-orange" onclick="deleteSelectedFolderInSystem()">🗑️ 현재 선택 폴더 삭제</button>
+                    <button class="btn-action btn-orange" onclick="deleteSelectedFolderInSystem()">🗑️ 폴더 삭제</button>
                 </div>
             </div>
 
@@ -19,7 +19,7 @@
                 </div>
                 <div class="main-contents">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="font-size:14px; color:var(--text-white);" id="current-folder-title-display">전체 프로젝트</h4>
+                        <h4 style="font-size:17px; color:var(--text-white);" id="current-folder-title-display">전체 프로젝트</h4>
                     </div>
                     <div class="grid-gallery" id="project-archive-gallery-element"></div>
                 </div>

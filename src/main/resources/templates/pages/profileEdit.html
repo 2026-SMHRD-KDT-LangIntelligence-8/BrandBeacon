@@ -2,9 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: layout(~{::content})}">
 <body>
-    <div th:fragment="content" style="max-width: 480px; margin: 40px auto;">
-        <h3 style="margin-bottom: 20px; font-size: 20px; text-align: center;">회원 정보 수정</h3>
+    <div th:fragment="content" style="max-width: 520px; margin: 40px auto;">
+        <h4 style="margin-bottom: 20px; font-size: 23px;">회원 정보 수정</h4>
         <div class="q-box">
+            <div class="input-group">
+                <label>현재 비밀번호</label>
+                <input type="password" id="modify-pw-current" placeholder="현재 비밀번호 입력">
+            </div>
             <div class="input-group">
                 <label>새로운 비밀번호 (최소 8자)</label>
                 <input type="password" id="modify-pw" placeholder="8자 이상 입력">

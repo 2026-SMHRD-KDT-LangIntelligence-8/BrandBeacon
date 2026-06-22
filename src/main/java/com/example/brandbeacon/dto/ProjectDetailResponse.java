@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class ProjectDetailResponse {
     private Long projectId;
+    private Long folderId;
     private String projectName;
     private String brandIntro;
     private String referenceType;
@@ -21,5 +22,7 @@ public class ProjectDetailResponse {
     private Float positionY;           // 포지셔닝 맵 Y 좌표
     private List<String> keywords;
     private List<String> imgUrls;
+    private String moodboardData; // 카테고리별 무드보드 구조 JSON 문자열
+    private String imageAlignmentsData; // 이미지별 유사도 배열 JSON 문자열
     private LocalDateTime createdAt;
 }

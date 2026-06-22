@@ -32,4 +32,8 @@ public class Folder {
     @CreationTimestamp
     @Column(name = "CREATED_AT", updatable = false)
     private LocalDateTime createdAt; // 생성 날짜
+
+    public void updateFolderName(String newName) {
+        this.folderName = newName;
+    }
 }

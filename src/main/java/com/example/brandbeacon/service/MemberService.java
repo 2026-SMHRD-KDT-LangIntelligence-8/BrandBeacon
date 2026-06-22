@@ -68,18 +68,25 @@ public class MemberService {
 
     // 4. 회원 정보 수정 로직
     @Transactional
-    public void updateMember(Long userId, String newNickname, String newPassword) {
-        // DB에서 회원 찾아오기
+    public void updateMember(Long userId, String currentPassword, String newNickname, String newPassword) {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 새 비밀번호가 넘어왔다면 암호화, 아니면 null 처리
+        // 현재 비밀번호 검증 (소셜 로그인 계정은 password 컬럼이 null일 수 있으므로 예외 처리)
+        if (member.getPassword() == null) {
+            throw new IllegalArgumentException("소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.");
+        }
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new IllegalArgumentException("현재 비밀번호를 입력해주세요.");
+        }
+        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
         String encryptedPassword = (newPassword != null && !newPassword.isBlank())
                 ? passwordEncoder.encode(newPassword)
                 : null;
 
-        // 엔티티의 정보 업데이트
-        // JPA의 영속성 컨텍스트 덕분에 save() 안 해도 자동 반영됨!
         member.updateInfo(newNickname, encryptedPassword);
     }
 

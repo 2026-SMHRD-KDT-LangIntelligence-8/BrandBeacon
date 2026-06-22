@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController // JSON 형태의 객체 데이터를 반환하는 컨트롤러
 @RequestMapping("/api/projects")
@@ -111,6 +112,8 @@ public class ProjectController {
             return ResponseEntity.ok("프로젝트가 성공적으로 생성되었습니다! 프로젝트 ID: " + projectId);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("저장 중 오류: " + e.getMessage());
         }
     }
 
@@ -128,6 +131,26 @@ public class ProjectController {
             return ResponseEntity.ok(myProjects);
 
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 프로젝트 폴더 이동 API
+    @PatchMapping("/{projectId}/folder")
+    public ResponseEntity<String> moveProjectFolder(
+            @PathVariable Long projectId,
+            @RequestBody Map<String, Object> body,
+            HttpServletRequest httpRequest) {
+        try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session == null || session.getAttribute("loginUserId") == null) {
+                return ResponseEntity.status(401).body("로그인이 필요한 서비스입니다.");
+            }
+            Long userId = (Long) session.getAttribute("loginUserId");
+            Long folderId = body.get("folderId") != null ? Long.valueOf(body.get("folderId").toString()) : null;
+            projectService.moveProjectToFolder(projectId, userId, folderId);
+            return ResponseEntity.ok("이동 완료");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
